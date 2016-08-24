@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.enow.storm</groupId>
+	<artifactId>enow-storm</artifactId>
+	<name>enow-storm</name>
+	<version>1.0</version>
+	<packaging>jar</packaging>
+	<description>Storm Spouts for Apache Kafka</description>
+	<developers>
+		<developer>
+			<id>writtic</id>
+			<name>Park Jun Seong</name>
+			<email>writtic@gmail.com</email>
+			<roles>
+				<role>Committer</role>
+			</roles>
+			<timezone>+9</timezone>
+		</developer>
+		<developer>
+			<id>kirkee2</id>
+			<name>Lee Gun Joon</name>
+			<email>kirkee92@gmail.com</email>
+			<roles>
+				<role>Committer</role>
+			</roles>
+			<timezone>+9</timezone>
+		</developer>
+	</developers>
+
+	<!--<properites> -->
+	<!--<kafka.version>0.9.0.1</kafka.version> -->
+	<!--<storm.version>1.0.2</storm.version> -->
+	<!--<hazelcast.version>3.6.4</hazelcast.version> -->
+	<!--<commons.collections.version>3.2.1</commons.collections.version> -->
+	<!--<clojure.version>1.7.0</clojure.version> -->
+	<!--<log4j-over-slf4j.version>1.6.6</log4j-over-slf4j.version -->
+	<!--</properites> -->
+	<dependencies>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20160810</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.3.1</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka_2.11</artifactId>
+			<version>0.9.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.storm</groupId>
+			<artifactId>storm-core</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.storm</groupId>
+			<artifactId>storm-mongodb</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.storm</groupId>
+			<artifactId>storm-kafka</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+		<!--In Memory Data Grid (IMDG) Open Source Solution for Data Sharing on 
+			Distributed Environment -->
+		<!-- <dependency> <groupId>com.hazelcast</groupId> <artifactId>hazelcast</artifactId> 
+			<version>3.6.4</version> </dependency> -->
+		<!--Types that extend and augment the Java Collections Framework -->
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.2</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<!-- Where the Python bits are kept -->
+				<directory>${basedir}/multilang</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.4.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.enow.storm.TestTopologyStaticHosts</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>clojars</id>
+			<url>https://clojars.org/repo/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+		</repository>
+	</repositories>
+
+	<profiles>
+		<profile>
+			<id>local</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.storm</groupId>
+					<artifactId>storm-core</artifactId>
+					<version>1.0.1</version>
+				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+					<version>1.6.6</version>
+				</dependency>
+				<dependency>
+					<groupId>org.clojure</groupId>
+					<artifactId>clojure</artifactId>
+					<version>1.7.0</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>cluster</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.apache.storm</groupId>
+					<artifactId>storm-core</artifactId>
+					<version>1.0.1</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+					<version>1.6.6</version>
+					<scope>provided</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.clojure</groupId>
+					<artifactId>clojure</artifactId>
+					<version>1.7.0</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
+</project>
