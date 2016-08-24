@@ -1,5 +1,5 @@
 import storm
-from enow.jython import Building
+from jython.Building import Building
 # Counter is a nice way to count things,
 # but it is a Python 2.7 thing
 
@@ -8,7 +8,7 @@ class CountBolt(storm.BasicBolt):
     def initialize(self, conf, context):
         self._conf = conf
         self._context = context
-        Building = Building()
+        self.Building = Building()
         # Create a new counter for this instance
         storm.logInfo("Counter bolt instance starting...")
         
@@ -19,7 +19,10 @@ class CountBolt(storm.BasicBolt):
         # Increment the counter9
         #storm.logInfo("Emitting %s" %(word))
         # Emit the word and count
-    
+        self.Building.setParameter('param')
+        self.Building.setcode('code')
+        self.Building.setPayload('{"key" : "value"}')
+        self.Building.run()
     
         storm.emit([word])
 
