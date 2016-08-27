@@ -33,14 +33,16 @@ class sourceControl:
         A function that stores the sources received.
     '''  
     def storeSources(self):
+        '''
         if not self.preCode or not self.body or self.postCode:
             print("At least one of the source is empty\n")
+        '''
             
         fileDir = os.path.dirname(os.path.realpath('__file__'))
         
-        pathPreCode = os.path.join(fileDir, 'src/enow/jython/pythonSrc/preCode.py')
-        pathbodyCode = os.path.join(fileDir, 'src/enow/jython/pythonSrc/body.py')
-        pathPostCode = os.path.join(fileDir, 'src/enow/jython/pythonSrc/preCode.py')
+        pathPreCode = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
+        pathbodyCode = os.path.join(fileDir, 'enow/jython/pythonSrc/body.py')
+        pathPostCode = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
 #         fPreCode = open(pathPreCode, "r+")
         fBodyCode = open(pathbodyCode, "r+")
 #         fPostCode = open(pathPostCode, "r+")

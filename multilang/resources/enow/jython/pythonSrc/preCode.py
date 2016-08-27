@@ -5,7 +5,7 @@ import logging
 import os
 
 fileDir = os.path.dirname(os.path.realpath('__file__'))
-modulePath = os.path.join(fileDir, 'src/enow/jython/pythonSrc')
+modulePath = os.path.join(fileDir, 'enow/jython/pythonSrc')
 sys.path.append(modulePath)
 
 from body import eventHandler
@@ -133,8 +133,12 @@ def Main():
     postProcess(_event, _context, _callback)
     
 if __name__ == "__main__":
+    '''
     sys.stderr.write("preCode.py : running")
     sys.stderr.flush()
+    '''
     Main()
+    '''
     sys.stderr.write("preCode.py : exiting")
     sys.stderr.flush()
+    '''

@@ -1,6 +1,7 @@
 package com.enow.storm.EventTopology;
 
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.kafka.*;
@@ -10,6 +11,7 @@ import org.apache.storm.topology.TopologyBuilder;
 
 public class EventTopology {
     public static void main(String[] args) throws Exception {
+    	BasicConfigurator.configure();
         Config config = new Config();
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);

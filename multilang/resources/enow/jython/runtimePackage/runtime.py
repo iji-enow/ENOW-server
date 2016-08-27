@@ -1,4 +1,5 @@
 from subprocess import PIPE, Popen
+import os
 '''
 Class : runtime
     Descriptions : 
@@ -18,11 +19,14 @@ class runtime:
     '''
     def run(self, _args, _payloads):
         
-        jythonPath = "/Users/jeasungpark/jython2.7.0/bin/jython"
+        fileDir = os.path.dirname(os.path.realpath('__file__'))
+        sourceDir = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
+        
+        jythonPath = "/usr/local/bin/python"
         command = []
         command.append(jythonPath)
         command.append("-u")
-        command.append("./src/enow/jython/pythonSrc/preCode.py")
+        command.append(sourceDir)
         
         process = Popen(args=command,
                     stdin=PIPE,

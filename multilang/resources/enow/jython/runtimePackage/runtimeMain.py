@@ -3,8 +3,8 @@ Created on 2016. 8. 15.
 
 @author: jeasungpark
 '''
-from jython.runtimePackage.sourceControl import sourceControl
-from jython.runtimePackage.runtime import runtime
+from .sourceControl import sourceControl
+from .runtime import runtime
 
 '''
 Class : main

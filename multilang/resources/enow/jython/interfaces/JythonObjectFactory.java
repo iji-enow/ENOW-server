@@ -18,7 +18,7 @@ import org.python.core.PyObject;
  * 	
  * 	building.method(args, ...);
  */
-
+/*
 public class JythonObjectFactory{
 	private static JythonObjectFactory instance = null;
 	private static PyObject pyObject = null;

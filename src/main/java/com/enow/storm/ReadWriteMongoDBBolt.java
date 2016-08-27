@@ -36,7 +36,7 @@ import com.mongodb.client.MongoDatabase;
 public class ReadWriteMongoDBBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(KafkaSpoutTestBolt.class);
 	private OutputCollector collector;
-	private String tmp;
+	private String tmp = "no";
 
 	@Override
 
@@ -52,27 +52,44 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		if ((null == word) || (word.length() == 0)) {
 			return;
 		}
-		// packet.put("picture",result);
 
-		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
+		MongoClient mymongoClient = new MongoClient("127.0.0.1", 27017);
+
+		mymongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
+		MongoDatabase mydbWrite = mymongoClient.getDatabase("word");
+		MongoCollection<Document> mycollection = mydbWrite.getCollection("word");
+		mycollection.insertOne(new Document("word", word));
+		
+		mymongoClient.close();
+		
+/*		
+		MongoClient mongoClient = new MongoClient("192.168.0.107", 27017);
 
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-		MongoDatabase dbWrite = mongoClient.getDatabase("word");
-		MongoCollection<Document> collection = dbWrite.getCollection("word");
-		collection.insertOne(new Document("word", word));
+		MongoDatabase dbWrite = mongoClient.getDatabase("source");
+		MongoCollection<Document> collection = dbWrite.getCollection("codes");
+		
+		
+	*/	
+		//FindIterable<Document> iterable = collection.find(new Document("name", new Document("$exists", true)));
 
 		/*
-		 * FindIterable<Document> iterable = collection.find(new
-		 * Document("function1", new Document("$exists",true)));
-		 * 
-		 * iterable.forEach(new Block<Document>() {
-		 * 
-		 * @Override public void apply(final Document document) { tmp =
-		 * document.toString(); } });
-		 */
+		FindIterable<Document> iterable = collection.find(new Document("name", "zzz.txt"));
+
+		iterable.forEach(new Block<Document>() {
+
+			@Override
+			public void apply(final Document document) {
+				tmp = document.toString();
+			}
+		});
+		
+		
+		String tmpyo = tmp.substring(61, tmp.length() - 3);
+		
 
 		mongoClient.close();
-
+*/
 		/*
 		 * if(tmp.compareTo("function not found") == 0){
 		 * 
@@ -89,6 +106,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		} catch (Exception e) {
 			collector.fail(input);
 		}
+		
 	}
 
 	@Override
