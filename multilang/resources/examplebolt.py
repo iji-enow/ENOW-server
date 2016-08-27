@@ -4,6 +4,7 @@ import thread
 import json
 import logging
 import os
+from symbol import parameters
 fileDir = os.path.dirname(os.path.realpath('__file__'))
 enow_Path = os.path.join(fileDir, 'enow/')
 enow_jython_Path = os.path.join(fileDir, 'enow/jython')
@@ -14,7 +15,7 @@ sys.path.append(enow_Path)
 sys.path.append(enow_jython_Path)
 sys.path.append(enow_jython_Building_Path)
 sys.path.append(enow_jython_runtimePackage_Path)
-sys.path.append("/Users/LeeGunJoon/.p2/pool/plugins/org.python.pydev_5.1.2.201606231256/pysrc")
+sys.path.append("/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc")
 from enow.jython.Building import Building
 # from jython.Building import Building
 # Counter is a nice way to count things,
@@ -45,15 +46,29 @@ class CountBolt(storm.BasicBolt):
         }''' 
         
         jsonObject = json.loads(jsonstring, strict=False)
-    
-        self.Building.setParameter(str(jsonObject["PARAMETER"]))
-        self.Building.setcode("def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")")
-        self.Building.setPayload(str(jsonObject["PAYLOAD"]))
+        
+        dictPayload = jsonObject["PAYLOAD"]
+        rawPayload = json.dumps(dictPayload)
+        rawSource = jsonObject["SOURCE"]
+        rawParameter = jsonObject["PARAMETER"]
+        
+        payload = rawPayload.replace("\r", "")
+        source = rawSource.replace("\r", "")
+        parameter = rawParameter.replace("\r", "")
+        
+        self.Building.setParameter(parameter.decode("utf-8").encode("ascii"))
+        self.Building.setcode(source.decode("utf-8").encode("ascii"))
+        self.Building.setPayload(payload.decode("utf-8").encode("ascii"))
         tmp = self.Building.run()
         
+        '''
+        self.Building.setParameter("-ls -t")
+        self.Building.setcode("def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")\n\ta=10\n\tcallback[\"returned\"] = str(a)\n")
+        self.Building.setPayload("{\"identification\" : \"original\"}")
+        tmp = self.Building.run()
+        '''
         
         storm.emit([tmp])
         
-
 # Start the bolt when it's invoked
 CountBolt().run()

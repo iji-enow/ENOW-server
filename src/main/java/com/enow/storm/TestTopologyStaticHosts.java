@@ -58,11 +58,11 @@ public class TestTopologyStaticHosts {
         builder.setSpout("kafka-spout", new KafkaSpout(kafkaConfig), 10);
         //builder.setBolt("read-write-mongo-bolt", new ReadWriteMongoDBBolt()).allGrouping("kafka-spout");
         builder.setBolt("execute-bolt", new ExecuteBolt()).allGrouping("kafka-spout");
-        //builder.setBolt("python-bolt", new PythonBolt()).allGrouping("execute-bolt");
+        builder.setBolt("python-bolt", new PythonBolt()).allGrouping("execute-bolt");
         //builder.setBolt("read-mongo-bolt", new ReadMongoDBBolt()).allGrouping("write-mongo-bolt");
         //builder.setBolt("read-mongo-bolt", new ReadMongoDBBolt()).allGrouping("write-mongo-bolt");
         //builder.setBolt("write-mongo-bolt", new WriteMongoDBBolt()).allGrouping("read-mongo-bolt");
-        builder.setBolt("kafka-bolt", new KafkaSpoutTestBolt()).allGrouping("execute-bolt");
+        builder.setBolt("kafka-bolt", new KafkaSpoutTestBolt()).allGrouping("python-bolt");
         //builder.setBolt("kafka-bolt", new KafkaSpoutTestBolt()).allGrouping("execute-bolt");
         
         

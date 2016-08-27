@@ -65,7 +65,7 @@ public class ExecuteBolt extends BaseRichBolt {
 	    //collection.insertOne(new Document("execute function",function));
 	    //collection.insertOne(new Document("execute result",result));
 	    
-	    
+	/*    
 	    JsonObject json = null;
         String webhook = null;
         Connect con = new Connect("https://hooks.slack.com/services/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");
@@ -76,7 +76,7 @@ public class ExecuteBolt extends BaseRichBolt {
         webhook = con.post(con.getURL(), json);
 	    
 	    //mongoClient.close();
-		
+	*/	
 		collector.emit(new Values(word));
 		try {
 			LOG.debug("input = [" + input + "]");
