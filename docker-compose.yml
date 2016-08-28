@@ -40,5 +40,6 @@ kafka:
     KAFKA_CREATE_TOPICS: "test:3:1,onlytest:3:1"
     KAFKA_ZOOKEEPER_CONNECT: 192.168.99.100:2181
     KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
+    KAFKA_ADVERTISED_PORT: 9092
   volumes:
       - /var/run/docker.sock:/var/run/docker.sock
