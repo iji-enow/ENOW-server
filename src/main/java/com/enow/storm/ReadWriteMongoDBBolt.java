@@ -26,6 +26,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonObject;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -53,6 +54,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 			return;
 		}
 
+		/*
 		MongoClient mymongoClient = new MongoClient("127.0.0.1", 27017);
 
 		mymongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -61,23 +63,21 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		mycollection.insertOne(new Document("word", word));
 		
 		mymongoClient.close();
+		*/
 		
-/*		
-		MongoClient mongoClient = new MongoClient("192.168.0.107", 27017);
+		
+		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
 
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 		MongoDatabase dbWrite = mongoClient.getDatabase("source");
 		MongoCollection<Document> collection = dbWrite.getCollection("codes");
-		
-		
-	*/	
+			
 		//FindIterable<Document> iterable = collection.find(new Document("name", new Document("$exists", true)));
 
-		/*
+		
 		FindIterable<Document> iterable = collection.find(new Document("name", "zzz.txt"));
 
 		iterable.forEach(new Block<Document>() {
-
 			@Override
 			public void apply(final Document document) {
 				tmp = document.toString();
@@ -85,11 +85,20 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		});
 		
 		
-		String tmpyo = tmp.substring(61, tmp.length() - 3);
+		String tmpyo = tmp.substring(61, tmp.length() - 2);
+		
+		JsonObject json = null;
+        String webhook = null;
+        Connect con = new Connect("https://hooks.slack.com/services/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");
+
+        
+        json = new JsonObject();
+        json.addProperty("text",tmpyo);
+        webhook = con.post(con.getURL(), json);
 		
 
 		mongoClient.close();
-*/
+
 		/*
 		 * if(tmp.compareTo("function not found") == 0){
 		 * 
@@ -98,7 +107,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		 * word = word + tmp;
 		 */
 
-		collector.emit(new Values(word));
+		collector.emit(new Values(tmpyo));
 
 		try {
 			LOG.debug("input = [" + input + "]");

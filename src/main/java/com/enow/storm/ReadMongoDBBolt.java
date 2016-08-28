@@ -109,6 +109,7 @@ public class ReadMongoDBBolt extends BaseRichBolt {
 	
 	    //tmp = iterable.toString();
 	    
+	    /*
 	    iterable.forEach(new Block<Document>() {
 	        @Override
 	        public void apply(final Document document) {
@@ -118,6 +119,7 @@ public class ReadMongoDBBolt extends BaseRichBolt {
 	    
 	    tmp = tmp.substring(40,tmp.length()-2);
 	    
+	    */
 	    mongoClient.close();
 		
 		collector.emit(new Values(tmp));
