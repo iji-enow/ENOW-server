@@ -18,7 +18,8 @@ import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.kafka.trident.GlobalPartitionInformation;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestTopologyStaticHosts {
 
@@ -41,16 +42,13 @@ public class TestTopologyStaticHosts {
         hostsAndPartitions.addPartition(0, new Broker("localhost", 9092));
         BrokerHosts brokerHosts = new StaticHosts(hostsAndPartitions);
         */
-    	
-        Config config = new Config();
-        config.setDebug(true);
-        config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
-        String zkConnString = "localhost:2181";
+
+        String zkConnString = "192.168.99.100:2181";
         String topic = "test";
         BrokerHosts brokerHosts = new ZkHosts(zkConnString);
 
-        SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts,topic, "/"+topic, "storm");
-       
+        SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts, topic, "/"+topic, "storm");
+
         kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         kafkaConfig.startOffsetTime = -1;
 
@@ -64,8 +62,8 @@ public class TestTopologyStaticHosts {
         //builder.setBolt("write-mongo-bolt", new WriteMongoDBBolt()).allGrouping("read-mongo-bolt");
         builder.setBolt("kafka-bolt", new KafkaSpoutTestBolt()).allGrouping("read-write-mongo-bolt");
         //builder.setBolt("kafka-bolt", new KafkaSpoutTestBolt()).allGrouping("execute-bolt");
-        
-        
+
+
         //builder.setBolt("print", new PrinterBolt()).shuffleGrouping("words");
         /*
         if (args != null && args.length > 1) {
@@ -82,12 +80,24 @@ public class TestTopologyStaticHosts {
             cluster.submitTopology("test", config, builder.createTopology());
         }
         */
-        
-        LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("test", config, builder.createTopology());
-        
+        Config config = new Config();
+        List<String> nimbus_seeds = new ArrayList<String>();
+        // nimbus url
+        nimbus_seeds.add("192.168.99.100");
+        nimbus_seeds.add("172.17.0.4");
+        // zookeeper url
+        List<String> zookeeper_servers = new ArrayList<String>();
+        zookeeper_servers.add("192.168.99.100");
+        zookeeper_servers.add("172.17.0.2");
+        config.put(Config.NIMBUS_SEEDS, nimbus_seeds);
+        config.put(Config.NIMBUS_THRIFT_PORT, 6627);
+        config.put(Config.STORM_ZOOKEEPER_PORT, 2181);
+        config.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeper_servers);
+        config.setDebug(true);
+        config.setNumWorkers(5);
+        StormSubmitter.submitTopology("test", config, builder.createTopology());
+
         //Thread.sleep(600000);
 
     }
 }
-
