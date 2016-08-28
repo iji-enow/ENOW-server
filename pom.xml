@@ -30,14 +30,6 @@
 		</developer>
 	</developers>
 
-	<!--<properites> -->
-	<!--<kafka.version>0.9.0.1</kafka.version> -->
-	<!--<storm.version>1.0.2</storm.version> -->
-	<!--<hazelcast.version>3.6.4</hazelcast.version> -->
-	<!--<commons.collections.version>3.2.1</commons.collections.version> -->
-	<!--<clojure.version>1.7.0</clojure.version> -->
-	<!--<log4j-over-slf4j.version>1.6.6</log4j-over-slf4j.version -->
-	<!--</properites> -->
 	<dependencies>
 		<dependency>
 			<groupId>org.json</groupId>
@@ -71,9 +63,9 @@
 			<artifactId>storm-kafka</artifactId>
 			<version>1.0.1</version>
 		</dependency>
-		<!--In Memory Data Grid (IMDG) Open Source Solution for Data Sharing on 
+		<!--In Memory Data Grid (IMDG) Open Source Solution for Data Sharing on
 			Distributed Environment -->
-		<!-- <dependency> <groupId>com.hazelcast</groupId> <artifactId>hazelcast</artifactId> 
+		<!-- <dependency> <groupId>com.hazelcast</groupId> <artifactId>hazelcast</artifactId>
 			<version>3.6.4</version> </dependency> -->
 		<!--Types that extend and augment the Java Collections Framework -->
 		<dependency>

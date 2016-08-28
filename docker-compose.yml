@@ -8,12 +8,14 @@ nimbus:
     - "3773:3773"
     - "3772:3772"
     - "6627:6627"
+    - "22"
   links:
     - zookeeper:zk
 supervisor:
   image: enow/storm-supervisor
   ports:
     - "8000:8000"
+    - "22"
   links:
     - nimbus:nimbus
     - zookeeper:zk
@@ -21,6 +23,7 @@ ui:
   image: enow/storm-ui
   ports:
     - "8080:8080"
+    - "22"
   links:
     - nimbus:nimbus
     - zookeeper:zk
@@ -31,6 +34,8 @@ kafka:
   links:
     - zookeeper:zk
   environment:
+    KAFKA_CREATE_TOPICS: "event:3:1,trigger:3:1,feed:3:1,onlytest:3:1"
+    KAFKA_ZOOKEEPER_CONNECT: 192.168.99.100:2181
     KAFKA_ADVERTISED_HOST_NAME: 192.168.99.100
   volumes:
       - /var/run/docker.sock:/var/run/docker.sock
