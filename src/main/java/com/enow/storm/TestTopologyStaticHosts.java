@@ -84,11 +84,9 @@ public class TestTopologyStaticHosts {
         List<String> nimbus_seeds = new ArrayList<String>();
         // nimbus url
         nimbus_seeds.add("192.168.99.100");
-        nimbus_seeds.add("172.17.0.4");
         // zookeeper url
         List<String> zookeeper_servers = new ArrayList<String>();
         zookeeper_servers.add("192.168.99.100");
-        zookeeper_servers.add("172.17.0.2");
         config.put(Config.NIMBUS_SEEDS, nimbus_seeds);
         config.put(Config.NIMBUS_THRIFT_PORT, 6627);
         config.put(Config.STORM_ZOOKEEPER_PORT, 2181);
