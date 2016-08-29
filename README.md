@@ -11,7 +11,6 @@ Test project for enow-storm based on information provided in and referenced by:
 
 Also contains an attempt at a sample implementation of trident state based on [Hazelcast](http://www.hazelcast.com/)
 
-
 ## Environment setup with [Docker](https://www.docker.io/)
 
 If you are using a Mac follow the instructions [here](https://docs.docker.com/installation/mac/) to setup a docker environment.
@@ -19,18 +18,20 @@ If you are using a Mac follow the instructions [here](https://docs.docker.com/in
 - Install [docker-compose](http://docs.docker.com/compose/install/)
 
 - Install [storm](https://storm.incubator.apache.org/downloads.html) (so you can upload your topology to the test cluster)
-
+- Create the custom test network for Apache Storm
+    - ```docker network create storm```
 - Start the test environment
     - ```docker-compose up```
 - Start a kafka shell
     - ```start-kafka-shell.sh <Docker Ip> <Zookeeper>```
 - From within the shell, create a topic
     - ```$KAFKA_HOME/bin/kafka-topics.sh --create --topic storm-sentence --partitions 2 --zookeeper $ZK --replication-factor 1```
--
+- For more details and troubleshooting see [https://github.com/enow/docker-kafka](https://github.com/enow/docker-kafka) </br>
+and </br> [https://github.com/enow/docker-storm](https://github.com/enow/docker-storm)
 
-- For more details and troubleshooting see [https://github.com/enow/kafka-docker](https://github.com/enow/kafka-docker) </br>
-and </br> [https://github.com/enow/storm-docker](https://github.com/enow/storm-docker)
+When the "ui" container is started, launch the Storm UI with browser "http://192.168.99.100:8080/index.html"
 
+__NOTE__: Please use the IP address from docker-machine ip default to replace the "192.168.99.100" according to your local docker configuration
 
 ## Build for running locally:
 
