@@ -26,7 +26,8 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.JsonObject;
+import org.json.simple.JSONValue;
+import org.json.simple.JSONObject;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -77,23 +78,35 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		
 		FindIterable<Document> iterable = collection.find(new Document("name", "zzz.txt"));
 
+		String tmp =iterable.first().toJson();
+		
+		
+		Object obj = JSONValue.parse(tmp);
+
+	    JSONObject jsonMsg = (JSONObject)obj;
+
+		//jsonmsg = new JSONObject(tmp);
+
+
+		/*
 		iterable.forEach(new Block<Document>() {
 			@Override
 			public void apply(final Document document) {
 				tmp = document.toString();
 			}
 		});
+		*/
 		
 		
-		String tmpyo = tmp.substring(61, tmp.length() - 2);
+		//String tmpyo = tmp.substring(61, tmp.length() - 2);
 		
-		JsonObject json = null;
+		JSONObject json = null;
         String webhook = null;
         Connect con = new Connect("https://hooks.slack.com/services/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");
 
         
-        json = new JsonObject();
-        json.addProperty("text",tmpyo);
+        json = new JSONObject();
+        json.put("text",tmp);
         webhook = con.post(con.getURL(), json);
 		
 
@@ -107,7 +120,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		 * word = word + tmp;
 		 */
 
-		collector.emit(new Values(tmpyo));
+		collector.emit(new Values(tmp));
 
 		try {
 			LOG.debug("input = [" + input + "]");

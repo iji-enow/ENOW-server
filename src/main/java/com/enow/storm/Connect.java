@@ -1,7 +1,7 @@
 package com.enow.storm;
 
 import java.net.URL;
-import com.google.gson.JsonObject;
+import org.json.simple.JSONObject;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class Connect {
         return url;
     }
 
-    public static String post(URL url, JsonObject json){
+    public static String post(URL url, JSONObject json){
         DataOutputStream printout;
         try {
             URLConnection urlConn = url.openConnection();

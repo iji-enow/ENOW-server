@@ -2,14 +2,11 @@ package com.enow.storm.TriggerTopology;
 
 public class TopicStructure {
 	private String corporationName;
-	private String ServerId;
-	private int parseNum;
-	private String functionName;
+	private String serverId;
 	private String brokerId;
 	private String deviceId;
-	private String parameter;
+	private String phaseRoadMapId;
 	
-	//enow/serverid/1/function1/brokerid/deviceid/parameter
 	public String getCorporationName() {
 		return corporationName;
 	}
@@ -17,22 +14,10 @@ public class TopicStructure {
 		this.corporationName = corporationName;
 	}
 	public String getServerId() {
-		return ServerId;
+		return serverId;
 	}
 	public void setServerId(String serverId) {
-		ServerId = serverId;
-	}
-	public int getParseNum() {
-		return parseNum;
-	}
-	public void setParseNum(int parseNum) {
-		this.parseNum = parseNum;
-	}
-	public String getFuncionName() {
-		return functionName;
-	}
-	public void setFuncionName(String funcionName) {
-		this.functionName = funcionName;
+		this.serverId = serverId;
 	}
 	public String getBrokerId() {
 		return brokerId;
@@ -46,14 +31,14 @@ public class TopicStructure {
 	public void setDeviceId(String deviceId) {
 		this.deviceId = deviceId;
 	}
-	public String getParameter() {
-		return parameter;
+
+	public String getPhaseRoadMapId() {
+		return phaseRoadMapId;
 	}
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
+	public void setPhaseRoadMapId(String phaseRoadMapId) {
+		this.phaseRoadMapId = phaseRoadMapId;
 	}
-	
-	public String getAll(){ 
-		return "corporationName: " +corporationName + " serverId: " + ServerId + " parseNum: " + parseNum + " functionName:  " + functionName + " brokerId: " + brokerId + " deviceId: " + deviceId + " parameter: " + parameter;
+	public String showAll(){
+		return "corporationName : "+ corporationName+" serverId : " + serverId + " brokerId : " + brokerId + " deviceId : " + deviceId + " PhaseRoadMapId : " + phaseRoadMapId;
 	}
 }

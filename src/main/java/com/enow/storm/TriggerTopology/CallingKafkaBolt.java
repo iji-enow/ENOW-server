@@ -46,6 +46,8 @@ public class CallingKafkaBolt extends BaseRichBolt {
     	
     	ts = (TopicStructure)input.getValueByField("topic");
     	final String msg = input.getStringByField("msg");
+    	final String machineIdCheck = input.getStringByField("machineIdCheck");
+    	final String phaseRoadMapIdCheck = input.getStringByField("phaseRoadMapIdCheck");
     	
     	//final String topic = input.getStringByField("topic");
     	//final String msg = input.getStringByField("msg");
@@ -53,9 +55,13 @@ public class CallingKafkaBolt extends BaseRichBolt {
     	
     	//final String inputMsg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
     	
-		ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", ts.getAll() + " msg : " + msg);
-		producer.send(data);
-
+		ProducerRecord<String, String> data1 = new ProducerRecord<String, String>("trigger", ts.showAll() + " msg : " + msg);
+		ProducerRecord<String, String> data2 = new ProducerRecord<String, String>("trigger","machine id check : " + machineIdCheck);
+		ProducerRecord<String, String> data3 = new ProducerRecord<String, String>("trigger","phase road map id check : " + phaseRoadMapIdCheck);
+		producer.send(data1);
+		producer.send(data2);
+		producer.send(data3);
+		
 		try {
 			LOG.debug("input = [" + input + "]");
 			collector.ack(input);
