@@ -31,7 +31,6 @@ public class TriggerTopology {
         builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
         builder.setBolt("calling-kafka-bolt", new CallingKafkaBolt()).allGrouping("staging-bolt");
         
-        
         /*
         nononoonopepepepepe
         config.setNumWorkers(2);

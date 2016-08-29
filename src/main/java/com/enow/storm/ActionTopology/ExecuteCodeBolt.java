@@ -31,7 +31,6 @@ public class ExecuteCodeBolt extends BaseRichBolt {
  	    {
  	        return;
  	    }
-    	
     	final String inputMsg = input.getValues().toString().substring(1,input.getValues().toString().length() - 1);	
 
 		

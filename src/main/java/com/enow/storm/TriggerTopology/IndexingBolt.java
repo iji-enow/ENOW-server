@@ -79,8 +79,6 @@ public class IndexingBolt extends BaseRichBolt {
 		
 		collection.insertOne(document);
 		
-		
-		
 		mongoClient.close();
 		
 		collector.emit(new Values(ts,msg));

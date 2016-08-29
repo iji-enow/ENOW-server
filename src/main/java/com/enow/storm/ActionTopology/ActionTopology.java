@@ -15,7 +15,6 @@ public class ActionTopology {
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
         
-        
         String zkConnString1 = "localhost:2181";
         String topic1 = "trigger";
         BrokerHosts brokerHosts1 = new ZkHosts(zkConnString1);
@@ -34,16 +33,17 @@ public class ActionTopology {
         kafkaConfig2.scheme = new SchemeAsMultiScheme(new StringScheme());
         kafkaConfig2.startOffsetTime = -1;
 
-
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("trigger-spout", new KafkaSpout(kafkaConfig1), 10);
+        // "status":"requested"1 | "live"2 | "dead"0,
+        // 서버에서 requested로 바꿔줘야 함
+        // "metadata":
         builder.setSpout("status-spout", new KafkaSpout(kafkaConfig2), 10);
         builder.setBolt("scheduling-bolt", new SchedulingBolt()).allGrouping("trigger-spout").allGrouping("status-spout");
         builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
         builder.setBolt("calling-kafka-bolt", new CallingKafkaBolt()).allGrouping("provisioning-bolt");
-        
-        
+
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("ActionTopology", config, builder.createTopology());
         

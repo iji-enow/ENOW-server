@@ -71,14 +71,8 @@ public class StagingBolt extends BaseRichBolt {
 		}else{
 			phaseRoadMapIdCheck = "phase road map id : now we have a problem";
 		}
-		
-		
-		
-		
     	
 		//FindIterable<Document> iterable = collection.find(new Document("deviceId", ts.getDeviceId()));
-
-		
 		
 		//String phaseInfo =iterable.first().toJson();
     	
