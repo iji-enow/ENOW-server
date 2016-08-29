@@ -32,6 +32,7 @@ public class CallingKafkaBolt extends BaseRichBolt {
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		producer =  new KafkaProducer<String, String>(props);
 		ts = new TopicStructure();
+		//git test
     }
 
     @Override
