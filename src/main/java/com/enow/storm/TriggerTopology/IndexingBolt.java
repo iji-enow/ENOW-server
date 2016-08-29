@@ -63,7 +63,7 @@ public class IndexingBolt extends BaseRichBolt {
 	    
 	    
 	    MongoClient mongoClient = new MongoClient("52.193.56.228", 9092);
-
+//nope
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
 		MongoCollection<Document> collection = dbWrite.getCollection("log");

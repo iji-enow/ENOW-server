@@ -33,6 +33,7 @@ public class TriggerTopology {
         
         
         /*
+        nononoonopepepepepe
         config.setNumWorkers(2);
         config.setMaxTaskParallelism(5);
         config.put(Config.NIMBUS_THRIFT_PORT, 6627);
