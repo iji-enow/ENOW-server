@@ -20,6 +20,8 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class IndexingBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
@@ -59,16 +61,22 @@ public class IndexingBolt extends BaseRichBolt {
 	        return;
 	    }
 	    
+	    
 	    MongoClient mymongoClient = new MongoClient("127.0.0.1", 27017);
 
 		mymongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 		MongoDatabase mydbWrite = mymongoClient.getDatabase("joon");
 		MongoCollection<Document> mycollection = mydbWrite.getCollection("log");
 		//mycollection.insertOne(new Document("topic", topic));
-		//mycollection.insertOne(new Document("msg", msg));
+		//mycollection.insertOne(new Document("msg", msg))
+		
+		long time = System.currentTimeMillis(); 
+		SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
 		Document document = new Document();
+		document.put("time",dayTime.format(new Date(time)));
 		document.put("topic", topic);
 		document.put("msg",msg);
+		
 		mycollection.insertOne(document);
 		
 		

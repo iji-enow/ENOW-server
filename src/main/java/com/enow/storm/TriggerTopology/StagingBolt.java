@@ -63,9 +63,10 @@ public class StagingBolt extends BaseRichBolt {
 		}
 		
 		MongoCollection<Document> phaseRoadMapCollection = dbWrite.getCollection("phaseRoadMap");
+		
 		if(phaseRoadMapCollection.count(new Document("phaseRoadMapId", ts.getPhaseRoadMapId())) == 0){
 			phaseRoadMapIdCheck = "Phase road map unchecked";
-		}else if(phaseRoadMapCollection.count(new Document("deviceId", ts.getDeviceId())) == 1){
+		}else if(phaseRoadMapCollection.count(new Document("phaseRoadMapId", ts.getPhaseRoadMapId())) == 1){
 			phaseRoadMapIdCheck = "Phase road map checked";
 		}else{
 			phaseRoadMapIdCheck = "phase road map id : now we have a problem";
