@@ -62,11 +62,11 @@ public class IndexingBolt extends BaseRichBolt {
 	    }
 	    
 	    
-	    MongoClient mymongoClient = new MongoClient("127.0.0.1", 27017);
+	    MongoClient mongoClient = new MongoClient("52.193.56.228", 9092);
 
-		mymongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-		MongoDatabase mydbWrite = mymongoClient.getDatabase("joon");
-		MongoCollection<Document> mycollection = mydbWrite.getCollection("log");
+		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
+		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
+		MongoCollection<Document> collection = dbWrite.getCollection("log");
 		//mycollection.insertOne(new Document("topic", topic));
 		//mycollection.insertOne(new Document("msg", msg))
 		
@@ -77,11 +77,11 @@ public class IndexingBolt extends BaseRichBolt {
 		document.put("topic", topic);
 		document.put("msg",msg);
 		
-		mycollection.insertOne(document);
+		collection.insertOne(document);
 		
 		
 		
-		mymongoClient.close();
+		mongoClient.close();
 		
 		collector.emit(new Values(ts,msg));
 		try {

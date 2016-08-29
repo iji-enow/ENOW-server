@@ -48,11 +48,11 @@ public class StagingBolt extends BaseRichBolt {
     	ts = (TopicStructure)input.getValueByField("topic");
     	final String msg = input.getStringByField("msg");
     	
-    	MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
+    	MongoClient mongoClient = new MongoClient("52.193.56.228", 9092);
 
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-		MongoDatabase dbWrite = mongoClient.getDatabase("joon");
-		MongoCollection<Document> deviceListCollection = dbWrite.getCollection("deviceList");
+		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
+		MongoCollection<Document> deviceListCollection = dbWrite.getCollection("device");
 		
 		if(deviceListCollection.count(new Document("deviceId", ts.getDeviceId())) == 0){
 			machineIdCheck = "device unchecked";
