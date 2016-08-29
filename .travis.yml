@@ -1,0 +1,4 @@
+language: java
+
+notifications:
+  slack: ijiteam:E9Rr8nKzl9hTppiVyvYAvzsZ
