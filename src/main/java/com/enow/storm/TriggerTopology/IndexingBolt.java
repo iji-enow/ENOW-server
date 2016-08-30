@@ -3,7 +3,6 @@ package com.enow.storm.TriggerTopology;
 
 import java.util.Map;
 
-import com.enow.dto.TopicStructure;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -15,6 +14,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;
@@ -22,17 +22,18 @@ import com.mongodb.client.MongoDatabase;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import com.enow.dto.TopicStructure;
 
 public class IndexingBolt extends BaseRichBolt {
     protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
     private OutputCollector collector;
-    private TopicStructure ts;
+    private TopicStructure topicStructure;
 
     @Override
 
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
-        ts = new TopicStructure();
+        topicStructure = new TopicStructure();
     }
 
     @Override
@@ -45,11 +46,11 @@ public class IndexingBolt extends BaseRichBolt {
 
         String topic = inputMsg.split(" ")[0];
 
-        ts.setCorporationName(topic.split("/")[0]);
-        ts.setServerId(topic.split("/")[1]);
-        ts.setBrokerId(topic.split("/")[2]);
-        ts.setDeviceId(topic.split("/")[3]);
-        ts.setPhaseRoadMapId(topic.split("/")[4]);
+        topicStructure.setCorporationName(topic.split("/")[0]);
+        topicStructure.setServerId(topic.split("/")[1]);
+        topicStructure.setBrokerId(topic.split("/")[2]);
+        topicStructure.setDeviceId(topic.split("/")[3]);
+        topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
 
         // enow/serverId/brokerId/deviceId/phaseRoadMapId
 
@@ -61,7 +62,7 @@ public class IndexingBolt extends BaseRichBolt {
         }
 
 
-        MongoClient mongoClient = new MongoClient("52.193.56.228", 9092);
+        MongoClient mongoClient = new MongoClient("52.193.17.248", 11111);
 
         mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
         MongoDatabase dbWrite = mongoClient.getDatabase("enow");
@@ -78,7 +79,7 @@ public class IndexingBolt extends BaseRichBolt {
 
         mongoClient.close();
 
-        collector.emit(new Values(ts, msg));
+        collector.emit(new Values(topicStructure, msg));
         try {
             LOG.debug("input = [" + input + "]");
             collector.ack(input);

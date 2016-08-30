@@ -1,14 +1,20 @@
 package com.enow.storm.TriggerTopology;
 
-import com.enow.dto.TopicStructure;
 import org.apache.kafka.clients.producer.*;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.enow.dto.TopicStructure;
+
+import com.enow.storm.Connect;
+import com.google.gson.JsonObject;
 
 import java.util.Map;
 import java.util.Properties;
@@ -19,6 +25,7 @@ public class CallingKafkaBolt extends BaseRichBolt {
     private Properties props;
     private Producer<String, String> producer;
     private TopicStructure ts;
+    private JSONObject json;
 
     @Override
 
@@ -46,9 +53,23 @@ public class CallingKafkaBolt extends BaseRichBolt {
         final String msg = input.getStringByField("msg");
         final boolean machineIdCheck = input.getBooleanByField("machineIdCheck");
         final boolean phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
+        
 
         if (machineIdCheck && phaseRoadMapIdCheck) {
-            ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", ts.output() + " msg : " + msg);
+        	json = new JSONObject();
+            json.put("spoutName","trigger");
+            json.put("corporationName", ts.getCorporationName());
+            json.put("serverId",ts.getServerId());
+            json.put("brokerId",ts.getBrokerId());   
+            json.put("deviceId",ts.getDeviceId());
+            json.put("phaseRoadMapId",ts.getPhaseRoadMapId());
+            json.put("metadata",msg);
+            ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", json.toString());
+            producer.send(data);
+        }else{
+        	json = new JSONObject();
+            json.put("error","error");
+        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", json.toString());
             producer.send(data);
         }
 

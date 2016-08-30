@@ -2,7 +2,6 @@ package com.enow.storm.TriggerTopology;
 
 import java.util.Map;
 
-import com.enow.dto.TopicStructure;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -14,10 +13,15 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.enow.dto.TopicStructure;
+
+import java.util.List;
 
 public class StagingBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
@@ -36,7 +40,7 @@ public class StagingBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		topicStructure = (TopicStructure) input.getValueByField("topicStucture");
+		topicStructure = (TopicStructure) input.getValueByField("topicStructure");
 		msg = input.getStringByField("msg");
 		if (null == topicStructure) {
 			return;
@@ -44,7 +48,7 @@ public class StagingBolt extends BaseRichBolt {
 			return;
 		}
 		// check Device ID
-		MongoClient mongoClient = new MongoClient("52.193.56.228", 9092);
+		MongoClient mongoClient = new MongoClient("52.193.17.248", 11111);
 
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
@@ -62,10 +66,9 @@ public class StagingBolt extends BaseRichBolt {
 		MongoCollection<Document> phaseRoadMapCollection = dbWrite.getCollection("phaseRoadMap");
 
 		try {
-			if (phaseRoadMapCollection.count(new Document("phaseRoadMapId", topicStructure.getPhaseRoadMapId())) == 0) {
+			if (phaseRoadMapCollection.count(new Document("phaseRoadMapId", Integer.parseInt(topicStructure.getPhaseRoadMapId()))) == 0) {
 				phaseRoadMapIdCheck = false;
-			} else if (phaseRoadMapCollection
-					.count(new Document("phaseRoadMapId", topicStructure.getPhaseRoadMapId())) == 1) {
+			} else if (phaseRoadMapCollection.count(new Document("phaseRoadMapId", Integer.parseInt(topicStructure.getPhaseRoadMapId()))) == 1) {
 				phaseRoadMapIdCheck = true;
 			} else {
 				// phaseRoadMapIdCheck = "phase road map id : now we have a
@@ -88,6 +91,6 @@ public class StagingBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("topicStucture", "msg", "machineIdCheck", "phaseRoadMapIdCheck"));
+		declarer.declare(new Fields("topicStructure", "msg", "machineIdCheck", "phaseRoadMapIdCheck"));
 	}
 }
