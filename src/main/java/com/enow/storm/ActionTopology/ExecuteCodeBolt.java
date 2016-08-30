@@ -11,7 +11,7 @@ import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.enow.storm.TriggerTopology.TopicStructure;
+import com.enow.dto.TopicStructure;
 
 
 public class ExecuteCodeBolt extends BaseRichBolt {

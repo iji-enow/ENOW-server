@@ -1,4 +1,4 @@
-package com.enow.storm.TriggerTopology;
+package com.enow.dto;
 
 public class TopicStructure {
 	private String corporationName;

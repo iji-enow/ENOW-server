@@ -2,6 +2,7 @@ package com.enow.storm.ActionTopology;
 
 
 import java.util.Map;
+import java.util.Queue;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -12,17 +13,18 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.enow.storm.TriggerTopology.TopicStructure;
+import com.enow.dto.TopicStructure;
 
 public class SchedulingBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
     private OutputCollector collector;
-    private TopicStructure ts;
+    private TopicStructure topicStructure;
+	private Queue buffer;
     @Override
     
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
-        ts = new TopicStructure();
+		topicStructure = new TopicStructure();
     }
 
     @Override

@@ -32,12 +32,8 @@ public class ActionTopology {
         
         kafkaConfig2.scheme = new SchemeAsMultiScheme(new StringScheme());
         kafkaConfig2.startOffsetTime = -1;
-
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("trigger-spout", new KafkaSpout(kafkaConfig1));
-        // "status":"requested"1 | "live"2 | "dead"0,
-        // 서버에서 requested로 바꿔줘야 함
-        // "metadata":
         builder.setSpout("status-spout", new KafkaSpout(kafkaConfig2));
         builder.setBolt("scheduling-bolt", new SchedulingBolt()).allGrouping("trigger-spout").allGrouping("status-spout");
         builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
