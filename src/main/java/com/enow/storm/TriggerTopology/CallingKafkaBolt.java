@@ -24,7 +24,7 @@ public class CallingKafkaBolt extends BaseRichBolt {
     private OutputCollector collector;
     private Properties props;
     private Producer<String, String> producer;
-    private TopicStructure ts;
+    private TopicStructure topicStructure;
     private JSONObject json;
 
     @Override
@@ -38,7 +38,7 @@ public class CallingKafkaBolt extends BaseRichBolt {
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producer = new KafkaProducer<String, String>(props);
-        ts = new TopicStructure();
+        topicStructure = new TopicStructure();
     }
 
     @Override
@@ -49,13 +49,14 @@ public class CallingKafkaBolt extends BaseRichBolt {
             return;
         }
 
-        ts = (TopicStructure) input.getValueByField("topicStructure");
+        topicStructure = (TopicStructure) input.getValueByField("topicStructure");
         final String msg = input.getStringByField("msg");
         final boolean machineIdCheck = input.getBooleanByField("machineIdCheck");
         final boolean phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
         
 
         if (machineIdCheck && phaseRoadMapIdCheck) {
+        	/*
         	json = new JSONObject();
             json.put("spoutName","trigger");
             json.put("corporationName", ts.getCorporationName());
@@ -66,10 +67,15 @@ public class CallingKafkaBolt extends BaseRichBolt {
             json.put("metadata",msg);
             ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", json.toString());
             producer.send(data);
+            */
+        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "trigger " + topicStructure.output() + " " + msg);
+            producer.send(data);
         }else{
+        	/*
         	json = new JSONObject();
             json.put("error","error");
-        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", json.toString());
+            */
+        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "error");
             producer.send(data);
         }
 

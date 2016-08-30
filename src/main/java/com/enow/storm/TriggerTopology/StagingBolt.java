@@ -10,16 +10,19 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.bson.Document;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.enow.dto.TopicStructure;
+import com.enow.storm.Connect;
 
 import java.util.List;
 
@@ -79,6 +82,27 @@ public class StagingBolt extends BaseRichBolt {
 			e.getMessage();
 			phaseRoadMapIdCheck = false;
 		}
+		
+		FindIterable<Document> iterable = phaseRoadMapCollection.find(new Document("phaseRoadMapId",1));
+		
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				document.toString();
+				JSONObject json = null;
+		        String webhook = null;
+		        Connect con = new Connect("https://hooks.slack.com/services/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");
+
+		        
+		        json = new JSONObject();
+		        json.put("text",document.toString());
+		        webhook = con.post(con.getURL(), json);
+			}
+		});
+		
+		
+		
+		
 		collector.emit(new Values(topicStructure, msg, machineIdCheck, phaseRoadMapIdCheck));
 
 		try {
