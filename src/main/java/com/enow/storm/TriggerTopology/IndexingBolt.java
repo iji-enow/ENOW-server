@@ -68,7 +68,7 @@ public class IndexingBolt extends BaseRichBolt {
         MongoCollection<Document> collection = dbWrite.getCollection("log");
 
         long time = System.currentTimeMillis();
-        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         Document document = new Document();
         document.put("time", dayTime.format(new Date(time)));
         document.put("topic", topic);
