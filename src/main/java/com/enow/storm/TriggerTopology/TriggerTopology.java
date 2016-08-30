@@ -12,7 +12,7 @@ import org.apache.storm.topology.TopologyBuilder;
 
 public class TriggerTopology {
     public static void main(String[] args) throws Exception {
-    	BasicConfigurator.configure();
+        BasicConfigurator.configure();
         Config config = new Config();
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
@@ -20,8 +20,8 @@ public class TriggerTopology {
         String topic = "event";
         BrokerHosts brokerHosts = new ZkHosts(zkConnString);
 
-        SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts,topic, "/"+topic, "storm");
-       
+        SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts, topic, "/" + topic, "storm");
+
         kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         kafkaConfig.startOffsetTime = -1;
 
@@ -43,10 +43,10 @@ public class TriggerTopology {
        
         submitter.submitTopology("Trigger", config, builder.createTopology());
         */
-        
+
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("TriggerTopology", config, builder.createTopology());
-        
+
     }
 }
 
