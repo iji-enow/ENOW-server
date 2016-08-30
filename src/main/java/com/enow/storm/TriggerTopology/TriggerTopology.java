@@ -30,9 +30,8 @@ public class TriggerTopology {
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
         builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
         builder.setBolt("calling-kafka-bolt", new CallingKafkaBolt()).allGrouping("staging-bolt");
-        
+
         /*
-        nononoonopepepepepe
         config.setNumWorkers(2);
         config.setMaxTaskParallelism(5);
         config.put(Config.NIMBUS_THRIFT_PORT, 6627);

@@ -37,7 +37,7 @@ public class StagingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
     	
-    	if(null == input.getValueByField("topic"))
+    	if(null == input.getValueByField("topicStucture"))
  	    {
  	        return;
  	    }else if((null == input.getStringByField("msg") || input.getStringByField("msg").length() == 0))
@@ -45,7 +45,7 @@ public class StagingBolt extends BaseRichBolt {
  	        return;
  	    }
     	
-    	ts = (TopicStructure)input.getValueByField("topic");
+    	ts = (TopicStructure)input.getValueByField("topicStucture");
     	final String msg = input.getStringByField("msg");
     	
     	MongoClient mongoClient = new MongoClient("52.193.56.228", 9092);
@@ -88,6 +88,6 @@ public class StagingBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	declarer.declare(new Fields("topic","msg","machineIdCheck","phaseRoadMapIdCheck"));
+    	declarer.declare(new Fields("topicStucture","msg","machineIdCheck","phaseRoadMapIdCheck"));
     }
 }

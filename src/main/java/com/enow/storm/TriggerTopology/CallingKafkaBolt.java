@@ -35,16 +35,15 @@ public class CallingKafkaBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {	
-    	if(null == input.getValueByField("topic"))
+    	if(null == input.getValueByField("topicStructure"))
  	    {
  	        return;
  	    }else if((null == input.getStringByField("msg") || input.getStringByField("msg").length() == 0))
  	    {
  	        return;
  	    }
-    	
-    	
-    	ts = (TopicStructure)input.getValueByField("topic");
+		
+    	ts = (TopicStructure)input.getValueByField("topicStructure");
     	final String msg = input.getStringByField("msg");
     	final String machineIdCheck = input.getStringByField("machineIdCheck");
     	final String phaseRoadMapIdCheck = input.getStringByField("phaseRoadMapIdCheck");
@@ -61,7 +60,7 @@ public class CallingKafkaBolt extends BaseRichBolt {
 		producer.send(data1);
 		producer.send(data2);
 		producer.send(data3);
-		
+
 		try {
 			LOG.debug("input = [" + input + "]");
 			collector.ack(input);

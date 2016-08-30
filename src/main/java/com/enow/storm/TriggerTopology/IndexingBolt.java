@@ -51,7 +51,7 @@ public class IndexingBolt extends BaseRichBolt {
     	ts.setDeviceId(topic.split("/")[3]);
     	ts.setPhaseRoadMapId(topic.split("/")[4]);
     	
-    	// enow/serverid/brokerid/deviceid/
+    	// enow/serverId/brokerId/deviceId/phaseRoadMapId
     	
     	String msg = inputMsg.split(" ")[1];
     	
@@ -92,6 +92,6 @@ public class IndexingBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	declarer.declare(new Fields("topic","msg"));
+    	declarer.declare(new Fields("topicStructure","msg"));
     }
 }
