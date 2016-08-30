@@ -41,4 +41,9 @@ public class TopicStructure {
 	public String showAll(){
 		return "corporationName : "+ corporationName+" serverId : " + serverId + " brokerId : " + brokerId + " deviceId : " + deviceId + " PhaseRoadMapId : " + phaseRoadMapId;
 	}
+	
+	public String output(){
+		return corporationName +"/"+ serverId +"/"+ brokerId +"/"+ deviceId +"/"+ phaseRoadMapId;
+	}
+	
 }

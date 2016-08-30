@@ -49,7 +49,7 @@ public class CallingKafkaBolt extends BaseRichBolt {
         final boolean phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
 
         if (machineIdCheck && phaseRoadMapIdCheck) {
-            ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", ts.showAll() + " msg : " + msg);
+            ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", ts.output() + " msg : " + msg);
             producer.send(data);
         }
 
