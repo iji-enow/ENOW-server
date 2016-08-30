@@ -29,7 +29,7 @@ public class ActionTopology {
         BrokerHosts brokerHosts2 = new ZkHosts(zkConnString2);
 
         SpoutConfig kafkaConfig2 = new SpoutConfig(brokerHosts1,topic2, "/"+topic2, "storm");
-        
+
         kafkaConfig2.scheme = new SchemeAsMultiScheme(new StringScheme());
         kafkaConfig2.startOffsetTime = -1;
         TopologyBuilder builder = new TopologyBuilder();
@@ -42,6 +42,5 @@ public class ActionTopology {
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("ActionTopology", config, builder.createTopology());
-        
     }
 }
