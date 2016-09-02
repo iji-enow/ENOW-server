@@ -11,6 +11,7 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.bson.Document;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,34 +27,42 @@ import com.enow.storm.Connect;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class StagingBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
 	private OutputCollector collector;
 	private TopicStructure topicStructure;
-	String msg = null;
 	boolean machineIdCheck = false;
 	boolean phaseRoadMapIdCheck = false;
+	boolean mapIdCheck = false;
+	FindIterable<Document> iterable;
+	JSONParser jsonParser;
+	JSONObject phaseRoadMapId;
+	JSONObject phases;
+	JSONObject phaseId;
+	JSONObject devices;
+	JSONObject deviceId;
+	JSONObject tmp;
 
 	@Override
 
 	public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 		topicStructure = new TopicStructure();
+		jsonParser = new JSONParser();
 	}
 
 	@Override
 	public void execute(Tuple input) {
 		topicStructure = (TopicStructure) input.getValueByField("topicStructure");
-		msg = input.getStringByField("msg");
 		if (null == topicStructure) {
-			return;
-		} else if ((null == msg || msg.length() == 0)) {
 			return;
 		}
 		// check Device ID
-		MongoClient mongoClient = new MongoClient( "127.0.0.1",27017 );
+		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
 
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
@@ -85,37 +94,177 @@ public class StagingBolt extends BaseRichBolt {
 		} catch (NumberFormatException e) {
 			e.getMessage();
 			phaseRoadMapIdCheck = false;
+			//topicStructure.getPhaseRoadMapId()이 숫자가 들어오지 않았을경우 
 		}
 
-		FindIterable<Document> iterable = phaseRoadMapCollection.find(new Document("phaseRoadMapId", 1));
+		if (phaseRoadMapIdCheck && machineIdCheck) {
+			try {
+				iterable = phaseRoadMapCollection
+						.find(new Document("phaseRoadMapId", Integer.parseInt(topicStructure.getPhaseRoadMapId())));
 
-		iterable.forEach(new Block<Document>() {
-			@Override
-			public void apply(final Document document) {
-				JSONParser jsonParser = new JSONParser();
-				JSONObject jsonObject;
 				try {
-					// JSON데이터를 넣어 JSON Object 로 만들어 준다.
-					jsonObject = (JSONObject) jsonParser.parse(document.toJson());
-					jsonObject.get("").toString();
-					
-					
-					
-					JSONObject json = null;
-					String webhook = null;
-					Connect con = new Connect("https://hooks.slack.com/services/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");
+					phaseRoadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
+					phases = (JSONObject) phaseRoadMapId.get("phases");
+					phaseId = (JSONObject) phases.get("phase1");
+					devices = (JSONObject) phaseId.get("devices");
+					deviceId = (JSONObject) devices.get(topicStructure.getDeviceId());
 
-					json = new JSONObject();
-					json.put("text", jsonObject.get("phaseId").toString());
-					webhook = con.post(con.getURL(), json);
+					try {
+						if (Double.parseDouble(deviceId.get("mapId").toString()) == 1) {
+							mapIdCheck = true;
+							topicStructure.setMapId("1");
+						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 3) {
+							mapIdCheck = true;
+							topicStructure.setMapId("3");
+						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 5) {
+							mapIdCheck = true;
+							topicStructure.setMapId("5");
+						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 7) {
+							mapIdCheck = true;
+							topicStructure.setMapId("7");
+						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 9) {
+							mapIdCheck = true;
+							topicStructure.setMapId("9");
+						} else {
+							mapIdCheck = false;
+						}
+					} catch (NumberFormatException e) {
+						// 우리가 mapId에 숫자가 아닌 값을 넣었다. 우리의 잘못.
+						mapIdCheck = false;
+					}
+
 				} catch (ParseException e) {
-					// TODO Auto-generated catch block
+					// iterable.first().toJson() 이 json형식의 string이 아닌 경우 발생 하지만
+					// tojson이기에 그럴 일은 발생하지 않은 것이라 가정.
 					e.printStackTrace();
+					mapIdCheck = false;
 				}
+			} catch (NumberFormatException e) {
+				e.getMessage();
+				phaseRoadMapIdCheck = false;
+				//topicStructure.getPhaseRoadMapId()이 숫자가 들어오지 않았을경우 
+			} catch (NullPointerException e) {
+				System.out.println(e.getMessage());
+				mapIdCheck = false;
+				//topicStructure.getDeviceId() 가 phase1에 있는 deviceId중 없는 경
 			}
-		});
+		}
 
-		collector.emit(new Values(topicStructure, msg, machineIdCheck, phaseRoadMapIdCheck));
+		/*
+		try {
+			iterable = phaseRoadMapCollection
+					.find(new Document("phaseRoadMapId", Integer.parseInt(topicStructure.getPhaseRoadMapId())));
+
+			iterable.forEach(new Block<Document>() {
+				@Override
+				public void apply(final Document document) {
+					JSONParser jsonParser = new JSONParser();
+					JSONObject phaseRoadMapId;
+					JSONObject phases;
+					JSONObject phaseId;
+					JSONObject devices;
+					JSONObject deviceId;
+					JSONObject tmp;
+
+					try {
+						phaseRoadMapId = (JSONObject) jsonParser.parse(document.toJson());
+						phases = (JSONObject) phaseRoadMapId.get("phases");
+						phaseId = (JSONObject) phases.get("phase1");
+						devices = (JSONObject) phaseId.get("devices");
+						deviceId = (JSONObject) devices.get(topicStructure.getDeviceId());
+
+						try {
+							if (Double.parseDouble(deviceId.get("mapId").toString()) == 1) {
+								mapIdCheck = true;
+							} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 3) {
+								mapIdCheck = true;
+							} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 5) {
+								mapIdCheck = true;
+							} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 7) {
+								mapIdCheck = true;
+							} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 9) {
+								mapIdCheck = true;
+							} else {
+								mapIdCheck = false;
+							}
+						} catch (NumberFormatException e) {
+							// 우리가 mapId에 숫자가 아닌 값을 넣었다. 우리의 잘못.
+							mapIdCheck = false;
+						}
+
+						JSONObject json = null;
+						String webhook = null;
+						Connect con = new Connect(
+								"https://hooks.slack.com/services/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");
+
+						json = new JSONObject();
+						json.put("text", Double.parseDouble(deviceId.get("mapId").toString()));
+						webhook = con.post(con.getURL(), json);
+
+						// phaseNum = (JSONObject)phaseId.get("phase1");
+						// deviceId = (JSONObject)phaseNum.get("devices");
+
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+		} catch (NumberFormatException e) {
+			System.out.println(e.getMessage());
+			phaseRoadMapIdCheck = false;
+		} catch (NullPointerException e) {
+			System.out.println(e.getMessage());
+			mapIdCheck = false;
+		}
+		*/
+
+		/*
+		 * iterable.forEach(new Block<Document>() {
+		 * 
+		 * @Override public void apply(final Document document) { JSONParser
+		 * jsonParser = new JSONParser(); JSONObject phaseRoadMapId; JSONArray
+		 * phases; JSONObject phaseId; JSONObject devices; JSONArray deviceId;
+		 * JSONObject tmp;
+		 * 
+		 * try { // JSON데이터를 넣어 JSON Object 로 만들어 준다. phaseRoadMapId =
+		 * (JSONObject) jsonParser.parse(document.toJson());
+		 * //jsonObject.get("").toString(); phases =
+		 * (JSONArray)phaseRoadMapId.get("phases"); phaseId =
+		 * (JSONObject)phases.get(0); //phaseId.get("phase1").toString() devices
+		 * = (JSONObject)phaseId.get("phase1"); deviceId =
+		 * (JSONArray)devices.get("devices"); tmp = (JSONObject)deviceId.get(0);
+		 * 
+		 * JSONObject json = null; String webhook = null; Connect con = new
+		 * Connect(
+		 * "https://hooks.slack.com/services/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"
+		 * );
+		 * 
+		 * json = new JSONObject(); json.put("text",
+		 * tmp.get(topicStructure.getDeviceId()).toString()); webhook =
+		 * con.post(con.getURL(), json);
+		 * 
+		 * 
+		 * 
+		 * for(String item : list){ JSONObject json = null; String webhook =
+		 * null; Connect con = new Connect(
+		 * "https://hooks.slack.com/services/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"
+		 * );
+		 * 
+		 * json = new JSONObject(); json.put("text", item); webhook =
+		 * con.post(con.getURL(), json); }
+		 * 
+		 * //phaseNum = (JSONObject)phaseId.get("phase1"); //deviceId =
+		 * (JSONObject)phaseNum.get("devices");
+		 * 
+		 * 
+		 * } catch (ParseException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); } } });
+		 * 
+		 * } catch (NumberFormatException e) { e.getMessage(); }
+		 */
+
+		collector.emit(new Values(topicStructure, machineIdCheck, phaseRoadMapIdCheck,mapIdCheck));
 
 		try {
 			LOG.debug("input = [" + input + "]");
@@ -127,6 +276,6 @@ public class StagingBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("topicStructure", "msg", "machineIdCheck", "phaseRoadMapIdCheck"));
+		declarer.declare(new Fields("topicStructure", "machineIdCheck", "phaseRoadMapIdCheck","mapIdCheck"));
 	}
 }

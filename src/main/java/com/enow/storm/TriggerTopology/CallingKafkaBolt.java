@@ -45,17 +45,14 @@ public class CallingKafkaBolt extends BaseRichBolt {
     public void execute(Tuple input) {
         if (null == input.getValueByField("topicStructure")) {
             return;
-        } else if ((null == input.getStringByField("msg") || input.getStringByField("msg").length() == 0)) {
-            return;
         }
 
         topicStructure = (TopicStructure) input.getValueByField("topicStructure");
-        final String msg = input.getStringByField("msg");
         final boolean machineIdCheck = input.getBooleanByField("machineIdCheck");
         final boolean phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
-        
+        final boolean mapIdCheck = input.getBooleanByField("mapIdCheck");
 
-        if (machineIdCheck && phaseRoadMapIdCheck) {
+        if (machineIdCheck && phaseRoadMapIdCheck && mapIdCheck) {
         	/*
         	json = new JSONObject();
             json.put("spoutName","trigger");
@@ -68,14 +65,14 @@ public class CallingKafkaBolt extends BaseRichBolt {
             ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", json.toString());
             producer.send(data);
             */
-        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "trigger " + topicStructure.output() + " " + msg);
+        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "trigger " + topicStructure.output());
             producer.send(data);
         }else{
         	/*
         	json = new JSONObject();
             json.put("error","error");
             */
-        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "error");
+        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "error : " + "machinIdCheck = " +machineIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck );
             producer.send(data);
         }
 

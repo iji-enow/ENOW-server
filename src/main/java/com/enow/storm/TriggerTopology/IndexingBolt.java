@@ -44,7 +44,7 @@ public class IndexingBolt extends BaseRichBolt {
 
         final String inputMsg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
-        String topic = inputMsg.split(" ")[0];
+        String topic = inputMsg.split(" ",2)[0];
 
         topicStructure.setCorporationName(topic.split("/")[0]);
         topicStructure.setServerId(topic.split("/")[1]);
@@ -53,8 +53,10 @@ public class IndexingBolt extends BaseRichBolt {
         topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
 
         // enow/serverId/brokerId/deviceId/phaseRoadMapId
-
-        String msg = inputMsg.split(" ")[1];
+        
+        String msg = inputMsg.split(" ",2)[1];
+        
+        topicStructure.setMsg(msg);
 
 
         if ((null == inputMsg) || (inputMsg.length() == 0)) {
@@ -79,7 +81,7 @@ public class IndexingBolt extends BaseRichBolt {
 
         mongoClient.close();
 
-        collector.emit(new Values(topicStructure, msg));
+        collector.emit(new Values(topicStructure));
         try {
             LOG.debug("input = [" + input + "]");
             collector.ack(input);
@@ -90,6 +92,6 @@ public class IndexingBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("topicStructure", "msg"));
+        declarer.declare(new Fields("topicStructure"));
     }
 }

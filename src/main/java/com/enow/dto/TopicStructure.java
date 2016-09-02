@@ -6,7 +6,21 @@ public class TopicStructure {
 	private String brokerId;
 	private String deviceId;
 	private String phaseRoadMapId;
+	private String msg;
+	private String mapId;
 	
+	public String getMsg() {
+		return msg;
+	}
+	public void setMsg(String msg) {
+		this.msg = msg;
+	}
+	public String getMapId() {
+		return mapId;
+	}
+	public void setMapId(String mapId) {
+		this.mapId = mapId;
+	}
 	public String getCorporationName() {
 		return corporationName;
 	}
@@ -43,7 +57,7 @@ public class TopicStructure {
 	}
 	
 	public String output(){
-		return corporationName +"/"+ serverId +"/"+ brokerId +"/"+ deviceId +"/"+ phaseRoadMapId;
+		return corporationName +"/"+ serverId +"/"+ brokerId +"/"+ deviceId +"/"+ phaseRoadMapId +"/"+ mapId +" "+msg;
 	}
 	
 }
