@@ -23,7 +23,7 @@ public class main {
     private static final String[] STREAMS = new String[]{"test_stream","test1_stream","test2_stream"};
     private static final String[] TOPICS = new String[]{"event", "trigger", "status", "proceed", "feed"};
     private static final String zkhost = "localhost:2181";
-
+    private LocalCluster cluster = new LocalCluster();
     public static void main(String[] args) throws Exception {
         new main().runMain(args);
     }
@@ -32,8 +32,8 @@ public class main {
 
 
         if (args.length == 0) {
-        	submitTopologyLocalCluster("action", getActionTopolgy(zkhost), getConfig());
-            submitTopologyLocalCluster("trigger", getTriggerTopolgy(zkhost), getConfig());
+        	submitTopologyLocalCluster("action", getActionTopolgy(), getConfig());
+            submitTopologyLocalCluster("trigger", getTriggerTopolgy(), getConfig());
         }
 //        else {
 //            submitTopologyRemoteCluster(args[0], getTriggerTopolgy(args), getConfig());
@@ -43,7 +43,6 @@ public class main {
     }
 
     protected void submitTopologyLocalCluster(String name, StormTopology topology, Config config) throws InterruptedException {
-        LocalCluster cluster = new LocalCluster();
         cluster.submitTopology(name, config, topology);
         stopWaitingForInput();
     }
@@ -68,13 +67,7 @@ public class main {
         return config;
     }
 
-    protected Config getConfig(String zkhost) {
-        Config config = new Config();
-        config.setDebug(true);
-        return config;
-    }
-
-    protected StormTopology getTriggerTopolgy(String zkhost) {
+    protected StormTopology getTriggerTopolgy() {
     	BasicConfigurator.configure();
         BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
@@ -88,7 +81,7 @@ public class main {
         builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
         return builder.createTopology();
     }
-    protected StormTopology getActionTopolgy(String zkhost) {
+    protected StormTopology getActionTopolgy() {
     	BasicConfigurator.configure();
         BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
