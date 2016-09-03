@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class StagingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
 	private OutputCollector collector;
 	private TopicStructure topicStructure;
 	boolean machineIdCheck = false;

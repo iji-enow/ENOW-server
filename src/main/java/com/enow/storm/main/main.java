@@ -109,7 +109,7 @@ public class main {
                 .allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt())
                 .allGrouping("execute-code-bolt");
-        builder.setBolt("calling-kafka-bolt", new com.enow.storm.TriggerTopology.CallingKafkaBolt())
+        builder.setBolt("calling-kafka-bolt", new com.enow.storm.TriggerTopology.CallingTriggerBolt())
                 .allGrouping("provisioning-bolt");
         return builder.createTopology();
     }

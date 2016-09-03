@@ -19,8 +19,8 @@ import com.google.gson.JsonObject;
 import java.util.Map;
 import java.util.Properties;
 
-public class CallingKafkaBolt extends BaseRichBolt {
-    protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
+public class CallingTriggerBolt extends BaseRichBolt {
+    protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
     private OutputCollector collector;
     private Properties props;
     private Producer<String, String> producer;

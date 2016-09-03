@@ -25,7 +25,7 @@ import java.util.Date;
 import com.enow.dto.TopicStructure;
 
 public class IndexingBolt extends BaseRichBolt {
-    protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
     private OutputCollector collector;
     private TopicStructure topicStructure;
 

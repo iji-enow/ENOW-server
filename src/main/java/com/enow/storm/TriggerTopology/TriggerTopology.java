@@ -29,7 +29,7 @@ public class TriggerTopology {
         builder.setSpout("event-spout", new KafkaSpout(kafkaConfig));
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
         builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
-        builder.setBolt("calling-kafka-bolt", new CallingKafkaBolt()).allGrouping("staging-bolt");
+        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
 
         /*
         config.setNumWorkers(2);
