@@ -3,8 +3,6 @@ package com.enow.storm.TriggerTopology;
 
 import java.util.Map;
 
-import com.lambdaworks.redis.api.StatefulRedisConnection;
-import com.lambdaworks.redis.api.sync.RedisCommands;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -17,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // Redis
-import com.lambdaworks.redis.*;
 // MongoDB
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
@@ -47,14 +44,6 @@ public class IndexingBolt extends BaseRichBolt {
             return;
         }
 
-        RedisClient redisClient = RedisClient.create("redis://password@localhost:6379/0");
-        StatefulRedisConnection<String, String> connection = redisClient.connect();
-        RedisCommands<String, String> syncCommands = connection.sync();
-
-        syncCommands.set("key", "Hello, Redis!");
-
-        connection.close();
-        redisClient.shutdown();
 
         final String inputMsg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
