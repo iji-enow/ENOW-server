@@ -17,25 +17,23 @@ import com.enow.dto.TopicStructure;
 public class ProvisioningBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
     private OutputCollector collector;
-    private TopicStructure ts;
+    private TopicStructure topicStructure;
     @Override
     
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
-        ts = new TopicStructure();
+        topicStructure = new TopicStructure();
     }
 
     @Override
     public void execute(Tuple input) {
-    	if((null == input.toString()) || (input.toString().length() == 0))
- 	    {
- 	        return;
- 	    }
-    	
-    	final String inputMsg = input.getValues().toString().substring(1,input.getValues().toString().length() - 1);	
-
+    	topicStructure = (TopicStructure) input.getValueByField("topicStructure");
+		if (null == topicStructure) {
+			return;
+		}
+    
 		
-		collector.emit(new Values(inputMsg));
+		collector.emit(new Values(topicStructure));
 		try {
 			LOG.debug("input = [" + input + "]");
 			collector.ack(input);
@@ -46,6 +44,6 @@ public class ProvisioningBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	declarer.declare(new Fields("msg"));
+    	declarer.declare(new Fields("topicStructure"));
     }
 }

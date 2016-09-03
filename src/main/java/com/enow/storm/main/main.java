@@ -6,6 +6,7 @@ package com.enow.storm.main;
 import com.enow.storm.ActionTopology.*;
 import com.enow.storm.TriggerTopology.*;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
@@ -21,7 +22,7 @@ import java.io.InputStreamReader;
 public class main {
     private static final String[] STREAMS = new String[]{"test_stream","test1_stream","test2_stream"};
     private static final String[] TOPICS = new String[]{"event", "trigger", "status", "proceed", "feed"};
-    private static final String zkhost = "127.0.0.1:2181";
+    private static final String zkhost = "localhost:2181";
 
     public static void main(String[] args) throws Exception {
         new main().runMain(args);
@@ -31,8 +32,8 @@ public class main {
 
 
         if (args.length == 0) {
-            submitTopologyLocalCluster(getTriggerTopolgy(zkhost), getConfig());
-            submitTopologyLocalCluster(getActionTopolgy(zkhost), getConfig());
+        	submitTopologyLocalCluster(getActionTopolgy(zkhost), getConfig());
+            submitTopologyLocalCluster(getTriggerTopolgy(zkhost), getConfig());         
         }
 //        else {
 //            submitTopologyRemoteCluster(args[0], getTriggerTopolgy(args), getConfig());
@@ -74,19 +75,21 @@ public class main {
     }
 
     protected StormTopology getTriggerTopolgy(String zkhost) {
+    	BasicConfigurator.configure();
         BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
         // event spouts setting
-        SpoutConfig eventConfig = new SpoutConfig(hosts, TOPICS[0], "/" + TOPICS[0], "enow");
+        SpoutConfig eventConfig = new SpoutConfig(hosts,TOPICS[0], "/" + TOPICS[0], "enow");
         eventConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         eventConfig.startOffsetTime = -1;
-        builder.setSpout("trigger-spout", new KafkaSpout(eventConfig));
+        builder.setSpout("event-spout", new KafkaSpout(eventConfig));
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
         builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
-        builder.setBolt("calling-kafka-bolt", new CallingFeedBolt()).allGrouping("staging-bolt");
+        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
         return builder.createTopology();
     }
     protected StormTopology getActionTopolgy(String zkhost) {
+    	BasicConfigurator.configure();
         BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
         // trigger spouts setting
@@ -109,12 +112,10 @@ public class main {
                 .allGrouping("trigger-spout")
                 .allGrouping("status-spout")
                 .allGrouping("proceed-spout");
-        builder.setBolt("execute-code-bolt", new ExecuteCodeBolt())
-                .allGrouping("scheduling-bolt");
-        builder.setBolt("provisioning-bolt", new ProvisioningBolt())
-                .allGrouping("execute-code-bolt");
-        builder.setBolt("calling-kafka-bolt", new com.enow.storm.TriggerTopology.CallingTriggerBolt())
-                .allGrouping("provisioning-bolt");
+        builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
+        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
+        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
+        builder.setBolt("calling-proceed-bolt", new CallingProceedBolt()).allGrouping("provisioning-bolt");
         return builder.createTopology();
     }
 }

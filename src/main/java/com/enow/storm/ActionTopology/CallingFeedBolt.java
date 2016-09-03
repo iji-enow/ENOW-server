@@ -5,6 +5,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ public class CallingFeedBolt extends BaseRichBolt {
     private OutputCollector collector;
     private Properties props;
     private Producer<String, String> producer;
-    private TopicStructure ts;
+    private TopicStructure topicStructure;
     @Override
     
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
@@ -29,18 +30,24 @@ public class CallingFeedBolt extends BaseRichBolt {
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		producer =  new KafkaProducer<String, String>(props);
-		ts = new TopicStructure();
+		topicStructure = new TopicStructure();
     }
 
     @Override
     public void execute(Tuple input) {	
-    	if((null == input.toString()) || (input.toString().length() == 0))
- 	    {
- 	        return;
- 	    }
-    	
-    	final String inputMsg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-    	
+    	topicStructure = (TopicStructure) input.getValueByField("topicStructure");
+		if (null == topicStructure) {
+			return;
+		}
+    
+		
+		collector.emit(new Values(topicStructure));
+		try {
+			LOG.debug("input = [" + input + "]");
+			collector.ack(input);
+		} catch (Exception e) {
+			collector.fail(input);
+		}
     	/*
     	if(null == input.getValueByField("topic"))
  	    {
@@ -56,7 +63,7 @@ public class CallingFeedBolt extends BaseRichBolt {
     	//final String msg = input.getStringByField("msg");
     	
 		//ProducerRecord<String, String> data = new ProducerRecord<String, String>("feed", "ServerID: " + ts.getServerId() +  " msg : " + msg);
-		ProducerRecord<String, String> data = new ProducerRecord<String, String>("feed",inputMsg);
+		ProducerRecord<String, String> data = new ProducerRecord<String, String>("feed",topicStructure.output());
 		
 		producer.send(data);
 
