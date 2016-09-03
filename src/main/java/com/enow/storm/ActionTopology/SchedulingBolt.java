@@ -59,7 +59,7 @@ public class SchedulingBolt extends BaseRichBolt {
         topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
 
         if (spoutName == "trigger") {
-            // trigger enow/serverId/brokerId/deviceId/phaseRoadMapId msg
+            // trigger enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId msg
 
             if ((null == msg) || (msg.length() == 0)) {
                 return;
@@ -74,7 +74,7 @@ public class SchedulingBolt extends BaseRichBolt {
         }
         if (spoutName == "status") {
             try {
-                // status enow/serverId/brokerId/deviceId/phaseRoadMapId JSON
+                // status enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
                 JSONParser jsonParser = new JSONParser();
                 JSONObject json = (JSONObject) jsonParser.parse(msg);
                 String deviceStatus = json.get("status").toString();

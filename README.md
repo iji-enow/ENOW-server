@@ -19,10 +19,61 @@ Todo List
 - [x] ~~Making Connection between Ponte and Kafka~~
 - [x] ~~Sending a message from Device(or Android) to Android(or Device) via ENOW System~~
 - [x] ~~Not using LocalCluster, But using StormSubmitter~~
-- [ ] Make Event topology
+- [x] Make Event topology
 - [ ] Make Trigger & Status topology
 - [ ] Make queue for Scheduling Bolt
 - [x] ~~Create test Document on MongoDB~~
 - [ ] Connect Storm to DashBoard
 - [ ] Connect Storm to Devices
 - [ ] Build on StormSubmitter
+
+Topologies
+----------
+
+모든 볼트는 Redis를 통해 상태 정보가 저장된다.
+
+#### TriggerTopology
+##### IndexingBolt :
+
+- ```eventKafka```에서 들어온 현 토픽과 메세지 값을 나눠서 ```TopicStructure``` 구조체에 저장한다.
+- 로그를 기록하여 몽고DB에 저장한다.
+- 파싱된 ```TopicStructure```를 PhasingBolt로 넘겨준다.
+
+###### PhasingBolt :
+
+- 몽고DB 안의 ```DeviceId```와 ```TopicStructure```에 있는 ```DeviceId```를 매칭한다.
+- 몽고DB 안의 ```PhaseRoadMapId```와 ```TopicStructure```에 있는 ```PhaseRoadMapId```를 매칭한다.
+- 현제 토픽에 해당하는 ```mapId```를 추출하여 토픽에 추가시켜준다.
+- ```TopicStructure```와 위에서 거친 검증 값에 따라 ```CallingTriggerBolt```로 넘겨 준다.
+
+###### CallingTriggerBolt :
+
+- StagingBolt에서 토픽 값과 메세지 값을 받아 ```triggerKafka```로 넘겨준다.
+
+#### ActionTopology
+
+###### SchedulingBolt :
+
+- ```triggerKafka``` 혹은 ```proceedKafka```에서 토픽과 메세지를 받아 스케줄링을 해준다.
+- ```triggerKafka```에서 받은 토픽과 메세지는 바로 ```ExecuteBolt```로 넘겨준다.
+- ```proceedKafka```에서 받은 토픽과 메세지는 해당 ```mapId```의 peerIn값을 몽고DB에서 받아와 현제 들어온 토픽이외의 다른 ```peerIn```값이 있는 경우 waiting을 걸어준다.
+
+###### ExecuteBolt :
+
+- ```SchdulingBolt```에서 받은 메세지의 값과 console에서 설정한 parameter값으로 console에서 작성한 source를 실행시킨다.
+- source를 돌려서 나온 result값을 ```SchedulingBolt```에서 받은 토픽과 함께 provisioningBolt로 넘겨준다.
+
+###### ProvisioningBolt :
+
+- ```ExecuteBolt```에서 받은 토픽의 ```mapId```의 ```peerOut```값을 몽고DB에서 찾아본다.
+- 만약 해당 ```mapId```의 ```peerOut```값 없다면 ```CallingFeedBolt```로 결과만 넘겨주고 ```peerOut```값이 있다면 결과를
+- ```CallingFeedBolt```로 넘겨주고 찾은 ```peerOut```값을 ```ExecuteBolt```에서 받은 토픽의 마지막에 추가하여
+- CallingProceedBolt로 결과값과 함께 넘겨준다.
+
+###### CallingProceedBolt :
+
+- ```ProvisioningBolt```에서 받은 토픽과 메세지를 ```proceedKafka```로 넘겨준다.
+
+###### CallingFeedBolt :
+
+- ```ProvisioningBolt```에서 받은 토픽과 메세지를 ```feedKafka```로 넘겨준다.

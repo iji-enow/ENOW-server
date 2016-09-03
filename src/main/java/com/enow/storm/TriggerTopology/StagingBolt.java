@@ -137,7 +137,6 @@ public class StagingBolt extends BaseRichBolt {
 						// 우리가 mapId에 숫자가 아닌 값을 넣었다. 우리의 잘못.
 						mapIdCheck = false;
 					}
-
 				} catch (ParseException e) {
 					// iterable.first().toJson() 이 json형식의 string이 아닌 경우 발생 하지만
 					// tojson이기에 그럴 일은 발생하지 않은 것이라 가정.
@@ -154,7 +153,6 @@ public class StagingBolt extends BaseRichBolt {
 				//topicStructure.getDeviceId() 가 phase1에 있는 deviceId중 없는 경
 			}
 		}
-
 		/*
 		try {
 			iterable = phaseRoadMapCollection
