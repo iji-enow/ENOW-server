@@ -6,7 +6,6 @@ package com.enow.storm.main;
 import com.enow.storm.ActionTopology.*;
 import com.enow.storm.TriggerTopology.*;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
@@ -18,14 +17,11 @@ import org.apache.storm.topology.TopologyBuilder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class main {
     private static final String[] STREAMS = new String[]{"test_stream","test1_stream","test2_stream"};
-    private static final String[] TOPICS = new String[]{"test","test1","test2"};
-
+    private static final String[] TOPICS = new String[]{"event", "trigger", "status", "proceed", "feed"};
+    private static final String zkhost = "127.0.0.1:2181";
 
     public static void main(String[] args) throws Exception {
         new main().runMain(args);
@@ -35,12 +31,13 @@ public class main {
 
 
         if (args.length == 0) {
-            submitTopologyLocalCluster(getTriggerTopolgy(args), getConfig());
-            submitTopologyLocalCluster(getActionTopolgy(args), getConfig());
-        } else {
-            submitTopologyRemoteCluster(args[0], getTriggerTopolgy(args), getConfig());
-            submitTopologyRemoteCluster(args[0], getActionTopolgy(args), getConfig());
+            submitTopologyLocalCluster(getTriggerTopolgy(zkhost), getConfig());
+            submitTopologyLocalCluster(getActionTopolgy(zkhost), getConfig());
         }
+//        else {
+//            submitTopologyRemoteCluster(args[0], getTriggerTopolgy(args), getConfig());
+//            submitTopologyRemoteCluster(args[0], getActionTopolgy(args), getConfig());
+//        }
 
     }
 
@@ -76,35 +73,42 @@ public class main {
         return config;
     }
 
-    protected StormTopology getTriggerTopolgy(String[] args) {
-        BrokerHosts hosts = new ZkHosts(args[1]);
+    protected StormTopology getTriggerTopolgy(String zkhost) {
+        BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
         // event spouts setting
-        SpoutConfig eventConfig = new SpoutConfig(hosts, "event", "/event", "enow");
+        SpoutConfig eventConfig = new SpoutConfig(hosts, TOPICS[0], "/" + TOPICS[0], "enow");
         eventConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         eventConfig.startOffsetTime = -1;
         builder.setSpout("trigger-spout", new KafkaSpout(eventConfig));
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
         builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
-        builder.setBolt("calling-kafka-bolt", new com.enow.storm.ActionTopology.CallingKafkaBolt()).allGrouping("staging-bolt");
+        builder.setBolt("calling-kafka-bolt", new CallingFeedBolt()).allGrouping("staging-bolt");
         return builder.createTopology();
     }
-    protected StormTopology getActionTopolgy(String[] args) {
-        BrokerHosts hosts = new ZkHosts(args[1]);
+    protected StormTopology getActionTopolgy(String zkhost) {
+        BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
         // trigger spouts setting
-        SpoutConfig triggerConfig = new SpoutConfig(hosts, "trigger", "/trigger", "enow");
+        SpoutConfig triggerConfig = new SpoutConfig(hosts, TOPICS[1], "/" + TOPICS[1], "enow");
         triggerConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         triggerConfig.startOffsetTime = -1;
         // status spouts setting
-        SpoutConfig statusConfig = new SpoutConfig(hosts, "status", "/status", "enow");
+        SpoutConfig statusConfig = new SpoutConfig(hosts, TOPICS[2], "/" + TOPICS[2], "enow");
         statusConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         statusConfig.startOffsetTime = -1;
+        // proceed spouts setting
+        SpoutConfig proceedConfig = new SpoutConfig(hosts, TOPICS[3], "/" + TOPICS[3], "enow");
+        proceedConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        proceedConfig.startOffsetTime = -1;
+
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
+        builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
                 .allGrouping("trigger-spout")
-                .allGrouping("status-spout");
+                .allGrouping("status-spout")
+                .allGrouping("proceed-spout");
         builder.setBolt("execute-code-bolt", new ExecuteCodeBolt())
                 .allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt())

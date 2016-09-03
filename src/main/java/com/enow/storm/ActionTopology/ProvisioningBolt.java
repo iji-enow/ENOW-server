@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.enow.dto.TopicStructure;
 
 public class ProvisioningBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
+	protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
     private OutputCollector collector;
     private TopicStructure ts;
     @Override

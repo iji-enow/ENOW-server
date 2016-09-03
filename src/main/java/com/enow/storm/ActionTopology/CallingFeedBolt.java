@@ -12,8 +12,8 @@ import java.util.Map;
 import java.util.Properties;
 import com.enow.dto.TopicStructure;
 
-public class CallingKafkaBolt extends BaseRichBolt {
-    protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
+public class CallingFeedBolt extends BaseRichBolt {
+    protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
     private OutputCollector collector;
     private Properties props;
     private Producer<String, String> producer;

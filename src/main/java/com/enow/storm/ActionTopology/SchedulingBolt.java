@@ -1,8 +1,6 @@
 package com.enow.storm.ActionTopology;
 
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.enow.dto.TopicStructure;
 
 public class SchedulingBolt extends BaseRichBolt {
-    protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
     private OutputCollector collector;
     private TopicStructure topicStructure;
 
@@ -37,7 +35,8 @@ public class SchedulingBolt extends BaseRichBolt {
         }
 
         String inputStr = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-        topicStructure.setMsg(inputStr.split(" ",3)[2]);
+        String msg = inputStr.split(" ",3)[2];
+        topicStructure.setMsg(msg);
 
         String spoutName = inputStr.split(" ",3)[0];
         String topic = inputStr.split("/",3)[1];
@@ -63,27 +62,27 @@ public class SchedulingBolt extends BaseRichBolt {
                 collector.fail(input);
             }
         } else if (spoutName == "status") {
+            if ((null == msg) || (msg.length() == 0)) {
+                return;
+            }
+            collector.emit(new Values(msg));
             try {
-                // status enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
-                JSONParser jsonParser = new JSONParser();
-                JSONObject json = (JSONObject) jsonParser.parse(msg);
-                String deviceStatus = json.get("status").toString();
-                String metadata = json.get("metadata").toString();
-
-            }catch(ParseException e){
-
+                LOG.debug("input = [" + input + "]");
+                collector.ack(input);
+            } catch (Exception e) {
+                collector.fail(input);
             }
         } else if (spoutName == "proceed") {
-            try {
-                // status enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
-                JSONParser jsonParser = new JSONParser();
-                JSONObject json = (JSONObject) jsonParser.parse(msg);
-                String deviceStatus = json.get("status").toString();
-                String metadata = json.get("metadata").toString();
-
-            }catch(ParseException e){
-
-            }
+//            try {
+//                // status enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
+//                JSONParser jsonParser = new JSONParser();
+//                JSONObject json = (JSONObject) jsonParser.parse(msg);
+//                String deviceStatus = json.get("status").toString();
+//                String metadata = json.get("metadata").toString();
+//
+//            }catch(ParseException e){
+//
+//            }
         }
     }
 

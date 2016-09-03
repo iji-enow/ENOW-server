@@ -38,7 +38,7 @@ public class ActionTopology {
         builder.setBolt("scheduling-bolt", new SchedulingBolt()).allGrouping("trigger-spout").allGrouping("status-spout");
         builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
-        builder.setBolt("calling-kafka-bolt", new CallingKafkaBolt()).allGrouping("provisioning-bolt");
+        builder.setBolt("calling-kafka-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("ActionTopology", config, builder.createTopology());
