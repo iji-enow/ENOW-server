@@ -61,42 +61,47 @@ public class StagingBolt extends BaseRichBolt {
 		if (null == topicStructure) {
 			return;
 		}
-		// check Device ID
+		// Connect MongoDB
 		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
-
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
+		// Get enow database
 		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
+		// Get device collection for matching input signal from device
 		MongoCollection<Document> deviceListCollection = dbWrite.getCollection("device");
 
 		if (deviceListCollection.count(new Document("deviceId", topicStructure.getDeviceId())) == 0) {
+			// There isn't deviceId that matches input signal from device
 			machineIdCheck = false;
 		} else if (deviceListCollection.count(new Document("deviceId", topicStructure.getDeviceId())) == 1) {
+			// There is deviceId that matches input signal from device
 			machineIdCheck = true;
 		} else {
 			// machineIdCheck = "device id : now we have a problem";
 			LOG.debug("There are more than two machine ID on MongoDB");
 		}
-		// check Phase Road-map ID
+		// Check Phase Road-map ID
 		MongoCollection<Document> phaseRoadMapCollection = dbWrite.getCollection("phaseRoadMap");
 
 		try {
 			if (phaseRoadMapCollection
 					.count(new Document("phaseRoadMapId", Integer.parseInt(topicStructure.getPhaseRoadMapId()))) == 0) {
+				// There isn't phaseRoadMapId that matches input signal from device
 				phaseRoadMapIdCheck = false;
 			} else if (phaseRoadMapCollection
 					.count(new Document("phaseRoadMapId", Integer.parseInt(topicStructure.getPhaseRoadMapId()))) == 1) {
+				// There is phaseRoadMapId that matches input signal from device
 				phaseRoadMapIdCheck = true;
 			} else {
-				// phaseRoadMapIdCheck = "phase road map id : now we have a
-				// problem";
-				LOG.debug("There are more than two Phase Roadmap Id on MongoDB");
+				// phaseRoadMapIdCheck = "phase road map id : now we have a problem";
+				LOG.debug("There are more than two Phase Road-map Id on MongoDB");
 			}
 		} catch (NumberFormatException e) {
 			e.getMessage();
 			phaseRoadMapIdCheck = false;
-			//topicStructure.getPhaseRoadMapId()이 숫자가 들어오지 않았을경우 
+			//topicStructure.getPhaseRoadMapId()에 숫자가 들어오지 않았을경우
 		}
-
+		// If phaseRoadMapIdCheck and machineIdCheck are confirmed
+        // insert data to topicStructure
 		if (phaseRoadMapIdCheck && machineIdCheck) {
 			try {
 				iterable = phaseRoadMapCollection
@@ -142,7 +147,7 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (NumberFormatException e) {
 				e.getMessage();
 				phaseRoadMapIdCheck = false;
-				//topicStructure.getPhaseRoadMapId()이 숫자가 들어오지 않았을경우 
+				//topicStructure.getPhaseRoadMapId()이 숫자가 들어오지 않았을경우
 			} catch (NullPointerException e) {
 				System.out.println(e.getMessage());
 				mapIdCheck = false;
