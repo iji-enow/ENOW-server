@@ -98,7 +98,7 @@ public class StagingBolt extends BaseRichBolt {
 		} catch (NumberFormatException e) {
 			e.getMessage();
 			phaseRoadMapIdCheck = false;
-			//topicStructure.getPhaseRoadMapId()에 숫자가 들어오지 않았을경우
+			// topicStructure.getPhaseRoadMapId()에 숫자가 들어오지 않았을경우
 		}
 		// If phaseRoadMapIdCheck and machineIdCheck are confirmed
         // insert data to topicStructure
