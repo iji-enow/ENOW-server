@@ -1,4 +1,4 @@
-TEST-storm ![travis](https://travis-ci.org/ENOW-IJI/enow-storm-joon.svg?branch=master) ![Maven Version](https://maven-badges.herokuapp.com/maven-central/org.apache.storm/storm-core/badge.svg)
+TEST-storm ![travis](https://travis-ci.org/ENOW-IJI/storm.svg?branch=master) ![Maven Version](https://maven-badges.herokuapp.com/maven-central/org.apache.storm/storm-core/badge.svg)
 =========================
 
 Test project for enow-storm based on information provided in and referenced by:
