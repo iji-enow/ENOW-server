@@ -11,9 +11,9 @@ Todo List
 - [x] ~~Making Connection between Ponte and Kafka~~
 - [x] ~~Sending a message from Device(or Android) to Android(or Device) via ENOW System~~
 - [x] ~~Not using LocalCluster, But using StormSubmitter~~
-- [x] Make Event topology
+- [x] ~~Make Event topology~~
 - [ ] Make Trigger & Status topology
-- [ ] Make queue for Scheduling Bolt
+- [ ] ~~Make queue for Scheduling Bolt~~ Connect Redis for preserving status info
 - [x] ~~Create test Document on MongoDB~~
 - [ ] Connect Storm to DashBoard
 - [ ] Connect Storm to Devices
@@ -49,6 +49,7 @@ Topologies
 - ```triggerKafka``` 혹은 ```proceedKafka```에서 토픽과 메세지를 받아 스케줄링을 해준다.
 - ```triggerKafka```에서 받은 토픽과 메세지는 바로 ```ExecuteBolt```로 넘겨준다.
 - ```proceedKafka```에서 받은 토픽과 메세지는 해당 ```mapId```의 peerIn값을 몽고DB에서 받아와 현제 들어온 토픽이외의 다른 ```peerIn```값이 있는 경우 waiting을 걸어준다.
+- ```statusKafka```에서 받은 토픽과 메시지는 __현제 실행 예정__ 디바이스의 상태정보와 메타데이터를 받아와 ```triggerKafka```의 값과 매칭시켜 code를 ```ExecuteBolt```를 execute시킬지 waiting시킬지 결정한다.
 
 ###### ExecuteBolt :
 
@@ -60,7 +61,7 @@ Topologies
 - ```ExecuteBolt```에서 받은 토픽의 ```mapId```의 ```peerOut```값을 몽고DB에서 찾아본다.
 - 만약 해당 ```mapId```의 ```peerOut```값 없다면 ```CallingFeedBolt```로 결과만 넘겨주고 ```peerOut```값이 있다면 결과를
 - ```CallingFeedBolt```로 넘겨주고 찾은 ```peerOut```값을 ```ExecuteBolt```에서 받은 토픽의 마지막에 추가하여
-- CallingProceedBolt로 결과값과 함께 넘겨준다.
+- ```CallingProceedBolt```로 결과값과 함께 넘겨준다.
 
 ###### CallingProceedBolt :
 
@@ -69,6 +70,7 @@ Topologies
 ###### CallingFeedBolt :
 
 - ```ProvisioningBolt```에서 받은 토픽과 메세지를 ```feedKafka```로 넘겨준다.
+
 
 References
 ----------

@@ -21,23 +21,13 @@ import com.enow.dto.TopicStructure;
 public class SchedulingBolt extends BaseRichBolt {
     protected static final Logger LOG = LoggerFactory.getLogger(CallingKafkaBolt.class);
     private OutputCollector collector;
-    // Structure that stores MQTT topic seperately
     private TopicStructure topicStructure;
-    // Kafka topic name
-    private String spoutName;
-    // MQTT topics
-    private String topic;
-    // Data
-    private String msg;
 
     @Override
-
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
         topicStructure = new TopicStructure();
-        spoutName = "";
-        topic = "";
-        msg = "";
+
     }
 
     @Override
@@ -47,19 +37,20 @@ public class SchedulingBolt extends BaseRichBolt {
         }
 
         String inputStr = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-        String msg = inputStr.split(" ")[1];
+        topicStructure.setMsg(inputStr.split(" ",3)[2]);
 
-        String spoutName = inputStr.split(" ")[0];
-        String topic = inputStr.split("/")[1];
-
+        String spoutName = inputStr.split(" ",3)[0];
+        String topic = inputStr.split("/",3)[1];
+        // enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
         topicStructure.setCorporationName(topic.split("/")[0]);
         topicStructure.setServerId(topic.split("/")[1]);
         topicStructure.setBrokerId(topic.split("/")[2]);
         topicStructure.setDeviceId(topic.split("/")[3]);
         topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
+        topicStructure.setMapId(topic.split("/")[5]);
 
         if (spoutName == "trigger") {
-            // trigger enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId msg
+            // trigger enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
 
             if ((null == msg) || (msg.length() == 0)) {
                 return;
@@ -71,8 +62,18 @@ public class SchedulingBolt extends BaseRichBolt {
             } catch (Exception e) {
                 collector.fail(input);
             }
-        }
-        if (spoutName == "status") {
+        } else if (spoutName == "status") {
+            try {
+                // status enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
+                JSONParser jsonParser = new JSONParser();
+                JSONObject json = (JSONObject) jsonParser.parse(msg);
+                String deviceStatus = json.get("status").toString();
+                String metadata = json.get("metadata").toString();
+
+            }catch(ParseException e){
+
+            }
+        } else if (spoutName == "proceed") {
             try {
                 // status enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
                 JSONParser jsonParser = new JSONParser();
