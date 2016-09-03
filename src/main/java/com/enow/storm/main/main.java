@@ -6,14 +6,20 @@ package com.enow.storm.main;
 import com.enow.storm.ActionTopology.*;
 import com.enow.storm.TriggerTopology.*;
 
+// storm
 import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.StormTopology;
-import org.apache.storm.kafka.*;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
+
+// storm-kafka
+import org.apache.storm.kafka.*;
+
+// storm-redis
+import org.apache.storm.redis.bolt.RedisStoreBolt;
 
 import java.io.BufferedReader;
 import java.io.IOException;
