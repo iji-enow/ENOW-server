@@ -10,27 +10,27 @@ import org.apache.storm.topology.TopologyBuilder;
 
 public class ActionTopology {
     public static void main(String[] args) throws Exception {
-    	BasicConfigurator.configure();
+        BasicConfigurator.configure();
         Config config = new Config();
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
-        
+
         String zkConnString = "localhost:2181";
         String topicTrigger = "trigger";
         BrokerHosts brokerHosts = new ZkHosts(zkConnString);
 
         SpoutConfig triggerConfig = new SpoutConfig(brokerHosts,topicTrigger, "/"+topicTrigger, "storm");
-        
+
         triggerConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         triggerConfig.startOffsetTime = -1;
-        
+
         String topicStatus = "status";
 
         SpoutConfig statusConfig = new SpoutConfig(brokerHosts,topicStatus, "/"+topicStatus, "storm");
 
         statusConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         statusConfig.startOffsetTime = -1;
-        
+
         String topicProceed = "proceed";
 
 

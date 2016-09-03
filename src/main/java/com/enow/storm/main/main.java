@@ -32,8 +32,8 @@ public class main {
 
 
         if (args.length == 0) {
-        	submitTopologyLocalCluster(getActionTopolgy(zkhost), getConfig());
-            submitTopologyLocalCluster(getTriggerTopolgy(zkhost), getConfig());         
+        	submitTopologyLocalCluster("action", getActionTopolgy(zkhost), getConfig());
+            submitTopologyLocalCluster("trigger", getTriggerTopolgy(zkhost), getConfig());
         }
 //        else {
 //            submitTopologyRemoteCluster(args[0], getTriggerTopolgy(args), getConfig());
@@ -42,9 +42,9 @@ public class main {
 
     }
 
-    protected void submitTopologyLocalCluster(StormTopology topology, Config config) throws InterruptedException {
+    protected void submitTopologyLocalCluster(String name, StormTopology topology, Config config) throws InterruptedException {
         LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("test", config, topology);
+        cluster.submitTopology(name, config, topology);
         stopWaitingForInput();
     }
 
