@@ -43,10 +43,11 @@ public class IndexingBolt extends BaseRichBolt {
             return;
         }
 
-
         final String inputMsg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
-        String topic = inputMsg.split(" ",2)[0];
+        String spoutSource = inputMsg.split(",",3)[0];
+        String topic = inputMsg.split(",",3)[1];
+        String msg = inputMsg.split(",",3)[2];
 
         topicStructure.setCorporationName(topic.split("/")[0]);
         topicStructure.setServerId(topic.split("/")[1]);
@@ -55,17 +56,16 @@ public class IndexingBolt extends BaseRichBolt {
         topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
 
         // enow/serverId/brokerId/deviceId/phaseRoadMapId
+       
         
-        String msg = inputMsg.split(" ",2)[1];
+        topicStructure.setCurrentMsg(msg);
         
-        topicStructure.setMsg(msg);
-
-
-        if ((null == inputMsg) || (inputMsg.length() == 0)) {
+        if ((null == msg) || (msg.length() == 0)) {
             return;
         }
 
 
+        /*
         MongoClient mongoClient = new MongoClient( "127.0.0.1",27017 );
 
         mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -82,8 +82,10 @@ public class IndexingBolt extends BaseRichBolt {
         collection.insertOne(document);
 
         mongoClient.close();
+        */
+        
 
-        collector.emit(new Values(topicStructure));
+        collector.emit(new Values(spoutSource,topicStructure));
         try {
             LOG.debug("input = [" + input + "]");
             collector.ack(input);
@@ -94,6 +96,6 @@ public class IndexingBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("topicStructure"));
+        declarer.declare(new Fields("spoutSource","topicStructure"));
     }
 }

@@ -35,17 +35,18 @@ public class StagingBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
 	private OutputCollector collector;
 	private TopicStructure topicStructure;
-	boolean machineIdCheck = false;
-	boolean phaseRoadMapIdCheck = false;
-	boolean mapIdCheck = false;
-	FindIterable<Document> iterable;
-	JSONParser jsonParser;
-	JSONObject phaseRoadMapId;
-	JSONObject phases;
-	JSONObject phaseId;
-	JSONObject devices;
-	JSONObject deviceId;
-	JSONObject tmp;
+	private boolean machineIdCheck;
+	private boolean phaseRoadMapIdCheck;
+	private boolean mapIdCheck;
+	private FindIterable<Document> iterable;
+	private String spoutSource;
+	private JSONParser jsonParser;
+	private JSONObject phaseRoadMapId;
+	private JSONObject phases;
+	private JSONObject phaseId;
+	private JSONObject devices;
+	private JSONObject deviceId;
+	private JSONObject tmp;
 
 	@Override
 
@@ -53,14 +54,23 @@ public class StagingBolt extends BaseRichBolt {
 		this.collector = collector;
 		topicStructure = new TopicStructure();
 		jsonParser = new JSONParser();
+		machineIdCheck = false;
+		phaseRoadMapIdCheck = false;
+		mapIdCheck = false;
+		spoutSource = null;
 	}
 
 	@Override
 	public void execute(Tuple input) {
 		topicStructure = (TopicStructure) input.getValueByField("topicStructure");
-		if (null == topicStructure) {
+		spoutSource = (String) input.getValueByField("spoutSource");
+		
+		if (topicStructure.isEmpty()) {
+			return;
+		}else if(spoutSource == null){
 			return;
 		}
+		
 		// Connect MongoDB
 		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -117,19 +127,19 @@ public class StagingBolt extends BaseRichBolt {
 					try {
 						if (Double.parseDouble(deviceId.get("mapId").toString()) == 1) {
 							mapIdCheck = true;
-							topicStructure.setMapId("1");
+							topicStructure.setCurrentMapId("1");
 						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 3) {
 							mapIdCheck = true;
-							topicStructure.setMapId("3");
+							topicStructure.setCurrentMapId("3");
 						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 5) {
 							mapIdCheck = true;
-							topicStructure.setMapId("5");
+							topicStructure.setCurrentMapId("5");
 						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 7) {
 							mapIdCheck = true;
-							topicStructure.setMapId("7");
+							topicStructure.setCurrentMapId("7");
 						} else if (Double.parseDouble(deviceId.get("mapId").toString()) == 9) {
 							mapIdCheck = true;
-							topicStructure.setMapId("9");
+							topicStructure.setCurrentMapId("9");
 						} else {
 							mapIdCheck = false;
 						}

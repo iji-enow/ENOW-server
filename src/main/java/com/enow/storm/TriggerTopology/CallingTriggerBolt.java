@@ -65,8 +65,9 @@ public class CallingTriggerBolt extends BaseRichBolt {
             ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", json.toString());
             producer.send(data);
             */
-        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "trigger " + topicStructure.output());
+        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "trigger|" + topicStructure.output());
             producer.send(data);
+            collector.emit(new Values(topicStructure.output()));
         }else{
         	/*
         	json = new JSONObject();
@@ -74,8 +75,11 @@ public class CallingTriggerBolt extends BaseRichBolt {
             */
         	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "error : " + "machinIdCheck = " +machineIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck );
             producer.send(data);
+            collector.emit(new Values("error : " + "machinIdCheck = " +machineIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck));
         }
 
+
+        
         try {
             LOG.debug("input = [" + input + "]");
             collector.ack(input);
@@ -86,5 +90,6 @@ public class CallingTriggerBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    	declarer.declare(new Fields("triggerTopologyResult"));
     }
 }

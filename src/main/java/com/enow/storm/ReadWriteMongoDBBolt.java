@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import org.json.simple.JSONValue;
 import org.json.simple.JSONObject;
+
+import com.enow.dto.TopicStructure;
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -38,12 +40,13 @@ import com.mongodb.client.MongoDatabase;
 public class ReadWriteMongoDBBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(KafkaSpoutTestBolt.class);
 	private OutputCollector collector;
-	private String tmp = "no";
+	private TopicStructure topicStructure;
 
 	@Override
 
 	public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
+		topicStructure = new TopicStructure();
 	}
 
 	@Override
@@ -54,6 +57,13 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		if ((null == word) || (word.length() == 0)) {
 			return;
 		}
+		
+		topicStructure.setBrokerId("brokerId");
+		topicStructure.setCorporationName("enow");
+		topicStructure.setDeviceId("deviceId1");
+		topicStructure.setCurrentMsg(word);
+		topicStructure.setServerId("serverId");
+		topicStructure.setPhaseRoadMapId("phaseRoadMapId");
 
 		/*
 		MongoClient mymongoClient = new MongoClient("127.0.0.1", 27017);
@@ -66,7 +76,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		mymongoClient.close();
 		*/
 		
-		
+		/*
 		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
 
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -84,7 +94,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		Object obj = JSONValue.parse(tmp);
 
 	    JSONObject jsonMsg = (JSONObject)obj;
-
+		 */
 		//jsonmsg = new JSONObject(tmp);
 
 
@@ -100,6 +110,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		
 		//String tmpyo = tmp.substring(61, tmp.length() - 2);
 		
+		/*
 		JSONObject json = null;
         String webhook = null;
         Connect con = new Connect("https://hooks.slack.com/services/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");
@@ -111,7 +122,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		
 
 		mongoClient.close();
-
+		*/
 		/*
 		 * if(tmp.compareTo("function not found") == 0){
 		 * 
@@ -120,7 +131,8 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 		 * word = word + tmp;
 		 */
 
-		collector.emit(new Values(tmp));
+		collector.emit(new Values(topicStructure));
+		//collector.emit(new Values(word));
 
 		try {
 			LOG.debug("input = [" + input + "]");
@@ -133,6 +145,7 @@ public class ReadWriteMongoDBBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("word"));
+		declarer.declare(new Fields("topicStructure"));
+		//declarer.declare(new Fields("word"));
 	}
 }

@@ -16,7 +16,13 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Tuple;
+
+import com.enow.storm.mapper.mongodb.SimpleMongoMapper;
+import com.enow.storm.mapper.mongodb.mongoDBMapper;
+
 import org.apache.storm.kafka.trident.GlobalPartitionInformation;
+import org.apache.storm.mongodb.common.mapper.MongoMapper;
+
 
 import java.util.Arrays;
 
@@ -54,9 +60,21 @@ public class TestTopologyStaticHosts {
         kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         kafkaConfig.startOffsetTime = -1;
 
+        String url = "mongodb://127.0.0.1:27017/enow";
+        String collectionName = "log";
+
+        
+        
+        //MongoMapper mapper = new mongoDBMapper().withFields("topicStructure");
+        MongoMapper mapper = new SimpleMongoMapper().withFields("topicStructure");
+
+        InsertMongoBolt insertBolt = new InsertMongoBolt(url, collectionName, mapper);
+        
+        
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("kafka-spout", new KafkaSpout(kafkaConfig), 10);
         builder.setBolt("read-write-mongo-bolt", new ReadWriteMongoDBBolt()).allGrouping("kafka-spout");
+        builder.setBolt("insert-bolt", insertBolt).allGrouping("read-write-mongo-bolt");
         //builder.setBolt("execute-bolt", new ExecuteBolt()).allGrouping("read-write-mongo-bolt");
         //builder.setBolt("python-bolt", new PythonBolt()).allGrouping("execute-bolt");
         //builder.setBolt("read-mongo-bolt", new ReadMongoDBBolt()).allGrouping("write-mongo-bolt");

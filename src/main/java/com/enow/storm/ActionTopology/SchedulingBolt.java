@@ -46,7 +46,7 @@ public class SchedulingBolt extends BaseRichBolt {
         String topic = inputStr.split(" ",3)[1];
         String msg = inputStr.split(" ",3)[2];
         
-        topicStructure.setMsg(msg);
+        topicStructure.setCurrentMsg(msg);
         
         MongoClient mongoClient = new MongoClient( "127.0.0.1",27017 );
 
@@ -65,7 +65,7 @@ public class SchedulingBolt extends BaseRichBolt {
         topicStructure.setBrokerId(topic.split("/")[2]);
         topicStructure.setDeviceId(topic.split("/")[3]);
         topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
-        topicStructure.setMapId(topic.split("/")[5]);
+        topicStructure.setCurrentMapId(topic.split("/")[5]);
 
         if (spoutName.equals("trigger")) {
             // trigger enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
