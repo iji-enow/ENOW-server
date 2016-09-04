@@ -1,7 +1,9 @@
 package com.enow.storm.ActionTopology;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,16 +25,15 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 public class SchedulingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
-	private OutputCollector collector;
-	private TopicStructure topicStructure;
-
+	protected static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
+    Map<String, TopicStructure> _executedNode = new HashMap<String, TopicStructure>();
+    private OutputCollector _collector;
+    private TopicStructure _topicStructure;
 	@Override
 	public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
-		this.collector = collector;
-		topicStructure = new TopicStructure();
-
-	}
+        _collector = collector;
+        _topicStructure = new TopicStructure();
+    }
 
 	@Override
     public void execute(Tuple input) {
@@ -40,91 +41,77 @@ public class SchedulingBolt extends BaseRichBolt {
             return;
         }
 
-        String inputStr = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-  
-        String spoutName = inputStr.split(" ",3)[0];
-        String topic = inputStr.split(" ",3)[1];
-        String msg = inputStr.split(" ",3)[2];
-        
-        topicStructure.setCurrentMsg(msg);
-        
-        MongoClient mongoClient = new MongoClient( "127.0.0.1",27017 );
+        String temp = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
-        mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-        MongoDatabase dbWrite = mongoClient.getDatabase("enow");
-        MongoCollection<Document> collection = dbWrite.getCollection("log");
-        
-        Document document = new Document();
-        document.put("spoutName", spoutName);
-
-        collection.insertOne(document);
-
-        // enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
-        topicStructure.setCorporationName(topic.split("/")[0]);
-        topicStructure.setServerId(topic.split("/")[1]);
-        topicStructure.setBrokerId(topic.split("/")[2]);
-        topicStructure.setDeviceId(topic.split("/")[3]);
-        topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
-        topicStructure.setCurrentMapId(topic.split("/")[5]);
-
-        if (spoutName.equals("trigger")) {
-            // trigger enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
-            if (null == topicStructure) {
-                return;
-            }
-            else{
-            	 collector.emit(new Values(topicStructure));
-                 
-            	 try {
-                     LOG.debug("input = [" + input + "]");
-                     collector.ack(input);
-                 } catch (Exception e) {
-                     collector.fail(input);
-                 }
-            }
-        } else if (spoutName.equals("status")) {
-        	if (null == topicStructure) {
-                return;
-            }
-            else{
-            	 collector.emit(new Values(topicStructure));
-                 
-            	 try {
-                     LOG.debug("input = [" + input + "]");
-                     collector.ack(input);
-                 } catch (Exception e) {
-                     collector.fail(input);
-                 }
-            }
-        } else if (spoutName.equals("proceed")){
-//            try {
-//                // status enow/serverId/brokerId/deviceId/phaseRoadMapId/mapId
-//                JSONParser jsonParser = new JSONParser();
-//                JSONObject json = (JSONObject) jsonParser.parse(msg);
-//                String deviceStatus = json.get("status").toString();
-//                String metadata = json.get("metadata").toString();
-//
-//            }catch(ParseException e){
-//
-//            }
-        	/*
-        	
-        	if (null == topicStructure) {
-                return;
-            }
-            else{
-            	 collector.emit(new Values(topicStructure));
-                 
-            	 try {
-                     LOG.debug("input = [" + input + "]");
-                     collector.ack(input);
-                 } catch (Exception e) {
-                     collector.fail(input);
-                 }
-            }
-            */
+        System.out.println(temp);
+        if ((null == temp) || (temp.length() == 0)) {
+            _LOG.warn("input value or length of input is empty : [" + input + "]\n");
+            return;
         }
-        
+
+
+        String[] elements = new String[3];
+        String[] topics = new String[7];
+        StringTokenizer tokenizer;
+        tokenizer = new StringTokenizer(temp, ",");
+        for (int index = 0; tokenizer.hasMoreTokens(); index++) {
+            elements[index] = tokenizer.nextToken().toString();
+//            System.out.println("elements[" + index + "]: " + elements[index]);
+        }
+        tokenizer = new StringTokenizer(elements[1], "/");
+        for (int index = 0; tokenizer.hasMoreTokens(); index++) {
+            topics[index] = tokenizer.nextToken().toString();
+//            System.out.println("topics[" + index + "]: " + topics[index]);
+        }
+        String currentMapId = topics[6];
+        _topicStructure.setCorporationName(topics[0]);
+        _topicStructure.setServerId(topics[1]);
+        _topicStructure.setBrokerId(topics[2]);
+        _topicStructure.setDeviceId(topics[3]);
+        _topicStructure.setPhaseRoadMapId(topics[4]);
+        _topicStructure.setPhaseId(topics[5]);
+        _topicStructure.setCurrentMapId(currentMapId);
+        _topicStructure.setCurrentMsg(elements[2]);
+        String _msgId = currentMapId;
+
+        if (elements[0].equals("trigger")) {
+            if (!this._executedNode.containsKey(_msgId)) {
+                try {
+                    this._executedNode.put(_msgId, _topicStructure);
+                    _LOG.debug("Try to insert input to Hashmap = [" + temp + "]\n");
+                    System.out.println("Succeed in storing " + temp + " to hashmap");
+                } catch (Exception e) {
+                    _LOG.warn("Fail in inserting input to Hashmap = [" + temp + "]\n");
+                }
+            }
+//            else if(!_executedNode.get(mapId).getCurrentMapId().isEmpty()){
+//                UUID previousMapId = UUID.fromString(_uuid + currentMapId);
+//                String previousMapId = _executedNode.get(mapId);
+//                String previousMsg = msgs.split("/")[1];
+//                _topicStructure.setPreviousMapId(previousMapId);
+//                _topicStructure.setPreviousMsg()
+//                try{
+//                    _LOG.debug("Try to insert input to Hashmap = [" + input + "]\n");
+//                    _executedNode.put(mapId, _topicStructure);
+//                    _executedNode.put(mapId, _topicStructure);
+//                } catch (Exception e) {
+//                    _LOG.warn("Fail in inserting input to Hashmap = [" + input + "]\n");
+//                }
+//            }
+        } else if (elements[0].equals("status")) {
+            if (this._executedNode.containsKey(_msgId)) {
+                _collector.emit(new Values(input));
+                try {
+                    _LOG.debug("Try to send input to ProvisioningBolt = [" + temp + "]\n");
+                    _collector.ack(input);
+                    System.out.println("Succeed in sending " + temp + " to hashmap");
+                } catch (Exception e) {
+                    _LOG.debug("Fail in sending input to ProvisioningBolt = [" + temp + "]\n");
+                    _collector.fail(input);
+                }
+                this._executedNode.remove(_msgId);
+            }
+        }
     }
 
 	@Override
