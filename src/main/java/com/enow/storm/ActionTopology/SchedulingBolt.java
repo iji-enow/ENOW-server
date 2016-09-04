@@ -100,7 +100,7 @@ public class SchedulingBolt extends BaseRichBolt {
 //            }
         } else if (elements[0].equals("status")) {
             if (this._executedNode.containsKey(_msgId)) {
-                _collector.emit(new Values(input));
+                _collector.emit(new Values(_topicStructure));
                 try {
                     _LOG.debug("Try to send input to ProvisioningBolt = [" + temp + "]\n");
                     _collector.ack(input);
