@@ -12,7 +12,7 @@ public class ActionTopology {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
         Config config = new Config();
-        config.setDebug(true);
+        config.setDebug(false);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
 
         String zkConnString = "localhost:2181";
@@ -41,15 +41,12 @@ public class ActionTopology {
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
-        builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
                 .allGrouping("trigger-spout")
-                .allGrouping("status-spout")
-                .allGrouping("proceed-spout");
+                .allGrouping("status-spout");
         builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
-        builder.setBolt("calling-proceed-bolt", new CallingProceedBolt()).allGrouping("provisioning-bolt");
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("ActionTopology", config, builder.createTopology());
     }

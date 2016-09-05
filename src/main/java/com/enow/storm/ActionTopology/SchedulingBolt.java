@@ -1,13 +1,6 @@
 package com.enow.storm.ActionTopology;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.enow.dto.TopicStructure;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -15,18 +8,15 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.enow.dto.TopicStructure;
-import com.mongodb.MongoClient;
-import com.mongodb.WriteConcern;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SchedulingBolt extends BaseRichBolt {
 	protected static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
-    Map<String, TopicStructure> _executedNode = new HashMap<String, TopicStructure>();
+    ConcurrentHashMap<String, TopicStructure> _executedNode = new ConcurrentHashMap<String, TopicStructure>();
     private OutputCollector _collector;
     private TopicStructure _topicStructure;
 	@Override
@@ -42,13 +32,13 @@ public class SchedulingBolt extends BaseRichBolt {
         }
 
         String temp = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-
+//        String temp = input.toString().substring(input.toString().indexOf("[")+1, input.toString().length() - 1);
         System.out.println(temp);
+
         if ((null == temp) || (temp.length() == 0)) {
             _LOG.warn("input value or length of input is empty : [" + input + "]\n");
             return;
         }
-
 
         String[] elements = new String[3];
         String[] topics = new String[7];
@@ -56,12 +46,12 @@ public class SchedulingBolt extends BaseRichBolt {
         tokenizer = new StringTokenizer(temp, ",");
         for (int index = 0; tokenizer.hasMoreTokens(); index++) {
             elements[index] = tokenizer.nextToken().toString();
-//            System.out.println("elements[" + index + "]: " + elements[index]);
+            System.out.println("elements[" + index + "]: " + elements[index]);
         }
         tokenizer = new StringTokenizer(elements[1], "/");
         for (int index = 0; tokenizer.hasMoreTokens(); index++) {
             topics[index] = tokenizer.nextToken().toString();
-//            System.out.println("topics[" + index + "]: " + topics[index]);
+            System.out.println("topics[" + index + "]: " + topics[index]);
         }
         String currentMapId = topics[6];
         _topicStructure.setCorporationName(topics[0]);
@@ -78,10 +68,11 @@ public class SchedulingBolt extends BaseRichBolt {
             if (!this._executedNode.containsKey(_msgId)) {
                 try {
                     this._executedNode.put(_msgId, _topicStructure);
-                    _LOG.debug("Try to insert input to Hashmap = [" + temp + "]\n");
-                    System.out.println("Succeed in storing " + temp + " to hashmap");
+                    _LOG.info("Try to insert input to Hashmap = [" + temp + "]\n");
+                    System.out.println("Succeed in storing " + temp + " to ConcurrentHashMap");
                 } catch (Exception e) {
                     _LOG.warn("Fail in inserting input to Hashmap = [" + temp + "]\n");
+                    System.out.println("Fail in storing " + temp + " to ConcurrentHashMap");
                 }
             }
 //            else if(!_executedNode.get(mapId).getCurrentMapId().isEmpty()){
@@ -102,14 +93,15 @@ public class SchedulingBolt extends BaseRichBolt {
             if (this._executedNode.containsKey(_msgId)) {
                 _collector.emit(new Values(_topicStructure));
                 try {
-                    _LOG.debug("Try to send input to ProvisioningBolt = [" + temp + "]\n");
+                    _LOG.info("Try to send input to ProvisioningBolt = [" + temp + "]\n");
+                    this._executedNode.remove(_msgId);
                     _collector.ack(input);
-                    System.out.println("Succeed in sending " + temp + " to hashmap");
+                    System.out.println("Succeed in sending and deleting " + temp + " in ConcurrentHashMap");
                 } catch (Exception e) {
-                    _LOG.debug("Fail in sending input to ProvisioningBolt = [" + temp + "]\n");
+                    _LOG.warn("Fail in sending input to ProvisioningBolt = [" + temp + "]\n");
                     _collector.fail(input);
+                    System.out.println("Fail in sending and deleting " + temp + " to ConcurrentHashMap");
                 }
-                this._executedNode.remove(_msgId);
             }
         }
     }
