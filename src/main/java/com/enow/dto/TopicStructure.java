@@ -18,6 +18,7 @@ public class TopicStructure implements Serializable {
 	private String previousMsg;
 	private String currentMapId;
 	private String previousMapId;
+	private boolean check;
 	
 
 	public TopicStructure() {
@@ -32,7 +33,6 @@ public class TopicStructure implements Serializable {
 		previousMsg = null;
 		currentMapId = null;
 		previousMapId = null;
-		
 	}
 
 	public boolean isEmpty() {
@@ -129,8 +129,16 @@ public class TopicStructure implements Serializable {
 		}else if(previousMapId == null){
 			return corporationName + "/" + serverId + "/" + brokerId + "/" + deviceId + "/" + phaseRoadMapId + "/" + phaseId + "/" + currentMapId  + "," + currentMsg;
 		}else{
-			return corporationName + "/" + serverId + "/" + brokerId + "/" + deviceId + "/" + phaseRoadMapId + "/" + phaseId + "/" + currentMapId + "/" + previousMapId + "|" + currentMsg + "/" + previousMsg;	
+			return corporationName + "/" + serverId + "/" + brokerId + "/" + deviceId + "/" + phaseRoadMapId + "/" + phaseId + "/" + previousMapId + "/" + currentMapId + "|" + previousMsg + "/" + currentMsg;	
 		}
+	}
+
+	public boolean isCheck() {
+		return check;
+	}
+
+	public void setCheck(boolean check) {
+		this.check = check;
 	}
 
 	@Override
@@ -138,7 +146,9 @@ public class TopicStructure implements Serializable {
 		return "TopicStructure [corporationName=" + corporationName + ", serverId=" + serverId + ", brokerId="
 				+ brokerId + ", deviceId=" + deviceId + ", phaseRoadMapId=" + phaseRoadMapId + ", phaseId=" + phaseId
 				+ ", currentMsg=" + currentMsg + ", previousMsg=" + previousMsg + ", currentMapId=" + currentMapId
-				+ ", previousMapId=" + previousMapId + "]";
+				+ ", previousMapId=" + previousMapId + ", check=" + check + "]";
 	}
+
+	
 
 }

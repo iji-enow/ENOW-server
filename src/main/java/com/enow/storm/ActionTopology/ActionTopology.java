@@ -31,25 +31,16 @@ public class ActionTopology {
         statusConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         statusConfig.startOffsetTime = -1;
 
-        String topicProceed = "proceed";
-
-
-        SpoutConfig proceedConfig = new SpoutConfig(brokerHosts,topicProceed, "/"+topicProceed, "storm");
-
-        proceedConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
-        proceedConfig.startOffsetTime = -1;
+       
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
-        builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
                 .allGrouping("trigger-spout")
-                .allGrouping("status-spout")
-                .allGrouping("proceed-spout");
+                .allGrouping("status-spout");
         builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
-        builder.setBolt("calling-proceed-bolt", new CallingProceedBolt()).allGrouping("provisioning-bolt");
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("ActionTopology", config, builder.createTopology());
     }

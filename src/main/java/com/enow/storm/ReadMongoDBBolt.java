@@ -49,6 +49,25 @@ public class ReadMongoDBBolt extends BaseRichBolt {
     	final String msg = input.getValues().toString();
     	String word = msg.substring(1, msg.length() - 1);
     	
+    	
+
+		/*
+		 * MongoClient mongoClient = new MongoClient( "127.0.0.1",27017 );
+		 * 
+		 * mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED); MongoDatabase
+		 * dbWrite = mongoClient.getDatabase("enow"); MongoCollection<Document>
+		 * collection = dbWrite.getCollection("log");
+		 * 
+		 * long time = System.currentTimeMillis(); SimpleDateFormat dayTime =
+		 * new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"); Document document = new
+		 * Document(); document.put("time", dayTime.format(new Date(time)));
+		 * document.put("topic", topic); document.put("msg", msg);
+		 * 
+		 * collection.insertOne(document);
+		 * 
+		 * mongoClient.close();
+		 */
+    	
     	/*
     	try{
     		BufferedImage myPicture = ImageIO.read(new File("/Users/LeeGunJoon/Desktop/test.png")); 	
@@ -84,6 +103,8 @@ public class ReadMongoDBBolt extends BaseRichBolt {
 	    MongoCollection<Document> collection = db.getCollection("word");
 	    
 
+	    
+	    
 	    /*
 		List<Document> documents = (List<Document>) collection.find().into(
 				new ArrayList<Document>());

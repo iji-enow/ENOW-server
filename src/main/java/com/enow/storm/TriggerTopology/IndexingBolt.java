@@ -1,7 +1,7 @@
 package com.enow.storm.TriggerTopology;
 
-
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -11,6 +11,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.bson.Document;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,78 +25,128 @@ import com.mongodb.client.MongoDatabase;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.enow.dto.TopicStructure;
+import com.enow.storm.Connect;
 
 public class IndexingBolt extends BaseRichBolt {
-    protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
-    private OutputCollector collector;
-    private TopicStructure topicStructure;
+	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
+	private OutputCollector collector;
 
-    @Override
+	@Override
 
-    public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
-        topicStructure = new TopicStructure();
-    }
+	public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
+		this.collector = collector;
 
-    @Override
-    public void execute(Tuple input) {
-        if ((null == input.toString()) || (input.toString().length() == 0)) {
-            return;
-        }
+	}
 
-        final String inputMsg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
+	@Override
+	public void execute(Tuple input) {
+		if ((null == input.toString()) || (input.toString().length() == 0)) {
+			return;
+		}
 
-        String spoutSource = inputMsg.split(",",3)[0];
-        String topic = inputMsg.split(",",3)[1];
-        String msg = inputMsg.split(",",3)[2];
+		String temp = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
-        topicStructure.setCorporationName(topic.split("/")[0]);
-        topicStructure.setServerId(topic.split("/")[1]);
-        topicStructure.setBrokerId(topic.split("/")[2]);
-        topicStructure.setDeviceId(topic.split("/")[3]);
-        topicStructure.setPhaseRoadMapId(topic.split("/")[4]);
+		
+		JSONObject json = null;
+        String webhook = null;
+        Connect con = new Connect("https://hooks.slack.com/services/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");
 
-        // enow/serverId/brokerId/deviceId/phaseRoadMapId
-       
         
-        topicStructure.setCurrentMsg(msg);
+        json = new JSONObject();
+        json.put("text",input.getValues().toString().substring(1, input.getValues().toString().length() - 1));
+        //json.put("text",elements[1].toString());
+        //json.put("text",elements[2].toString());
+        webhook = con.post(con.getURL(), json);
+		
+		TopicStructure _topicStructure = new TopicStructure();
+		String[] elements = new String[3];
+		String[] messages = new String[2];
+		String[] topics = new String[8];
+		StringTokenizer tokenizer;
+		tokenizer = new StringTokenizer(temp, ",");
+		
+		
         
-        if ((null == msg) || (msg.length() == 0)) {
-            return;
-        }
+		for (int index = 0; tokenizer.hasMoreTokens(); index++) {
+			elements[index] = tokenizer.nextToken().toString();
+		}
 
+		if (elements[0].equals("trigger")) {
+			tokenizer = new StringTokenizer(elements[1], "/");
+			for (int index = 0; tokenizer.hasMoreTokens(); index++) {
+				topics[index] = tokenizer.nextToken().toString();
+				if(topics[index] == null || (topics[index].length() == 0)){
+					return;
+				}
+			}
+			_topicStructure.setCorporationName(topics[0]);
+			_topicStructure.setServerId(topics[1]);
+			_topicStructure.setBrokerId(topics[2]);
+			_topicStructure.setDeviceId(topics[3]);
+			_topicStructure.setPhaseRoadMapId(topics[4]);
+			
+			tokenizer = new StringTokenizer(elements[2], "/");
+			
+			for (int index = 0; tokenizer.hasMoreTokens(); index++) {
+				messages[index] = tokenizer.nextToken().toString();
+			}
+			
+			_topicStructure.setCurrentMsg(messages[0]);
+			
+			if ((null == messages[0]) || (messages[0].length() == 0)) {
+				return;
+			}
+			
+		} else if (elements[0].equals("proceed")) {
+			tokenizer = new StringTokenizer(elements[1], "/");
+			for (int index = 0; tokenizer.hasMoreTokens(); index++) {
+				topics[index] = tokenizer.nextToken().toString();
+				if(topics[index] == null || (topics[index].length() == 0)){
+					return;
+				}
+			}
+			_topicStructure.setCorporationName(topics[0]);
+			_topicStructure.setServerId(topics[1]);
+			_topicStructure.setBrokerId(topics[2]);
+			_topicStructure.setDeviceId(topics[3]);
+			_topicStructure.setPhaseRoadMapId(topics[4]);
+			_topicStructure.setPhaseId(topics[5]);
+			_topicStructure.setCurrentMapId(topics[6]);
+			_topicStructure.setPreviousMapId(topics[7]);
 
-        /*
-        MongoClient mongoClient = new MongoClient( "127.0.0.1",27017 );
+			tokenizer = new StringTokenizer(elements[2], "/");
+			
+			for (int index = 0; tokenizer.hasMoreTokens(); index++) {
+				messages[index] = tokenizer.nextToken().toString();
+			}
+			_topicStructure.setCurrentMsg(messages[0]);	
+			_topicStructure.setPreviousMsg(messages[1]);
+			
+			if (((null == messages[0]) || (messages[0].length() == 0)) || ((null == messages[1]) || (messages[0].length() == 1))) {
+				return;
+			}
+		} else {
 
-        mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-        MongoDatabase dbWrite = mongoClient.getDatabase("enow");
-        MongoCollection<Document> collection = dbWrite.getCollection("log");
-
-        long time = System.currentTimeMillis();
-        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        Document document = new Document();
-        document.put("time", dayTime.format(new Date(time)));
-        document.put("topic", topic);
-        document.put("msg", msg);
-
-        collection.insertOne(document);
-
-        mongoClient.close();
-        */
+		}
+		
         
+        json = new JSONObject();
+        json.put("text","여기 왓");
+        //json.put("text",elements[1].toString());
+        //json.put("text",elements[2].toString());
+        webhook = con.post(con.getURL(), json);
 
-        collector.emit(new Values(spoutSource,topicStructure));
-        try {
-            LOG.debug("input = [" + input + "]");
-            collector.ack(input);
-        } catch (Exception e) {
-            collector.fail(input);
-        }
-    }
+		collector.emit(new Values(elements[0], _topicStructure));
+		try {
+			LOG.debug("input = [" + input + "]");
+			collector.ack(input);
+		} catch (Exception e) {
+			collector.fail(input);
+		}
+	}
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("spoutSource","topicStructure"));
-    }
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("spoutSource", "topicStructure"));
+	}
 }

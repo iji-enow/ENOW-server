@@ -17,6 +17,7 @@ import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseBasicBolt;
 import org.apache.storm.tuple.Tuple;
 
+import com.enow.storm.mapper.mongodb.InsertMongoBolt;
 import com.enow.storm.mapper.mongodb.SimpleMongoMapper;
 import com.enow.storm.mapper.mongodb.mongoDBMapper;
 

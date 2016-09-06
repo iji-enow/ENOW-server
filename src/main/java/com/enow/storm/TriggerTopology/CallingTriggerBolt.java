@@ -16,80 +16,119 @@ import com.enow.dto.TopicStructure;
 import com.enow.storm.Connect;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
 public class CallingTriggerBolt extends BaseRichBolt {
-    protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
-    private OutputCollector collector;
-    private Properties props;
-    private Producer<String, String> producer;
-    private TopicStructure topicStructure;
-    private JSONObject json;
+	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
+	private OutputCollector collector;
+	private Properties props;
+	private Producer<String, String> producer;
+	private TopicStructure topicStructure;
+	private String spoutSource;
+	boolean serverIdCheck;
+	boolean brokerIdCheck;
+	boolean deviceIdCheck;
+	boolean phaseRoadMapIdCheck;
+	boolean mapIdCheck;
+	ArrayList<TopicStructure> topicStructureArray;
 
-    @Override
+	@Override
 
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
-        props = new Properties();
-        props.put("producer.type", "sync");
-        props.put("batch.size", "1");
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        producer = new KafkaProducer<String, String>(props);
-        topicStructure = new TopicStructure();
-    }
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		this.collector = collector;
+		props = new Properties();
+		props.put("producer.type", "sync");
+		props.put("batch.size", "1");
+		props.put("bootstrap.servers", "localhost:9092");
+		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		producer = new KafkaProducer<String, String>(props);
+		topicStructure = new TopicStructure();
+	}
 
-    @Override
-    public void execute(Tuple input) {
-        if (null == input.getValueByField("topicStructure")) {
-            return;
-        }
+	@Override
+	public void execute(Tuple input) {
+		spoutSource = input.getStringByField("spoutSource");
+		topicStructureArray = (ArrayList<TopicStructure>) input.getValueByField("topicStructureArray");
+		deviceIdCheck = input.getBooleanByField("deviceIdCheck");
+		phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
+		mapIdCheck = input.getBooleanByField("mapIdCheck");
+		serverIdCheck = input.getBooleanByField("serverIdCheck");
+		brokerIdCheck = input.getBooleanByField("brokerIdCheck");
+		if (spoutSource.equals("trigger")) {
+			if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck && mapIdCheck) {
+				/*
+				 * json = new JSONObject(); json.put("spoutName","trigger");
+				 * json.put("corporationName", ts.getCorporationName());
+				 * json.put("serverId",ts.getServerId());
+				 * json.put("brokerId",ts.getBrokerId());
+				 * json.put("deviceId",ts.getDeviceId());
+				 * json.put("phaseRoadMapId",ts.getPhaseRoadMapId());
+				 * json.put("metadata",msg); ProducerRecord<String, String> data
+				 * = new ProducerRecord<String, String>("trigger",
+				 * json.toString()); producer.send(data);
+				 */
 
-        topicStructure = (TopicStructure) input.getValueByField("topicStructure");
-        final boolean machineIdCheck = input.getBooleanByField("machineIdCheck");
-        final boolean phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
-        final boolean mapIdCheck = input.getBooleanByField("mapIdCheck");
+				for (TopicStructure tmp : topicStructureArray) {
+					ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
+							"trigger," + tmp.output());
+					producer.send(data);
+				}
+			} else {
+				/*
+				 * json = new JSONObject(); json.put("error","error");
+				 */
+				ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
+						"error : "+ "serverIdCheck = " + serverIdCheck + "brokerIdCheck = " + brokerIdCheck + "machinIdCheck = " + deviceIdCheck + " phaseRoadMapIdCheck = "
+								+ phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck);
+				producer.send(data);
+			}
+		}else if(spoutSource.equals("proceed")){
+			if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck && mapIdCheck) {
+				/*
+				 * json = new JSONObject(); json.put("spoutName","trigger");
+				 * json.put("corporationName", ts.getCorporationName());
+				 * json.put("serverId",ts.getServerId());
+				 * json.put("brokerId",ts.getBrokerId());
+				 * json.put("deviceId",ts.getDeviceId());
+				 * json.put("phaseRoadMapId",ts.getPhaseRoadMapId());
+				 * json.put("metadata",msg); ProducerRecord<String, String> data
+				 * = new ProducerRecord<String, String>("trigger",
+				 * json.toString()); producer.send(data);
+				 */
 
-        if (machineIdCheck && phaseRoadMapIdCheck && mapIdCheck) {
-        	/*
-        	json = new JSONObject();
-            json.put("spoutName","trigger");
-            json.put("corporationName", ts.getCorporationName());
-            json.put("serverId",ts.getServerId());
-            json.put("brokerId",ts.getBrokerId());   
-            json.put("deviceId",ts.getDeviceId());
-            json.put("phaseRoadMapId",ts.getPhaseRoadMapId());
-            json.put("metadata",msg);
-            ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", json.toString());
-            producer.send(data);
-            */
-        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "trigger|" + topicStructure.output());
-            producer.send(data);
-            collector.emit(new Values(topicStructure.output()));
-        }else{
-        	/*
-        	json = new JSONObject();
-            json.put("error","error");
-            */
-        	ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger", "error : " + "machinIdCheck = " +machineIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck );
-            producer.send(data);
-            collector.emit(new Values("error : " + "machinIdCheck = " +machineIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck));
-        }
+				for (TopicStructure tmp : topicStructureArray) {
+					ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
+							"proceed," + tmp.output());
+					producer.send(data);
+				}
+			} else {
+				/*
+				 * json = new JSONObject(); json.put("error","error");
+				 */
+				ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
+						"error : "+ "serverIdCheck = " + serverIdCheck + "brokerIdCheck = " + brokerIdCheck + "machinIdCheck = " + deviceIdCheck + " phaseRoadMapIdCheck = "
+								+ phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck);
+				producer.send(data);
+			}
+		}else{
+			//spoutSource가 Trigger나 proceed가 아닌 경
+		}
+		
+		collector.emit(new Values(topicStructure.output()));
 
+		try {
+			LOG.debug("input = [" + input + "]");
+			collector.ack(input);
+		} catch (Exception e) {
+			collector.fail(input);
+		}
+	}
 
-        
-        try {
-            LOG.debug("input = [" + input + "]");
-            collector.ack(input);
-        } catch (Exception e) {
-            collector.fail(input);
-        }
-    }
-
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	declarer.declare(new Fields("triggerTopologyResult"));
-    }
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		declarer.declare(new Fields("triggerTopologyResult"));
+	}
 }
