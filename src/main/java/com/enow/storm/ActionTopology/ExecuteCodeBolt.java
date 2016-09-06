@@ -15,34 +15,33 @@ import com.enow.dto.TopicStructure;
 
 public class ExecuteCodeBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
-    private OutputCollector collector;
-    private TopicStructure topicStructure;
+    private OutputCollector _collector;
+    private TopicStructure _topicStructure;
+    private String _spoutSource;
+    private boolean _check;
     @Override
-    
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
-        topicStructure = new TopicStructure();
+        _collector = collector;
+        _topicStructure = new TopicStructure();
     }
 
     @Override
     public void execute(Tuple input) {
-    	topicStructure = (TopicStructure) input.getValueByField("topicStructure");
-		if (null == topicStructure) {
-			return;
-		}
-    
-		
-		collector.emit(new Values(topicStructure));
+    	_topicStructure = (TopicStructure) input.getValueByField("topicStructure");
+        _spoutSource = (String) input.getValueByField("spoutSource");
+        _check = (boolean) input.getBooleanByField("check");
+
+        _collector.emit(new Values(_spoutSource, _topicStructure, _check));
 		try {
 			LOG.debug("input = [" + input + "]");
-			collector.ack(input);
+			_collector.ack(input);
 		} catch (Exception e) {
-			collector.fail(input);
+			_collector.fail(input);
 		}
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	declarer.declare(new Fields("topicStructure"));
+    	declarer.declare(new Fields("spoutSource", "topicStructure", "check"));
     }
 }

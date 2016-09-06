@@ -15,14 +15,17 @@ import com.enow.dto.TopicStructure;
 
 public class CallingFeedBolt extends BaseRichBolt {
     protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
-    private OutputCollector collector;
-    private Properties props;
+    private OutputCollector _collector;
+	private TopicStructure _topicStructure;
+	private String _spoutSource;
+	private boolean _check;
     private Producer<String, String> producer;
-    private TopicStructure topicStructure;
+	private Properties props;
+
     @Override
     
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        this.collector = collector;
+        _collector = collector;
 		props = new Properties();
 		props.put("producer.type", "sync");
 		props.put("batch.size", "1");
@@ -30,23 +33,20 @@ public class CallingFeedBolt extends BaseRichBolt {
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		producer =  new KafkaProducer<String, String>(props);
-		topicStructure = new TopicStructure();
+		_topicStructure = new TopicStructure();
     }
 
     @Override
     public void execute(Tuple input) {	
-    	topicStructure = (TopicStructure) input.getValueByField("topicStructure");
-		if (null == topicStructure) {
-			return;
-		}
-    
-		
-		collector.emit(new Values(topicStructure));
+    	_topicStructure = (TopicStructure) input.getValueByField("topicStructure");
+		_spoutSource = (String) input.getValueByField("spoutSource");
+		_check = (boolean) input.getValueByField("check");
+		_collector.emit(new Values(_topicStructure));
 		try {
 			LOG.debug("input = [" + input + "]");
-			collector.ack(input);
+			_collector.ack(input);
 		} catch (Exception e) {
-			collector.fail(input);
+			_collector.fail(input);
 		}
     	/*
     	if(null == input.getValueByField("topic"))
@@ -57,21 +57,13 @@ public class CallingFeedBolt extends BaseRichBolt {
  	        return;
  	    }
  	    */
-    	
-    	
+
     	//ts = (TopicStructure)input.getValueByField("topic");
     	//final String msg = input.getStringByField("msg");
-    	
 		//ProducerRecord<String, String> data = new ProducerRecord<String, String>("feed", "ServerID: " + ts.getServerId() +  " msg : " + msg);
-		ProducerRecord<String, String> data = new ProducerRecord<String, String>("feed",topicStructure.output());
-		
-		producer.send(data);
-
-		try {
-			LOG.debug("input = [" + input + "]");
-			collector.ack(input);
-		} catch (Exception e) {
-			collector.fail(input);
+		if(_check) {
+			ProducerRecord<String, String> data = new ProducerRecord<String, String>("feed", _topicStructure.output());
+			producer.send(data);
 		}
     }
 

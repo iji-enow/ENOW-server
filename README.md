@@ -46,7 +46,7 @@ Topologies
 ###### SchedulingBolt :
 
 - `triggerKafka` 혹은 `statusKafka`에서 토픽과 메세지를 받아 스케줄링을 해준다.
-- `triggerKafka`에서 받은 토픽과 메세지는 바로 `ConcurrentHashMap`에 MapId를 키값으로 삼아 저장된다.
+- `triggerKafka`에서 받은 토픽과 메세지는 바로 `ConcurrentHashMap`에 `mapId` 키값으로 삼아 저장된다.
 - `triggerKafka`에서 받은 토픽과 메세지는 해당 `mapId`의 peerIn값을 몽고DB에서 받아와 현제 들어온 토픽이외의 다른 `peerIn`값이 있는 경우 waiting(check = false)을 걸어준다.
 - `statusKafka`는 연결된 모든 데이터의 상태정보를 읽어들이고, `ConcurrentHashMap`에 저장된 __현제 실행 예정__ 디바이스의 상태정보와 메타데이터는 `triggerKafka`의 값과 매칭시켜 code를 `ExecuteBolt`를 execute시킬지 waiting시킬지 결정한다.
 

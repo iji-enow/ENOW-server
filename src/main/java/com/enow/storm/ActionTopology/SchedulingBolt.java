@@ -66,11 +66,13 @@ public class SchedulingBolt extends BaseRichBolt {
         String _msgId = currentMapId;
         boolean check = false;
         if (elements[0].equals("trigger")) {
+            // spoutSource == trigger
             if (!this._executedNode.containsKey(_msgId)) {
                 this._executedNode.put(_msgId, _topicStructure);
                 check = true;
             }
             // Data handling part
+
             _collector.emit(new Values(elements[0], _topicStructure, check));
             try {
                 _collector.ack(input);
@@ -82,6 +84,7 @@ public class SchedulingBolt extends BaseRichBolt {
                 System.out.println("Fail in storing " + temp + " to ConcurrentHashMap");
             }
         } else if (elements[0].equals("status")) {
+            // spoutSource == status
             if (this._executedNode.containsKey(_msgId)) {
                 check = true;
             }
