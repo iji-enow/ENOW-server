@@ -10,29 +10,30 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SchedulingBolt extends BaseRichBolt {
-	protected static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
+    protected static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
     ConcurrentHashMap<String, TopicStructure> _executedNode = new ConcurrentHashMap<String, TopicStructure>();
     private OutputCollector _collector;
     private TopicStructure _topicStructure;
-	@Override
-	public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
+
+    @Override
+    public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
         _topicStructure = new TopicStructure();
     }
 
-	@Override
+    @Override
     public void execute(Tuple input) {
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
 
         String temp = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-//        String temp = input.toString().substring(input.toString().indexOf("[")+1, input.toString().length() - 1);
         System.out.println(temp);
 
         if ((null == temp) || (temp.length() == 0)) {
@@ -63,54 +64,45 @@ public class SchedulingBolt extends BaseRichBolt {
         _topicStructure.setCurrentMapId(currentMapId);
         _topicStructure.setCurrentMsg(elements[2]);
         String _msgId = currentMapId;
-
+        boolean check = false;
         if (elements[0].equals("trigger")) {
             if (!this._executedNode.containsKey(_msgId)) {
-                _collector.emit(new Values(_topicStructure));
-                try {
-                    this._executedNode.put(_msgId, _topicStructure);
-                    _collector.ack(input);
-                    _LOG.info("Try to insert input to Hashmap = [" + temp + "]\n");
-                    System.out.println("Succeed in storing " + temp + " to ConcurrentHashMap");
-                } catch (Exception e) {
-                    _collector.fail(input);
-                    _LOG.warn("Fail in inserting input to Hashmap = [" + temp + "]\n");
-                    System.out.println("Fail in storing " + temp + " to ConcurrentHashMap");
-                }
+                this._executedNode.put(_msgId, _topicStructure);
+                check = true;
             }
-//            else if(!_executedNode.get(mapId).getCurrentMapId().isEmpty()){
-//                UUID previousMapId = UUID.fromString(_uuid + currentMapId);
-//                String previousMapId = _executedNode.get(mapId);
-//                String previousMsg = msgs.split("/")[1];
-//                _topicStructure.setPreviousMapId(previousMapId);
-//                _topicStructure.setPreviousMsg()
-//                try{
-//                    _LOG.debug("Try to insert input to Hashmap = [" + input + "]\n");
-//                    _executedNode.put(mapId, _topicStructure);
-//                    _executedNode.put(mapId, _topicStructure);
-//                } catch (Exception e) {
-//                    _LOG.warn("Fail in inserting input to Hashmap = [" + input + "]\n");
-//                }
-//            }
+            // Data handling part
+            _collector.emit(new Values(elements[0], _topicStructure, check));
+            try {
+                _collector.ack(input);
+                _LOG.info("Try to insert input to Hashmap = [" + temp + "]\n");
+                System.out.println("Succeed in storing " + temp + " to ConcurrentHashMap");
+            } catch (Exception e) {
+                _collector.fail(input);
+                _LOG.warn("Fail in inserting input to Hashmap = [" + temp + "]\n");
+                System.out.println("Fail in storing " + temp + " to ConcurrentHashMap");
+            }
         } else if (elements[0].equals("status")) {
             if (this._executedNode.containsKey(_msgId)) {
-                _collector.emit(new Values(_topicStructure));
-                try {
-                    this._executedNode.remove(_msgId);
-                    _collector.ack(input);
-                    _LOG.info("Try to send input to ProvisioningBolt = [" + temp + "]\n");
-                    System.out.println("Succeed in sending and deleting " + temp + " in ConcurrentHashMap");
-                } catch (Exception e) {
-                    _collector.fail(input);
-                    _LOG.warn("Fail in sending input to ProvisioningBolt = [" + temp + "]\n");
-                    System.out.println("Fail in sending and deleting " + temp + " to ConcurrentHashMap");
-                }
+                check = true;
+            }
+            // Data handling part
+
+            _collector.emit(new Values(elements[0], _topicStructure, check));
+            try {
+                this._executedNode.remove(_msgId);
+                _collector.ack(input);
+                _LOG.info("Try to send input to ProvisioningBolt = [" + temp + "]\n");
+                System.out.println("Succeed in sending and deleting " + temp + " in ConcurrentHashMap");
+            } catch (Exception e) {
+                _collector.fail(input);
+                _LOG.warn("Fail in sending input to ProvisioningBolt = [" + temp + "]\n");
+                System.out.println("Fail in sending and deleting " + temp + " to ConcurrentHashMap");
             }
         }
     }
 
-	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("topicStructure"));
-	}
+    @Override
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+        declarer.declare(new Fields("spoutSource", "topicStructure", "check"));
+    }
 }
