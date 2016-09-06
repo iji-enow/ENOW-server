@@ -66,11 +66,14 @@ public class SchedulingBolt extends BaseRichBolt {
 
         if (elements[0].equals("trigger")) {
             if (!this._executedNode.containsKey(_msgId)) {
+                _collector.emit(new Values(_topicStructure));
                 try {
                     this._executedNode.put(_msgId, _topicStructure);
+                    _collector.ack(input);
                     _LOG.info("Try to insert input to Hashmap = [" + temp + "]\n");
                     System.out.println("Succeed in storing " + temp + " to ConcurrentHashMap");
                 } catch (Exception e) {
+                    _collector.fail(input);
                     _LOG.warn("Fail in inserting input to Hashmap = [" + temp + "]\n");
                     System.out.println("Fail in storing " + temp + " to ConcurrentHashMap");
                 }
@@ -93,13 +96,13 @@ public class SchedulingBolt extends BaseRichBolt {
             if (this._executedNode.containsKey(_msgId)) {
                 _collector.emit(new Values(_topicStructure));
                 try {
-                    _LOG.info("Try to send input to ProvisioningBolt = [" + temp + "]\n");
                     this._executedNode.remove(_msgId);
                     _collector.ack(input);
+                    _LOG.info("Try to send input to ProvisioningBolt = [" + temp + "]\n");
                     System.out.println("Succeed in sending and deleting " + temp + " in ConcurrentHashMap");
                 } catch (Exception e) {
-                    _LOG.warn("Fail in sending input to ProvisioningBolt = [" + temp + "]\n");
                     _collector.fail(input);
+                    _LOG.warn("Fail in sending input to ProvisioningBolt = [" + temp + "]\n");
                     System.out.println("Fail in sending and deleting " + temp + " to ConcurrentHashMap");
                 }
             }
