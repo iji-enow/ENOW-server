@@ -1,6 +1,4 @@
 package com.enow.storm.ActionTopology;
-
-
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;

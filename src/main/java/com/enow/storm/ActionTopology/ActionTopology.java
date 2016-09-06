@@ -12,7 +12,7 @@ public class ActionTopology {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
         Config config = new Config();
-        config.setDebug(true);
+        config.setDebug(false);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
 
         String zkConnString = "localhost:2181";

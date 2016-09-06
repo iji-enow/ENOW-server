@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import com.enow.dto.TopicStructure;
 
-
 public class ExecuteCodeBolt extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
     private OutputCollector collector;

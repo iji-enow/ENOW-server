@@ -114,7 +114,6 @@ public class main {
         builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
-        builder.setBolt("calling-proceed-bolt", new CallingProceedBolt()).allGrouping("provisioning-bolt");
         return builder.createTopology();
     }
 }
