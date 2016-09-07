@@ -10,6 +10,13 @@
     <packaging>jar</packaging>
     <description>Storm Spouts for Apache Kafka</description>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <storm.version>1.0.2</storm.version>
@@ -63,17 +70,11 @@
             <artifactId>storm-mongodb</artifactId>
             <version>${storm.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-kafka</artifactId>
             <version>${storm.version}</version>
         </dependency>
-        <!--In Memory Data Grid (IMDG) Open Source Solution for Data Sharing on
-            Distributed Environment -->
-        <!-- <dependency> <groupId>com.hazelcast</groupId> <artifactId>hazelcast</artifactId>
-            <version>3.6.4</version> </dependency> -->
-        <!--Types that extend and augment the Java Collections Framework -->
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
@@ -128,17 +129,26 @@
             </plugin>
         </plugins>
     </build>
-
     <repositories>
         <repository>
-            <id>clojars</id>
-            <url>https://clojars.org/repo/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
             <releases>
                 <enabled>true</enabled>
             </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>clojars</id>
+            <url>https://clojars.org/repo/</url>
         </repository>
     </repositories>
 

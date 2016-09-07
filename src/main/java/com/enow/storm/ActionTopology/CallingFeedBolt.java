@@ -45,6 +45,13 @@ public class CallingFeedBolt extends BaseRichBolt {
     	_topicStructure = (TopicStructure) input.getValueByField("topicStructure");
 		_spoutSource = (String) input.getValueByField("spoutSource");
 		_check = (boolean) input.getValueByField("check");
+		if(_check) {
+			// If this input is ack node
+
+		} else {
+			// If this input is exec node
+
+		}
 		_collector.emit(new Values(_topicStructure));
 		try {
 			_LOG.debug("input = [" + input + "]");

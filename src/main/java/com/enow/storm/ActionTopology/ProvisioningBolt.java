@@ -34,7 +34,13 @@ public class ProvisioningBolt extends BaseRichBolt {
         _topicStructure = (TopicStructure) input.getValueByField("topicStructure");
         _spoutSource = (String) input.getValueByField("spoutSource");
         _check = (boolean) input.getBooleanByField("check");
+        if(_check) {
+            // If this input is ack node
 
+        } else {
+            // If this input is exec node
+
+        }
         _collector.emit(new Values(_spoutSource, _topicStructure, _check));
 		try {
 			_LOG.debug("input = [" + input + "]");
