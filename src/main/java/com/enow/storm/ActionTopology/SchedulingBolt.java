@@ -146,7 +146,6 @@ public class SchedulingBolt extends BaseRichBolt {
                 check = true;
             }
             // Data handling part
-
         }
         */
         // Don't block data flow of Apache Storm!
