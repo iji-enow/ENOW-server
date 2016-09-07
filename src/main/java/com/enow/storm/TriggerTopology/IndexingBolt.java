@@ -38,16 +38,16 @@ public class IndexingBolt extends BaseRichBolt {
 		String temp = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
 		
-		JSONObject json = null;
-        String webhook = null;
-        Connect con = new Connect("https://hooks.slack.com/services/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");
-
-        
-        json = new JSONObject();
-        json.put("text",input.getValues().toString().substring(1, input.getValues().toString().length() - 1));
+//		JSONObject json = null;
+//        String webhook = null;
+//        Connect con = new Connect("https://hooks.slack.com/services/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");
+//
+//
+//        json = new JSONObject();
+//        json.put("text",input.getValues().toString().substring(1, input.getValues().toString().length() - 1));
         //json.put("text",elements[1].toString());
         //json.put("text",elements[2].toString());
-        webhook = con.post(con.getURL(), json);
+//        webhook = con.post(con.getURL(), json);
 		
 		TopicStructure _topicStructure = new TopicStructure();
 		String[] elements = new String[3];
@@ -121,11 +121,11 @@ public class IndexingBolt extends BaseRichBolt {
 		}
 		
         
-        json = new JSONObject();
-        json.put("text","여기 왓");
+//        json = new JSONObject();
+//        json.put("text","여기 왓");
         //json.put("text",elements[1].toString());
         //json.put("text",elements[2].toString());
-        webhook = con.post(con.getURL(), json);
+//        webhook = con.post(con.getURL(), json);
 
 		collector.emit(new Values(elements[0], _topicStructure));
 		try {

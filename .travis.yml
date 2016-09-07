@@ -18,4 +18,4 @@ branches:
   - master
 env:
   global:
-  - LANG="ko_KR.utf8"
+  - LANG="en_US.utf8"
