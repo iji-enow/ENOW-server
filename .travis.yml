@@ -1,6 +1,9 @@
+# Enable JAVA support
 language: java
+# Compiler selection
 jdk:
   - oraclejdk8
+  - openjdk7
 install: /bin/bash ./dev-tools/travis/travis-install.sh `pwd`
 script: /bin/bash ./dev-tools/travis/travis-script.sh `pwd` $MODULES
 notifications:
