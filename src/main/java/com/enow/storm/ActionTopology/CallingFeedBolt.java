@@ -14,7 +14,7 @@ import java.util.Properties;
 import com.enow.dto.TopicStructure;
 
 public class CallingFeedBolt extends BaseRichBolt {
-    protected static final Logger LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
+    protected static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
     private OutputCollector _collector;
 	private TopicStructure _topicStructure;
 	private String _spoutSource;
@@ -37,13 +37,17 @@ public class CallingFeedBolt extends BaseRichBolt {
     }
 
     @Override
-    public void execute(Tuple input) {	
+    public void execute(Tuple input) {
+		if ((null == input.toString()) || (input.toString().length() == 0)) {
+			_LOG.warn("input value or length of input is empty : [" + input + "]\n");
+			return;
+		}
     	_topicStructure = (TopicStructure) input.getValueByField("topicStructure");
 		_spoutSource = (String) input.getValueByField("spoutSource");
 		_check = (boolean) input.getValueByField("check");
 		_collector.emit(new Values(_topicStructure));
 		try {
-			LOG.debug("input = [" + input + "]");
+			_LOG.debug("input = [" + input + "]");
 			_collector.ack(input);
 		} catch (Exception e) {
 			_collector.fail(input);
