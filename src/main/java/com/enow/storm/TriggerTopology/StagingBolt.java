@@ -2,6 +2,8 @@ package com.enow.storm.TriggerTopology;
 
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -11,28 +13,20 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.bson.Document;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
-import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.enow.dto.TopicStructure;
-import com.enow.storm.Connect;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class StagingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
+	protected static final Logger _LOG = LogManager.getLogger(StagingBolt.class);
 	private OutputCollector collector;
 	private TopicStructure _topicStructure;
 	private boolean deviceIdCheck;
@@ -92,7 +86,7 @@ public class StagingBolt extends BaseRichBolt {
 			// There is deviceId that matches input signal from device
 			serverIdCheck = true;
 		} else {
-			LOG.debug("There are more than two server ID on MongoDB");
+			_LOG.debug("There are more than two server ID on MongoDB");
 			// this should not happen it's our mistake
 		}
 
@@ -107,7 +101,7 @@ public class StagingBolt extends BaseRichBolt {
 			brokerIdCheck = true;
 		} else {
 			// machineIdCheck = "device id : now we have a problem";
-			LOG.debug("There are more than two broker ID on MongoDB");
+			_LOG.debug("There are more than two broker ID on MongoDB");
 		}
 
 		// Get device collection for matching input signal from device
@@ -121,7 +115,7 @@ public class StagingBolt extends BaseRichBolt {
 			deviceIdCheck = true;
 		} else {
 			// machineIdCheck = "device id : now we have a problem";
-			LOG.debug("There are more than two machine ID on MongoDB");
+			_LOG.debug("There are more than two machine ID on MongoDB");
 		}
 		// Check Phase Road-map ID
 		
@@ -142,7 +136,7 @@ public class StagingBolt extends BaseRichBolt {
 			} else {
 				// phaseRoadMapIdCheck = "phase road map id : now we have a
 				// problem";
-				LOG.debug("There are more than two Phase Road-map Id on MongoDB");
+				_LOG.debug("There are more than two Phase Road-map Id on MongoDB");
 			}
 		} catch (NumberFormatException e) {
 			e.getMessage();
@@ -417,7 +411,7 @@ public class StagingBolt extends BaseRichBolt {
 		collector.emit(new Values(spoutSource,topicStructureArray, serverIdCheck,brokerIdCheck,deviceIdCheck, phaseRoadMapIdCheck, mapIdCheck));
 
 		try {
-			LOG.debug("input = [" + input + "]");
+			_LOG.debug("input = [" + input + "]");
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);

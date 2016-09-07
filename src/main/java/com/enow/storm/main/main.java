@@ -19,7 +19,6 @@ import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.kafka.*;
 
 // storm-redis
-import org.apache.storm.redis.bolt.RedisStoreBolt;
 
 import java.io.BufferedReader;
 import java.io.IOException;

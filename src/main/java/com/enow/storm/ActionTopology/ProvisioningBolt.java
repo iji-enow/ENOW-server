@@ -1,6 +1,7 @@
 package com.enow.storm.ActionTopology;
-import java.util.Map;
 
+import com.enow.dto.TopicStructure;
+import org.apache.logging.log4j.LogManager;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -8,12 +9,11 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.enow.dto.TopicStructure;
+
+import java.util.Map;
 
 public class ProvisioningBolt extends BaseRichBolt {
-	protected static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
+    protected static final org.apache.logging.log4j.Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
     private OutputCollector _collector;
     private TopicStructure _topicStructure;
     private String _spoutSource;

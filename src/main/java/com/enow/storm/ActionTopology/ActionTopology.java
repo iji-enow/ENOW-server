@@ -10,7 +10,8 @@ import org.apache.storm.topology.TopologyBuilder;
 
 public class ActionTopology {
     public static void main(String[] args) throws Exception {
-
+        //PropertyConfigurator.configure("./src/main.java.resources/log4j.properties");
+        BasicConfigurator.configure();
 
         String zkConnString = "localhost:2181";
         BrokerHosts brokerHosts = new ZkHosts(zkConnString);

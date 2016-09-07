@@ -12,6 +12,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.utils.TupleUtils;
+import org.apache.storm.utils.BatchHelper;
 import org.bson.Document;
 
 public class InsertMongoBolt extends AbstractMongoBolt {

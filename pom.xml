@@ -20,6 +20,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <storm.version>1.0.2</storm.version>
+        <kafka.artifactId>kafka_2.11</kafka.artifactId>
+        <kafka.version>0.9.0.1</kafka.version>
     </properties>
 
     <developers>
@@ -57,8 +59,22 @@
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka_2.11</artifactId>
-            <version>0.9.0.1</version>
+            <artifactId>${kafka.artifactId}</artifactId>
+            <version>${kafka.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.zookeeper</groupId>
+                    <artifactId>zookeeper</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
@@ -67,24 +83,18 @@
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-mongodb</artifactId>
+            <artifactId>storm-kafka</artifactId>
             <version>${storm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
-            <artifactId>storm-kafka</artifactId>
+            <artifactId>storm-mongodb</artifactId>
             <version>${storm.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.storm</groupId>
-            <artifactId>storm-redis</artifactId>
-            <version>${storm.version}</version>
-            <type>jar</type>
         </dependency>
     </dependencies>
 
@@ -93,6 +103,18 @@
             <resource>
                 <!-- Where the Python bits are kept -->
                 <directory>${basedir}/multilang</directory>
+            </resource>
+            <resource>
+                <directory>./src/main/resources</directory>
+            </resource>
+        </resources>
+        <resources>
+            <resource>
+                <directory>${basedir}/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>log4j2.xml</include>
+                </includes>
             </resource>
         </resources>
         <plugins>
@@ -110,7 +132,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.enow.storm.TestTopologyStaticHosts</mainClass>
+                                    <mainClass>com.enow.storm.main.main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -163,7 +185,17 @@
                 <dependency>
                     <groupId>org.apache.storm</groupId>
                     <artifactId>storm-core</artifactId>
-                    <version>1.0.1</version>
+                    <version>${storm.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.storm</groupId>
+                    <artifactId>storm-kafka</artifactId>
+                    <version>${storm.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.storm</groupId>
+                    <artifactId>storm-mongodb</artifactId>
+                    <version>${storm.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.clojure</groupId>
@@ -178,7 +210,19 @@
                 <dependency>
                     <groupId>org.apache.storm</groupId>
                     <artifactId>storm-core</artifactId>
-                    <version>1.0.1</version>
+                    <version>${storm.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.storm</groupId>
+                    <artifactId>storm-kafka</artifactId>
+                    <version>${storm.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.storm</groupId>
+                    <artifactId>storm-mongodb</artifactId>
+                    <version>${storm.version}</version>
                     <scope>provided</scope>
                 </dependency>
                 <dependency>

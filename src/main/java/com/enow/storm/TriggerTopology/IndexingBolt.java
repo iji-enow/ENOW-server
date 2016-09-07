@@ -3,6 +3,8 @@ package com.enow.storm.TriggerTopology;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -10,25 +12,14 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.bson.Document;
 import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 // MongoDB
-import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.WriteConcern;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import com.enow.dto.TopicStructure;
-import com.enow.storm.Connect;
 
 public class IndexingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
+	protected static final Logger _LOG = LogManager.getLogger(IndexingBolt.class);
 	private OutputCollector collector;
 
 	@Override
@@ -138,7 +129,7 @@ public class IndexingBolt extends BaseRichBolt {
 
 		collector.emit(new Values(elements[0], _topicStructure));
 		try {
-			LOG.debug("input = [" + input + "]");
+			_LOG.debug("input = [" + input + "]");
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);

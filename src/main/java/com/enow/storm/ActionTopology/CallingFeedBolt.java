@@ -1,20 +1,22 @@
 package com.enow.storm.ActionTopology;
-import org.apache.kafka.clients.producer.*;
+
+import com.enow.dto.TopicStructure;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.logging.log4j.LogManager;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
-import com.enow.dto.TopicStructure;
 
 public class CallingFeedBolt extends BaseRichBolt {
-    protected static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
+	protected static final org.apache.logging.log4j.Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
     private OutputCollector _collector;
 	private TopicStructure _topicStructure;
 	private String _spoutSource;

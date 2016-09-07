@@ -6,10 +6,8 @@ import java.text.SimpleDateFormat;
 import org.apache.storm.mongodb.common.mapper.MongoMapper;
 import org.apache.storm.tuple.ITuple;
 import org.bson.Document;
-import org.json.simple.JSONObject;
 
 import com.enow.dto.TopicStructure;
-import com.enow.storm.Connect;
 
 public class SimpleMongoMapper implements MongoMapper {
 	private String[] fields;
