@@ -13,7 +13,7 @@ Todo List
 - [x] ~~Not using LocalCluster, But using `StormSubmitter`~~
 - [ ] Make Event topology
 - [ ] Make Trigger & Status topology
-- [x] Syncronizing data stream with `ConcurrentHashMap`
+- [x] ~~Syncronizing data stream with `ConcurrentHashMap`~~
 - [x] ~~Create test Document on MongoDB~~
 - [x] ~~Connect Apache Storm to MongoDB~~
 - [ ] Connect Apache Storm to Console
