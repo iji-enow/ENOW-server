@@ -35,6 +35,7 @@ class CountBolt(storm.BasicBolt):
     def process(self, tup):
         # Get the word from the inbound tuple
         word = tup.values[0]
+
         # Increment the counter9
         # storm.logInfo("Emitting %s" %(word))
         # Emit the word and count
