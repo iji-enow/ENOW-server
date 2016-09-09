@@ -71,7 +71,6 @@ Payload
 - __Acknowledge cycle__</br>
 ```JSON
 {
-    "source":"ack",
     "corporationName":"enow",
     "serverId":"serverId1",
     "brokerId":"brokerId1",
@@ -86,7 +85,6 @@ Payload
 - __Execution cycle__</br>
 ```JSON
 {
-    "source":"exec",
     "corporationName":"enow",
     "serverId":"serverId1",
     "brokerId":"brokerId1",
