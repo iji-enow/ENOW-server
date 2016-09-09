@@ -26,43 +26,77 @@ Topologies
 #### TriggerTopology
 ##### IndexingBolt :
 
-- `eventKafka`에서 들어온 현 토픽과 메세지 값을 나눠서 `TopicStructure` 구조체에 저장한다.
-- 로그를 기록하여 몽고DB에 저장한다.
-- 파싱된 `TopicStructure`를 `PhasingBolt로` 넘겨준다.
+- `eventKafka` 토픽에서 들어온 `JSON`꼴의 `String`을 `jsonObject`로 바꿔준다.
+- `ack = false`일 경우 `HashMap`에 해당 토픽을 저장해놓는다.
+- `ack = true`일 경우 `HashMap`에 해당하는 토픽이 있는지 확인 후 있다면 넘겨주고 없다면 무시한다.
 
-###### PhasingBolt :
+###### StagingBolt :
 
-- 몽고DB 안의 `DeviceId`와 `TopicStructure`에 있는 `DeviceId`를 매칭한다.
-- 몽고DB 안의 `PhaseRoadMapId`와 `TopicStructure`에 있는 `PhaseRoadMapId`를 매칭한다.
-- 현제 토픽에 해당하는 `mapId`를 추출하여 토픽에 추가시켜준다.
-- `TopicStructure`와 위에서 거친 검증 값에 따라 `CallingTriggerBolt`로 넘겨 준다.
+- 현재 노드에 해당하는 `serverId`, `brokerId`, `deviceId`, `phaseRoadMapId`의 값들이 유효한 값인지 검증한다.
+- 현재 노드에 해당하는 `mapId`와 `phaseId`를 추출하여 `jsonObject`에 추가시켜준다.
+- `ack = true`일 경우 현재 노드의 `peerOut`, `peerIn` 값들을 확인하여 `jsonObject`에 저장한다.
+- `ack = true`일 경우 현재 노드의 `phaseLastNode`과 다음 `phase`의 `phaseInitNode` 값들을 확인하여 `jsonObject`에 저장한다.
+- `JSON`과 위에서 거친 검증 값에 따라 `CallingTriggerBolt`로 넘겨 준다.
 
 ###### CallingTriggerBolt :
 
-- StagingBolt에서 토픽 값과 메세지 값을 받아 `triggerKafka`로 넘겨준다.
+- `StagingBolt`에서 넘겨준 `jsonObject`를 받아 `triggerKafka`로 넘겨준다.
 
 #### ActionTopology
 
 ###### SchedulingBolt :
 
-- `triggerKafka` 혹은 `statusKafka`에서 토픽과 메세지를 받아 스케줄링을 해준다.
-- `triggerKafka`에서 받은 토픽과 메세지는 바로 `ConcurrentHashMap`에 `mapId` 키값으로 삼아 저장된다.
-- `triggerKafka`에서 받은 토픽과 메세지는 해당 `mapId`의 peerIn값을 몽고DB에서 받아와 현제 들어온 토픽이외의 다른 `peerIn`값이 있는 경우 waiting(check = false)을 걸어준다.
-- `statusKafka`는 연결된 모든 데이터의 상태정보를 읽어들이고, `ConcurrentHashMap`에 저장된 __현제 실행 예정__ 디바이스의 상태정보와 메타데이터는 `triggerKafka`의 값과 매칭시켜 code를 `ExecuteBolt`를 execute시킬지 waiting시킬지 결정한다.
+- `triggerKafka`에서 `jsonObject`를 받아 스케줄링을 해준다.
+- `ack = false`일 때, 새로 들어온 `mapId`인지 확인하고, 새로 들어온 `mapId`면 `ConcurrentHashMap`에 `peer`들과 함께 저장된다.(`peer`중 하나라도 자신을 저장을 초래한 적이 있다면 무시된다)
+- `ack = true`일 때, `ConcurrentHashMap`에 자신과 함께 저장된 `peer`들의 `Key`값을 확인하고, `peer` 들의 `value`값이 모두 `true`면 디바이스에서 `ack` 값을 보낼 준비를 한다.
 
 ###### ExecuteBolt :
 
-- `SchdulingBolt`에서 받은 메세지의 값과 console에서 설정한 parameter값으로 console에서 작성한 source를 실행시킨다.
-- source를 돌려서 나온 result값을 `SchedulingBolt`에서 받은 토픽과 함께 `provisioningBolt`로 넘겨준다.
+- `SchdulingBolt`에서 받은 `message` 값과 console에서 설정한 `parameter`값으로 console에서 작성한 `source code`를 실행시킨다.
+- `source code`를 실행하고 산출된 `result`를 `SchedulingBolt`에서 받은 토픽과 함께 `provisioningBolt`로 `emit`한다.
 
 ###### ProvisioningBolt :
 
-- `ExecuteBolt`에서 받은 토픽의 `mapId`의 `peerOut`값을 몽고DB에서 찾아본다.
-- 만약 해당 `mapId`의 `peerOut`값이 없다면 비어있는 채 `CallingFeedBolt`로 결과만 넘겨주고 `peerOut`값이 있다면 `ExecuteBolt`에서 받은 토픽의 마지막에 추가하여 결과를 `CallingFeedBolt`로 넘겨준다.
+- `proceed`값을 확인하여 `ack` 값을 `false`로 바꿀지 `true`로 바꿀지 결정한다.
+- 만약 해당 `mapId`의 `peerOut`값이 없다면 비어있는 채 `CallingFeedBolt`로 결과만 넘겨주고 `peerOut`값이 있다면 `ExecuteBolt`에서 받은 `result`를 messages에 추가하여 `CallingFeedBolt`로 넘겨준다.
 
 ###### CallingFeedBolt :
 
+- peerIn 이 없는 Phase의 init 노드들의 리스트들에 시동을 걸어준다.
 - `ProvisioningBolt`에서 받은 토픽과 메세지를 `feedKafka`로 넘겨준다.
+
+Payload
+-------
+
+- __Acknowledge cycle__</br>
+```JSON
+{
+    "source":"ack",
+    "corporationName":"enow",
+    "serverId":"serverId1",
+    "brokerId":"brokerId1",
+    "deviceId":"deviceId1",
+    "phaseRoadMapId":"1",
+    "message":"messages",
+    "ack":true,
+    "procced":true
+}
+```
+
+- __Execution cycle__</br>
+```JSON
+{
+    "source":"exec",
+    "corporationName":"enow",
+    "serverId":"serverId1",
+    "brokerId":"brokerId1",
+    "deviceId":"deviceId1",
+    "phaseRoadMapId":"1",
+    "message":"messages",
+    "ack":false,
+    "procced":false
+}
+```
 
 
 References

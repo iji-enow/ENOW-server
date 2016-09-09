@@ -52,6 +52,6 @@ public class ProvisioningBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    	declarer.declare(new Fields("spoutSource", "topicStructure", "check"));
+    	declarer.declare(new Fields("jsonObject"));
     }
 }
