@@ -191,11 +191,12 @@ public class StagingBolt extends BaseRichBolt {
 									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
 									tmpTopicStructure.setCurrentMapId("1");
 
+									/*
 									if (waitMapId.contains(2)) {
 										tmpTopicStructure.setWaitMapId(waitMapId);
 										tmpTopicStructure.setLastMapId(true);
 									}
-
+									*/
 									topicStructureArray.add(tmpTopicStructure);
 								} else {
 								}
@@ -212,10 +213,12 @@ public class StagingBolt extends BaseRichBolt {
 									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
 									tmpTopicStructure.setCurrentMapId("3");
 
+									/*
 									if (waitMapId.contains(3)) {
 										tmpTopicStructure.setWaitMapId(waitMapId);
 										tmpTopicStructure.setLastMapId(true);
 									}
+									*/
 
 									topicStructureArray.add(tmpTopicStructure);
 
@@ -234,10 +237,12 @@ public class StagingBolt extends BaseRichBolt {
 									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
 									tmpTopicStructure.setCurrentMapId("5");
 
+									/*
 									if (waitMapId.contains(5)) {
 										tmpTopicStructure.setWaitMapId(waitMapId);
 										tmpTopicStructure.setLastMapId(true);
 									}
+									*/
 									
 									topicStructureArray.add(tmpTopicStructure);
 
@@ -256,10 +261,12 @@ public class StagingBolt extends BaseRichBolt {
 									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
 									tmpTopicStructure.setCurrentMapId("7");
 
+									/*
 									if (waitMapId.contains(7)) {
 										tmpTopicStructure.setWaitMapId(waitMapId);
 										tmpTopicStructure.setLastMapId(true);
 									}
+									*/
 
 									topicStructureArray.add(tmpTopicStructure);
 								} else {
@@ -277,10 +284,12 @@ public class StagingBolt extends BaseRichBolt {
 									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
 									tmpTopicStructure.setCurrentMapId("9");
 
+									/*
 									if (waitMapId.contains(9)) {
 										tmpTopicStructure.setWaitMapId(waitMapId);
 										tmpTopicStructure.setLastMapId(true);
 									}
+									*/
 
 									topicStructureArray.add(tmpTopicStructure);
 
@@ -347,10 +356,12 @@ public class StagingBolt extends BaseRichBolt {
 									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
 									tmpTopicStructure.setCurrentMapId("1");
 
+									/*
 									if (waitMapId.contains(2)) {
 										tmpTopicStructure.setWaitMapId(waitMapId);
 										tmpTopicStructure.setLastMapId(true);
 									}
+									*/
 
 									topicStructureArray.add(tmpTopicStructure);
 								} else {

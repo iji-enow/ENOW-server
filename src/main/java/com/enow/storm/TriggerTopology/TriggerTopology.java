@@ -9,7 +9,6 @@ import org.apache.storm.kafka.*;
 import org.apache.storm.mongodb.common.mapper.MongoMapper;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
-import com.enow.storm.mapper.mongodb.BatchHelper;
 
 
 import com.enow.storm.mapper.mongodb.InsertMongoBolt;
