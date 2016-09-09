@@ -23,44 +23,24 @@ public class SchedulingBolt extends BaseRichBolt {
     ConcurrentHashMap<String, TopicStructure> _executedNode = new ConcurrentHashMap<String, TopicStructure>();
     private OutputCollector _collector;
     private TopicStructure _topicStructure;
+    private JSONParser _parser;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
         _topicStructure = new TopicStructure();
+        _parser = new JSONParser();
     }
 
     @Override
     public void execute(Tuple input) {
 
-        JSONParser parser= new JSONParser();;
-        JSONObject _jsonObject;
+        JSONObject _jsonObject = (JSONObject)input.getValueByField("jsonObject");
 
-        if ((null == input.toString()) || (input.toString().length() == 0)) {
-            return;
-        }
-
-        String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-
-        try {
-            _jsonObject = (JSONObject) parser.parse(msg);
-        } catch (ParseException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-            _jsonObject = null;
-        }
-
-        _collector.emit(new Values(_jsonObject));
-        try {
-            _LOG.debug("input = [" + input + "]");
-            _collector.ack(input);
-        } catch (Exception e) {
-            _collector.fail(input);
-        }
-        if ((null == input.toString()) || (input.toString().length() == 0)) {
-            _LOG.warn("input value or length of input is empty : [" + input + "]\n");
-            return;
-        }
+//        if () {
+//            _LOG.warn("input value or length of input is empty : [" + input + "]\n");
+//            return;
+//        }
 
         String temp = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
         System.out.println(temp);
@@ -97,7 +77,7 @@ public class SchedulingBolt extends BaseRichBolt {
         // _topicStructure.setCurrentMsg(elements[2]);
         boolean check = false;
 
-        // Case 1 : spoutSource == trigger
+        // Execution Cycle 1 : ack == false
 
         if (elements[0].equals("status")) {
             // Is this init node?
@@ -178,16 +158,15 @@ public class SchedulingBolt extends BaseRichBolt {
         */
         // Don't block data flow of Apache Storm!
         // 무조건 emit을 함으로써 storm의 데이터 흐름을 막지 않아야!!!
-        _collector.emit(new Values(elements[0], _topicStructure, check));
-        try {
-            _collector.ack(input);
-            _LOG.info("Try to send input to ExecuteCodeBolt = [" + temp + "]\n");
-            System.out.println("Succeed in sending " + temp + " to ExecuteCodeBolt");
-        } catch (Exception e) {
-            _collector.fail(input);
-            _LOG.warn("Fail in send input to ExecuteCodeBolt = [" + temp + "]\n");
-            System.out.println("Fail in sending " + temp + " to ExecuteCodeBolt");
-        }
+//        _collector.emit(new Values(_jsonObject));
+//        try {
+//            _LOG.info("Try to send input to ExecuteCodeBolt = [\n" + _jsonObject.toJSONString() + "\n]\n");
+//            // _jsonObject = (JSONObject)_parser.parse(_jsonObject);
+//        } catch (ParseException e1) {
+//            // TODO Auto-generated catch block
+//            _LOG.warn("Fail in send input to ExecuteCodeBolt = [\n" + _jsonObject.toJSONString() + "\n]\n");
+//            e1.printStackTrace();
+//        }
     }
 
     @Override

@@ -4,7 +4,9 @@ import com.enow.dto.TopicStructure;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.connect.json.JsonSerializer;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -16,7 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class CallingFeedBolt extends BaseRichBolt {
-	protected static final org.apache.logging.log4j.Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
+	protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
     private OutputCollector _collector;
 	private TopicStructure _topicStructure;
 	private String _spoutSource;
@@ -33,7 +35,9 @@ public class CallingFeedBolt extends BaseRichBolt {
 		props.put("batch.size", "1");
 		props.put("bootstrap.servers", "localhost:9092");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.apache.kafka.connect.json.JsonSerializer");
+		// props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		// props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		producer =  new KafkaProducer<String, String>(props);
 		_topicStructure = new TopicStructure();
     }

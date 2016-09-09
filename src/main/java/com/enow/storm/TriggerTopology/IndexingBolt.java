@@ -58,9 +58,7 @@ public class IndexingBolt extends BaseRichBolt {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			_jsonObject = null;
-		} 
-		
-		
+		}
 		
 		/*
 		JSONObject json = null;
