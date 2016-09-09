@@ -35,9 +35,8 @@ public class SchedulingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        JSONObject _jsonObject = (JSONObject)input.getValueByField("jsonObject");
-
-//        if () {
+//        JSONObject _jsonObject = (JSONObject)_parser.parse(input.getValueByField("jsonObject"));
+//        if (_jsonObject == null) {
 //            _LOG.warn("input value or length of input is empty : [" + input + "]\n");
 //            return;
 //        }

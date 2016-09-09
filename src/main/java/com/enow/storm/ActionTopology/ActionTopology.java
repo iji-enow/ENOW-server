@@ -6,7 +6,7 @@ import org.apache.storm.LocalCluster;
 import org.apache.storm.kafka.*;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
-
+import org.apache.kafka.connect.json.JsonSchema;
 
 public class ActionTopology {
     public static void main(String[] args) throws Exception {
@@ -18,12 +18,12 @@ public class ActionTopology {
         // Trigger Kafka setting
         String topicTrigger = "trigger";
         SpoutConfig triggerConfig = new SpoutConfig(brokerHosts,topicTrigger, "/"+topicTrigger, "storm");
-        triggerConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        triggerConfig.scheme = new SchemeAsMultiScheme(new JsonScheme());
         triggerConfig.startOffsetTime = -1;
         // Status Kafka setting
         String topicStatus = "status";
         SpoutConfig statusConfig = new SpoutConfig(brokerHosts,topicStatus, "/"+topicStatus, "storm");
-        statusConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        statusConfig.scheme = new SchemeAsMultiScheme(new JsonScheme());
         statusConfig.startOffsetTime = -1;
         // Build Topology
         TopologyBuilder builder = new TopologyBuilder();
