@@ -32,7 +32,7 @@ public class TriggerTopology {
 
         SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts, topic, "/" + topic, "storm");
 
-        kafkaConfig.scheme = new SchemeAsMultiScheme(new JsonScheme());
+        kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         kafkaConfig.startOffsetTime = -1;
         
         String url = "mongodb://127.0.0.1:27017/log";
