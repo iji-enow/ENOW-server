@@ -62,7 +62,7 @@ Topologies
 
 ###### CallingFeedBolt :
 
-- peerIn 이 없는 Phase의 init 노드들의 리스트들에 시동을 걸어준다.
+- `peerIn` 이 없는 `Phase`의 init 노드들의 리스트들에 시동을 걸어준다.(시뮬레이션용)
 - `ProvisioningBolt`에서 받은 토픽과 메세지를 `feedKafka`로 넘겨준다.
 
 Payload
@@ -95,7 +95,6 @@ Payload
     "procced":false
 }
 ```
-
 
 References
 ----------

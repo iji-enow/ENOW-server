@@ -10,6 +10,9 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -29,6 +32,31 @@ public class SchedulingBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
+
+        JSONParser parser= new JSONParser();;
+        JSONObject _jsonObject;
+
+        if ((null == input.toString()) || (input.toString().length() == 0)) {
+            return;
+        }
+
+        String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
+
+        try {
+            _jsonObject = (JSONObject) parser.parse(msg);
+        } catch (ParseException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+            _jsonObject = null;
+        }
+
+        _collector.emit(new Values(_jsonObject));
+        try {
+            _LOG.debug("input = [" + input + "]");
+            _collector.ack(input);
+        } catch (Exception e) {
+            _collector.fail(input);
+        }
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             _LOG.warn("input value or length of input is empty : [" + input + "]\n");
             return;

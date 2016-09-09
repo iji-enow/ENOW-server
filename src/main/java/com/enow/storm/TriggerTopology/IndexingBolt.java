@@ -14,8 +14,8 @@ import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // MongoDB
 import com.mongodb.BasicDBObject;
@@ -30,7 +30,7 @@ import com.enow.dto.TopicStructure;
 import com.enow.storm.Connect;
 
 public class IndexingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
+	protected static final Logger LOG = LogManager.getLogger(IndexingBolt.class);
 	private OutputCollector collector;
 
 	@Override

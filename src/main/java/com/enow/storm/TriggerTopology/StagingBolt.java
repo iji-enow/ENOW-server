@@ -13,8 +13,8 @@ import org.apache.storm.tuple.Values;
 import org.bson.Document;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Lists;
 import com.mongodb.Block;
@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class StagingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
+	protected static final Logger LOG = LogManager.getLogger(StagingBolt.class);
 	private OutputCollector collector;
 
 	@Override

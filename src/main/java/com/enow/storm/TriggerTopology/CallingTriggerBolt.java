@@ -9,8 +9,8 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.enow.dto.TopicStructure;
 
 import com.enow.storm.Connect;
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class CallingTriggerBolt extends BaseRichBolt {
-	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
+	protected static final Logger LOG = LogManager.getLogger(CallingTriggerBolt.class);
 	private OutputCollector collector;
 	private Properties props;
 
