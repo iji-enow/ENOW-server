@@ -33,15 +33,15 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		props.put("producer.type", "sync");
 		props.put("batch.size", "1");
 		props.put("bootstrap.servers", "localhost:9092");
-		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("key.serializer", "org.apache.kafka.connect.json.JsonSerializer");
 		props.put("value.serializer", "org.apache.kafka.connect.json.JsonSerializer");
-		// props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		// props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		//props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		//props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 	}
 
 	@Override
 	public void execute(Tuple input) {
-		Producer<String, String> producer = new KafkaProducer<String, String>(props);
+		Producer<String, String> producer = new KafkaProducer<String,String>(props);
 		String spoutSource;
 		boolean serverIdCheck;
 		boolean brokerIdCheck;
@@ -50,9 +50,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		boolean mapIdCheck;
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
-		// spoutSource = input.getStringByField("spoutSource");
-		// topicStructureArray = (ArrayList<TopicStructure>)
-		// input.getValueByField("topicStructureArray");
+		_jsonArray = (ArrayList<JSONObject>)input.getValueByField("jsonArray");
 		deviceIdCheck = input.getBooleanByField("deviceIdCheck");
 		phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
 		mapIdCheck = input.getBooleanByField("mapIdCheck");
@@ -66,10 +64,12 @@ public class CallingTriggerBolt extends BaseRichBolt {
 					producer.send(data);
 					collector.emit(new Values(tmpJsonObject.toJSONString()));
 				}else{
+					/*
 					ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger","error : " + "serverIdCheck = " + serverIdCheck + " brokerIdCheck = " + brokerIdCheck
 							+ " machinIdCheck = " + deviceIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck
 							+ " mapIdCheck = " + mapIdCheck);
 					producer.send(data);
+					*/
 					collector.emit(new Values(tmpJsonObject.toJSONString()));
 					
 				}

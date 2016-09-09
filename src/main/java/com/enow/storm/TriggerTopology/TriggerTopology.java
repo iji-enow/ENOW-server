@@ -5,15 +5,19 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;
-import org.apache.storm.kafka.*;
+import org.apache.storm.kafka.BrokerHosts;
+import org.apache.storm.kafka.KafkaSpout;
+import org.apache.storm.kafka.SpoutConfig;
+import org.apache.storm.kafka.StringScheme;
+import org.apache.storm.kafka.ZkHosts;
 import org.apache.storm.mongodb.common.mapper.MongoMapper;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
-
+import com.enow.storm.ActionTopology.JsonScheme;
 import com.enow.storm.mapper.mongodb.InsertMongoBolt;
 import com.enow.storm.mapper.mongodb.SimpleMongoMapper;
-import com.enow.storm.mapper.mongodb.mongoDBMapper;
+
 
 
 public class TriggerTopology {
@@ -28,7 +32,7 @@ public class TriggerTopology {
 
         SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts, topic, "/" + topic, "storm");
 
-        kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        kafkaConfig.scheme = new SchemeAsMultiScheme(new JsonScheme());
         kafkaConfig.startOffsetTime = -1;
         
         String url = "mongodb://127.0.0.1:27017/log";
