@@ -1,5 +1,4 @@
 package com.enow.storm.TriggerTopology;
-
 import java.util.Map;
 
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -32,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class StagingBolt extends BaseRichBolt {
+public class StagingBolt2 extends BaseRichBolt {
 	protected static final Logger LOG = LoggerFactory.getLogger(CallingTriggerBolt.class);
 	private OutputCollector collector;
 
@@ -44,14 +43,13 @@ public class StagingBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		TopicStructure _topicStructure = new TopicStructure();
+		JSONObject _jsonObject;
 		boolean deviceIdCheck = false;
 		boolean phaseRoadMapIdCheck = false;
 		boolean mapIdCheck = false;
 		boolean brokerIdCheck = false;
 		boolean serverIdCheck = false;
 		FindIterable<Document> iterable;
-		String spoutSource;
 		JSONParser jsonParser = new JSONParser();
 		JSONObject phaseRoadMapId;
 		JSONObject phases;
@@ -61,22 +59,14 @@ public class StagingBolt extends BaseRichBolt {
 		JSONArray ifLastMapId;
 		boolean ifLastMapIdCheck = false;
 		ArrayList<Integer> waitMapId = new ArrayList<Integer>();
-		ArrayList<TopicStructure> topicStructureArray = new ArrayList<TopicStructure>();
-		TopicStructure tmpTopicStructure = new TopicStructure();
+		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
+		
+		_jsonObject = (JSONObject)input.getValueByField("jsonObject");
 
-		_topicStructure = (TopicStructure) input.getValueByField("topicStructure");
-		spoutSource = input.getStringByField("spoutSource");
-		
-	
-		
-		
-		if (_topicStructure.isEmpty()) {
-			return;
-		} else if (spoutSource == null) {
+		if(_jsonObject == null){
 			return;
 		}
 		
-
 		// Connect MongoDB
 		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -85,10 +75,10 @@ public class StagingBolt extends BaseRichBolt {
 
 		MongoCollection<Document> serverListCollection = dbWrite.getCollection("server");
 
-		if (serverListCollection.count(new Document("serverId", _topicStructure.getServerId())) == 0) {
+		if (serverListCollection.count(new Document("serverId", (String)_jsonObject.get("serverId"))) == 0) {
 			// There isn't deviceId that matches input signal from device
 			serverIdCheck = false;
-		} else if (serverListCollection.count(new Document("serverId", _topicStructure.getServerId())) == 1) {
+		} else if (serverListCollection.count(new Document("serverId", (String)_jsonObject.get("serverId"))) == 1) {
 			// There is deviceId that matches input signal from device
 			serverIdCheck = true;
 		} else {
@@ -99,10 +89,10 @@ public class StagingBolt extends BaseRichBolt {
 		// Get device collection for matching input signal from device
 		MongoCollection<Document> brokerListCollection = dbWrite.getCollection("broker");
 
-		if (brokerListCollection.count(new Document("brokerId", _topicStructure.getBrokerId())) == 0) {
+		if (brokerListCollection.count(new Document("brokerId", (String)_jsonObject.get("brokerId"))) == 0) {
 			// There isn't deviceId that matches input signal from device
 			brokerIdCheck = false;
-		} else if (brokerListCollection.count(new Document("brokerId", _topicStructure.getBrokerId())) == 1) {
+		} else if (brokerListCollection.count(new Document("brokerId", (String)_jsonObject.get("brokerId"))) == 1) {
 			// There is deviceId that matches input signal from device
 			brokerIdCheck = true;
 		} else {
@@ -113,10 +103,10 @@ public class StagingBolt extends BaseRichBolt {
 		// Get device collection for matching input signal from device
 		MongoCollection<Document> deviceListCollection = dbWrite.getCollection("device");
 
-		if (deviceListCollection.count(new Document("deviceId", _topicStructure.getDeviceId())) == 0) {
+		if (deviceListCollection.count(new Document("deviceId", (String)_jsonObject.get("deviceId"))) == 0) {
 			// There isn't deviceId that matches input signal from device
 			deviceIdCheck = false;
-		} else if (deviceListCollection.count(new Document("deviceId", _topicStructure.getDeviceId())) == 1) {
+		} else if (deviceListCollection.count(new Document("deviceId", (String)_jsonObject.get("deviceId"))) == 1) {
 			// There is deviceId that matches input signal from device
 			deviceIdCheck = true;
 		} else {
@@ -124,6 +114,7 @@ public class StagingBolt extends BaseRichBolt {
 			LOG.debug("There are more than two machine ID on MongoDB");
 		}
 		// Check Phase Road-map ID
+		
 
 		dbWrite = mongoClient.getDatabase("enow");
 
@@ -131,12 +122,12 @@ public class StagingBolt extends BaseRichBolt {
 
 		try {
 			if (phaseRoadMapCollection.count(
-					new Document("phaseRoadMapId", Integer.parseInt(_topicStructure.getPhaseRoadMapId()))) == 0) {
+					new Document("phaseRoadMapId", (long)_jsonObject.get("phaseRoadMapId"))) == 0) {
 				// There isn't phaseRoadMapId that matches input signal from
 				// device
 				phaseRoadMapIdCheck = false;
 			} else if (phaseRoadMapCollection.count(
-					new Document("phaseRoadMapId", Integer.parseInt(_topicStructure.getPhaseRoadMapId()))) == 1) {
+					new Document("phaseRoadMapId", (long)_jsonObject.get("phaseRoadMapId"))) == 1) {
 				// There is phaseRoadMapId that matches input signal from device
 				phaseRoadMapIdCheck = true;
 			} else {
@@ -152,27 +143,20 @@ public class StagingBolt extends BaseRichBolt {
 		// If phaseRoadMapIdCheck and machineIdCheck are confirmed
 		// insert data to topicStructure
 
-		if (spoutSource.equals("trigger")) {
+		if (!(boolean)_jsonObject.get("ack")) {
 			if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck) {
 				try {
 					iterable = phaseRoadMapCollection.find(
-							new Document("phaseRoadMapId", Integer.parseInt(_topicStructure.getPhaseRoadMapId())));
+							new Document("phaseRoadMapId", (long)_jsonObject.get("phaseRoadMapId")));
 
 					try {
 						phaseRoadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 						phases = (JSONObject) phaseRoadMapId.get("phases");
 						phaseId = (JSONObject) phases.get("phase1");
 						devices = (JSONObject) phaseId.get("devices");
-						deviceId = (JSONArray) devices.get(_topicStructure.getDeviceId());
+						deviceId = (JSONArray) devices.get((String)_jsonObject.get("deviceId"));
 
-						_topicStructure.setPhaseId("phase1");
-
-						ifLastMapId = (JSONArray) phaseRoadMapId.get("phase1");
-
-						for (int i = 0; i < ifLastMapId.size(); i++) {
-							Double tmpDouble = (Double)ifLastMapId.get(i);
-							waitMapId.add(tmpDouble.intValue());
-						}
+						_jsonObject.put("phaseId", "phase1");
 
 						for (int n = 0; n < deviceId.size(); n++) {
 							JSONObject deviceIdList = (JSONObject) deviceId.get(n);
@@ -181,108 +165,42 @@ public class StagingBolt extends BaseRichBolt {
 								if (Double.parseDouble(deviceIdList.get("mapId").toString()) == 1) {
 									mapIdCheck = true;
 
-									tmpTopicStructure = new TopicStructure();
-									tmpTopicStructure.setCorporationName(_topicStructure.getCorporationName());
-									tmpTopicStructure.setServerId(_topicStructure.getServerId());
-									tmpTopicStructure.setBrokerId(_topicStructure.getBrokerId());
-									tmpTopicStructure.setPhaseRoadMapId(_topicStructure.getPhaseRoadMapId());
-									tmpTopicStructure.setDeviceId(_topicStructure.getDeviceId());
-									tmpTopicStructure.setPhaseId(_topicStructure.getPhaseId());
-									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
-									tmpTopicStructure.setCurrentMapId("1");
-
-									if (waitMapId.contains(2)) {
-										tmpTopicStructure.setWaitMapId(waitMapId);
-										tmpTopicStructure.setLastMapId(true);
-									}
-
-									topicStructureArray.add(tmpTopicStructure);
+									_jsonObject.put("mapId",1);
+									_jsonArray.add(_jsonObject);
 								} else {
 								}
 
 								if (Double.parseDouble(deviceIdList.get("mapId").toString()) == 3) {
 									mapIdCheck = true;
-									tmpTopicStructure = new TopicStructure();
-									tmpTopicStructure.setCorporationName(_topicStructure.getCorporationName());
-									tmpTopicStructure.setServerId(_topicStructure.getServerId());
-									tmpTopicStructure.setBrokerId(_topicStructure.getBrokerId());
-									tmpTopicStructure.setPhaseRoadMapId(_topicStructure.getPhaseRoadMapId());
-									tmpTopicStructure.setDeviceId(_topicStructure.getDeviceId());
-									tmpTopicStructure.setPhaseId(_topicStructure.getPhaseId());
-									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
-									tmpTopicStructure.setCurrentMapId("3");
-
-									if (waitMapId.contains(3)) {
-										tmpTopicStructure.setWaitMapId(waitMapId);
-										tmpTopicStructure.setLastMapId(true);
-									}
-
-									topicStructureArray.add(tmpTopicStructure);
+									
+									_jsonObject.put("mapId",3);
+									_jsonArray.add(_jsonObject);
 
 								} else {
 								}
 
 								if (Double.parseDouble(deviceIdList.get("mapId").toString()) == 5) {
 									mapIdCheck = true;
-									tmpTopicStructure = new TopicStructure();
-									tmpTopicStructure.setCorporationName(_topicStructure.getCorporationName());
-									tmpTopicStructure.setServerId(_topicStructure.getServerId());
-									tmpTopicStructure.setBrokerId(_topicStructure.getBrokerId());
-									tmpTopicStructure.setPhaseRoadMapId(_topicStructure.getPhaseRoadMapId());
-									tmpTopicStructure.setDeviceId(_topicStructure.getDeviceId());
-									tmpTopicStructure.setPhaseId(_topicStructure.getPhaseId());
-									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
-									tmpTopicStructure.setCurrentMapId("5");
-
-									if (waitMapId.contains(5)) {
-										tmpTopicStructure.setWaitMapId(waitMapId);
-										tmpTopicStructure.setLastMapId(true);
-									}
 									
-									topicStructureArray.add(tmpTopicStructure);
+									_jsonObject.put("mapId",5);
+									_jsonArray.add(_jsonObject);
 
 								} else {
 								}
 
 								if (Double.parseDouble(deviceIdList.get("mapId").toString()) == 7) {
 									mapIdCheck = true;
-									tmpTopicStructure = new TopicStructure();
-									tmpTopicStructure.setCorporationName(_topicStructure.getCorporationName());
-									tmpTopicStructure.setServerId(_topicStructure.getServerId());
-									tmpTopicStructure.setBrokerId(_topicStructure.getBrokerId());
-									tmpTopicStructure.setPhaseRoadMapId(_topicStructure.getPhaseRoadMapId());
-									tmpTopicStructure.setDeviceId(_topicStructure.getDeviceId());
-									tmpTopicStructure.setPhaseId(_topicStructure.getPhaseId());
-									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
-									tmpTopicStructure.setCurrentMapId("7");
-
-									if (waitMapId.contains(7)) {
-										tmpTopicStructure.setWaitMapId(waitMapId);
-										tmpTopicStructure.setLastMapId(true);
-									}
-
-									topicStructureArray.add(tmpTopicStructure);
+									
+									_jsonObject.put("mapId",7);
+									_jsonArray.add(_jsonObject);
 								} else {
 								}
 
 								if (Double.parseDouble(deviceIdList.get("mapId").toString()) == 9) {
 									mapIdCheck = true;
-									tmpTopicStructure = new TopicStructure();
-									tmpTopicStructure.setCorporationName(_topicStructure.getCorporationName());
-									tmpTopicStructure.setServerId(_topicStructure.getServerId());
-									tmpTopicStructure.setBrokerId(_topicStructure.getBrokerId());
-									tmpTopicStructure.setPhaseRoadMapId(_topicStructure.getPhaseRoadMapId());
-									tmpTopicStructure.setDeviceId(_topicStructure.getDeviceId());
-									tmpTopicStructure.setPhaseId(_topicStructure.getPhaseId());
-									tmpTopicStructure.setCurrentMsg(_topicStructure.getCurrentMsg());
-									tmpTopicStructure.setCurrentMapId("9");
-
-									if (waitMapId.contains(9)) {
-										tmpTopicStructure.setWaitMapId(waitMapId);
-										tmpTopicStructure.setLastMapId(true);
-									}
-
-									topicStructureArray.add(tmpTopicStructure);
+									
+									_jsonObject.put("mapId",9);
+									_jsonArray.add(_jsonObject);
 
 								} else {
 								}
@@ -308,7 +226,12 @@ public class StagingBolt extends BaseRichBolt {
 					// topicStructure.getDeviceId() 가 phase1에 있는 deviceId중 없는 경
 				}
 			}
-		}else if (spoutSource.equals("trigger")) {
+		}else if((boolean)_jsonObject.get("ack")){
+		
+		}else{
+			
+		}
+		/*else if (spoutSource.equals("trigger")) {
 			if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck) {
 				try {
 					iterable = phaseRoadMapCollection.find(
@@ -381,6 +304,7 @@ public class StagingBolt extends BaseRichBolt {
 		}else{
 			return;
 		}
+		*/
 
 		/*
 		 * if (phaseRoadMapIdCheck && machineIdCheck) { try { iterable =
@@ -509,7 +433,7 @@ public class StagingBolt extends BaseRichBolt {
 		 * } catch (NumberFormatException e) { e.getMessage(); }
 		 */
 
-		collector.emit(new Values(spoutSource, topicStructureArray, serverIdCheck, brokerIdCheck, deviceIdCheck,
+		collector.emit(new Values(_jsonArray, serverIdCheck, brokerIdCheck, deviceIdCheck,
 				phaseRoadMapIdCheck, mapIdCheck));
 
 		try {
@@ -522,7 +446,7 @@ public class StagingBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("spoutSource", "topicStructureArray", "serverIdCheck", "brokerIdCheck",
+		declarer.declare(new Fields("jsonArray", "serverIdCheck", "brokerIdCheck",
 				"deviceIdCheck", "phaseRoadMapIdCheck", "mapIdCheck"));
 	}
 }
