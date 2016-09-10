@@ -49,8 +49,12 @@ public class CallingFeedBolt extends BaseRichBolt {
 		}
 
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
-
-		_collector.emit(new Values(_jsonObject));
+		Boolean proceed = (Boolean) _jsonObject.get("proceed");
+		if (proceed) {
+			_jsonObject.put("ack", true);
+		} else {
+		}
+			_collector.emit(new Values(_jsonObject));
 		try {
 			_LOG.debug("input = [" + input + "]");
 			_collector.ack(input);
