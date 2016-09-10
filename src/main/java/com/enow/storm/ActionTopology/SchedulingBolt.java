@@ -20,29 +20,61 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SchedulingBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(SchedulingBolt.class);
-    ConcurrentHashMap<String, TopicStructure> _executedNode = new ConcurrentHashMap<String, TopicStructure>();
+    ConcurrentHashMap<int[], Boolean> _peerNode = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, JSONObject> _executed = new ConcurrentHashMap<>();
     private OutputCollector _collector;
-    private TopicStructure _topicStructure;
     private JSONParser _parser;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
-        _topicStructure = new TopicStructure();
         _parser = new JSONParser();
     }
 
     @Override
     public void execute(Tuple input) {
 
-//        JSONObject _jsonObject = (JSONObject)_parser.parse(input.getValueByField("jsonObject"));
-//        if (_jsonObject == null) {
-//            _LOG.warn("input value or length of input is empty : [" + input + "]\n");
-//            return;
-//        }
+        JSONParser parser= new JSONParser();;
+        JSONObject _jsonObject;
 
-        String temp = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-        System.out.println(temp);
+        if ((null == input.toString()) || (input.toString().length() == 0)) {
+            return;
+        }
+
+        String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
+
+        try {
+            _jsonObject = (JSONObject) parser.parse(msg);
+            _LOG.warn("Succeed in inserting messages to JSONObject : \n" + _jsonObject.toJSONString());
+        } catch (ParseException e1) {
+            e1.printStackTrace();
+            _LOG.warn("Fail in inserting messages to JSONObject");
+            _jsonObject = null;
+            _collector.fail(input);
+            return;
+        }
+
+        System.out.println(_jsonObject.toJSONString());
+
+        if((boolean)_jsonObject.get("ack")){
+            // ack = true
+            int[] waitingPeers = (int[]) _jsonObject.get("waitingPeer");
+            int[] outingPeers = (int[]) _jsonObject.get("outingPeer");
+
+        }else{
+            // ack = false
+
+            // 새로 들어온 `mapId`인지 확인
+
+            // 새로 들어온 `mapId`면 `ConcurrentHashMap`에 `peer`들과 함께 저장
+            int[] waitingPeers = (int[]) _jsonObject.get("waitingPeer");
+            _peerNode.put(waitingPeers, false);
+            // `peer`중 하나라도 자신을 저장을 초래한 적이 있다면 무시
+
+
+
+        }
+        /*
         // The elements variable
         // elements[0] = spoutSource
         // elements[1] = topics
@@ -144,6 +176,7 @@ public class SchedulingBolt extends BaseRichBolt {
                 }
             }
         }
+        */
         // Case 2 : spoutSource == status
         // Data handling part
         /*

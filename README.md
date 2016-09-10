@@ -1,6 +1,8 @@
 TEST-storm ![travis](https://travis-ci.org/ENOW-IJI/storm.svg?branch=master) [![Maven Version](https://maven-badges.herokuapp.com/maven-central/org.apache.storm/storm-core/badge.svg)](http://search.maven.org/#search|gav|1|g:"org.apache.storm"%20AND%20a:"storm-core")
 =========================
 
+
+
 Todo List
 ---------
 - [x] ~~Constructing development enviroment of Apache Storm~~
@@ -19,6 +21,17 @@ Todo List
 - [ ] Connect Apache Storm to Console
 - [ ] Connect Apache Storm to Devices
 - [ ] Build on `StormSubmitter`
+
+Elements
+--------
+
+#### Peers
+
+- peerOut
+- peerIn
+- virtualPeer
+
+####
 
 Topologies
 ----------
@@ -47,8 +60,8 @@ Topologies
 ###### SchedulingBolt :
 
 - `triggerKafka`에서 `jsonObject`를 받아 스케줄링을 해준다.
+- `ack = true`일 때, `ConcurrentHashMap`에 자신과 함께 저장된 `peer`들의 `Key`값을 확인하고, `peer` 들의 `proceed`값이 모두 `true`면 디바이스에서 `ack` 값을 보낼 준비를 한다.
 - `ack = false`일 때, 새로 들어온 `mapId`인지 확인하고, 새로 들어온 `mapId`면 `ConcurrentHashMap`에 `peer`들과 함께 저장된다.(`peer`중 하나라도 자신을 저장을 초래한 적이 있다면 무시된다)
-- `ack = true`일 때, `ConcurrentHashMap`에 자신과 함께 저장된 `peer`들의 `Key`값을 확인하고, `peer` 들의 `value`값이 모두 `true`면 디바이스에서 `ack` 값을 보낼 준비를 한다.
 
 ###### ExecuteBolt :
 
@@ -65,6 +78,8 @@ Topologies
 - `peerIn` 이 없는 `Phase`의 init 노드들의 리스트들에 시동을 걸어준다.(시뮬레이션용)
 - `ProvisioningBolt`에서 받은 토픽과 메세지를 `feedKafka`로 넘겨준다.
 
+
+
 Payload
 -------
 
@@ -76,9 +91,14 @@ Payload
     "brokerId":"brokerId1",
     "deviceId":"deviceId1",
     "phaseRoadMapId":"1",
+    "phaseId":"phaseId1",
+    "mapId":1,
     "message":"messages",
+    "init":true,
     "ack":true,
-    "procced":true
+    "procced":true,
+    "waitingPeer":[1, 2],
+    "outingPeer":[11, 13]
 }
 ```
 
@@ -90,9 +110,14 @@ Payload
     "brokerId":"brokerId1",
     "deviceId":"deviceId1",
     "phaseRoadMapId":"1",
+    "phaseId":"phaseId1",
+    "mapId":1,
     "message":"messages",
+    "init":false,
     "ack":false,
-    "procced":false
+    "procced":false,
+    "waitingPeer":[1, 2],
+    "outingPeer":[11, 13]
 }
 ```
 
