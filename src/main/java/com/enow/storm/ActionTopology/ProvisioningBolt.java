@@ -1,6 +1,5 @@
 package com.enow.storm.ActionTopology;
 
-import com.enow.dto.TopicStructure;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -13,7 +12,6 @@ import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.util.Map;
 
@@ -42,6 +40,7 @@ public class ProvisioningBolt extends BaseRichBolt {
         } else {
             _jsonObject.put("ack", false);
         }
+
         JSONArray outingJSON = (JSONArray) _jsonObject.get("incomingPeer");
         String[] outingPeers = new String[outingJSON.size()];
         for(int i = 0; i<outingJSON.size(); i++ )
