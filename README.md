@@ -61,9 +61,10 @@ Topologies
 
 - `triggerKafka`에서 `jsonObject`를 받아 스케줄링을 해준다.
 - `ack = true`일 때, `ConcurrentHashMap`에 자신과 함께 저장된 `peer`들의 `Key`값을 확인하고, `peer` 들의 `proceed`값이 모두 `true`면 디바이스에서 `ack` 값을 보낼 준비를 한다.
-- `ack = false`일 때, 새로 들어온 `mapId`인지 확인하고, 새로 들어온 `mapId`면 `ConcurrentHashMap`에 `peer`들과 함께 저장된다.(`peer`중 하나라도 자신을 저장을 초래한 적이 있다면 무시된다)
+- `ack = false`일 때, 새로 들어온 `mapId`인지 확인하고, 새로 들어온 `mapId`면 `ConcurrentHashMap`에 `peer`들과 함께 저장된다.(`peer`중 하나라도 자신을 저장을 초래한 적이 있다면 무시된다) 또한 `peerIn`값이 존재하면 아이디 값들을 `_visitedNode`라는 `ConcurrentHashMap`에 존재하는 키(`mapId`)값별 `jsonObject`의 `message`를 참조하여 해당 `jsonObject`의 `previousData`에 넣어준다.
+- 모든 작업이 완료되면 수정된 `jsonObject`를 `ExecutingBolt`로 `emit`한다.
 
-###### ExecuteBolt :
+###### ExecutingBolt :
 
 - `SchdulingBolt`에서 받은 `message` 값과 console에서 설정한 `parameter`값으로 console에서 작성한 `source code`를 실행시킨다.
 - `source code`를 실행하고 산출된 `result`를 `SchedulingBolt`에서 받은 토픽과 함께 `provisioningBolt`로 `emit`한다.
@@ -71,7 +72,7 @@ Topologies
 ###### ProvisioningBolt :
 
 - `proceed`값을 확인하여 `ack` 값을 `false`로 바꿀지 `true`로 바꿀지 결정한다.
-- 만약 해당 `mapId`의 `peerOut`값이 없다면 비어있는 채 `CallingFeedBolt`로 결과만 넘겨주고 `peerOut`값이 있다면 `ExecuteBolt`에서 받은 `result`를 messages에 추가하여 `CallingFeedBolt`로 넘겨준다.
+- 만약 해당 `mapId`의 `peerOut`값이 없다면 비어있는 채 `CallingFeedBolt`로 결과만 넘겨주고 `peerOut`값이 있다면 `ExecutingBolt`에서 받은 `result`를 messages에 추가하여 `CallingFeedBolt`로 넘겨준다.
 
 ###### CallingFeedBolt :
 
@@ -92,13 +93,20 @@ Payload
     "deviceId":"deviceId1",
     "phaseRoadMapId":"1",
     "phaseId":"phaseId1",
-    "mapId":1,
-    "message":"messages",
+    "mapId":"1",
+    "message":{
+        "PARAMETER" : "-ls -t",
+        "SOURCE" : "def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")\n\ta=10\n\tcallback[\"returned\"] = str(a)\n",
+        "PAYLOAD" : {"identification" : "original"}
+    },
     "init":true,
     "ack":true,
     "procced":true,
-    "waitingPeer":[1, 2],
-    "outingPeer":[11, 13]
+    "waitingPeer":["1", "2"],
+    "incomingPeer":["0"],
+    "outingPeer":["11", "13"],
+    "subsequentInitPeer":["15"],
+    "previousData":{}
 }
 ```
 
@@ -112,12 +120,19 @@ Payload
     "phaseRoadMapId":"1",
     "phaseId":"phaseId1",
     "mapId":1,
-    "message":"messages",
+    "message":{
+        "PARAMETER" : "-ls -t",
+        "SOURCE" : "def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")\n\ta=10\n\tcallback[\"returned\"] = str(a)\n",
+        "PAYLOAD" : {"identification" : "original"}
+    },
     "init":false,
     "ack":false,
     "procced":false,
-    "waitingPeer":[1, 2],
-    "outingPeer":[11, 13]
+    "waitingPeer":["1", "2"],
+    "incomingPeer":["0"],
+    "outingPeer":["11", "13"],
+    "subsequentInitPeer":["15"],
+    "previousData":{}
 }
 ```
 

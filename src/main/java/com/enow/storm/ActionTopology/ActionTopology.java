@@ -6,7 +6,6 @@ import org.apache.storm.LocalCluster;
 import org.apache.storm.kafka.*;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.kafka.connect.json.JsonSchema;
 
 public class ActionTopology {
     public static void main(String[] args) throws Exception {
@@ -32,8 +31,8 @@ public class ActionTopology {
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
                 .allGrouping("trigger-spout")
                 .allGrouping("status-spout");
-        builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
-        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
+        builder.setBolt("executing-bolt", new ExecutingBolt()).allGrouping("scheduling-bolt");
+        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("executing-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
         LocalCluster cluster = new LocalCluster();
 

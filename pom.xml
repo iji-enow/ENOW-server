@@ -52,12 +52,6 @@
             <version>20160810</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.3.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>${kafka.artifactId}</artifactId>
             <version>${kafka.version}</version>

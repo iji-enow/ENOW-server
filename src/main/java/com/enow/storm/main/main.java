@@ -109,7 +109,7 @@ public class main {
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
                 .allGrouping("trigger-spout")
                 .allGrouping("status-spout");
-        builder.setBolt("execute-code-bolt", new ExecuteCodeBolt()).allGrouping("scheduling-bolt");
+        builder.setBolt("execute-code-bolt", new ExecutingBolt()).allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
         return builder.createTopology();

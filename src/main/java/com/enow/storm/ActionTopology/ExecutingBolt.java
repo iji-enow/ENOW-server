@@ -15,16 +15,16 @@ import org.apache.storm.tuple.Values;
 import java.util.Map;
 
 
-public class ExecuteCodeBolt extends ShellBolt implements IRichBolt {
+public class ExecutingBolt extends ShellBolt implements IRichBolt {
     // Call the countbolt.py using Python
-    public ExecuteCodeBolt() {
-        super("python", "examplebolt.py");
+    public ExecutingBolt() {
+        super("python", "executingBolt.py");
     }
 
     // Declare that we emit a 'jsonObject'
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("jsonObject"));
+        declarer.declare(new Fields("jsonObject", "message"));
     }
 
     // Nothing to do for configuration
