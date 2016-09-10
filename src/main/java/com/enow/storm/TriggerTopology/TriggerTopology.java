@@ -14,7 +14,6 @@ import org.apache.storm.mongodb.common.mapper.MongoMapper;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
-import com.enow.storm.ActionTopology.JsonScheme;
 import com.enow.storm.mapper.mongodb.InsertMongoBolt;
 import com.enow.storm.mapper.mongodb.SimpleMongoMapper;
 

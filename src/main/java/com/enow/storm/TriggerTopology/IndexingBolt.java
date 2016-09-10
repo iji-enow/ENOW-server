@@ -30,100 +30,54 @@ public class IndexingBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
-		JSONParser parser= new JSONParser();;
+		JSONParser parser = new JSONParser();
 		JSONObject _jsonObject;
-		
+
 		if ((null == input.toString()) || (input.toString().length() == 0)) {
 			return;
 		}
 
 		String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-	
-		
+
 		try {
 			_jsonObject = (JSONObject) parser.parse(msg);
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-			_jsonObject = null;
-		} 
-       
-		/*
-		TopicStructure _topicStructure = new TopicStructure();
-		String[] elements = new String[3];
-		String[] messages = new String[2];
-		String[] topics = new String[8];
-		StringTokenizer tokenizer;
-		tokenizer = new StringTokenizer(tmp, ",");
 
-		try {
-			for (int index = 0; tokenizer.hasMoreTokens(); index++) {
-				elements[index] = tokenizer.nextToken().toString();
-			}
+			if (_jsonObject.containsKey("init")) {
 
-			if (elements[0].equals("trigger")) {
-				tokenizer = new StringTokenizer(elements[1], "/");
-				for (int index = 0; tokenizer.hasMoreTokens(); index++) {
-					topics[index] = tokenizer.nextToken().toString();
-					if (topics[index] == null || (topics[index].length() == 0)) {
-						return;
-					}
-				}
-				_topicStructure.setCorporationName(topics[0]);
-				_topicStructure.setServerId(topics[1]);
-				_topicStructure.setBrokerId(topics[2]);
-				_topicStructure.setDeviceId(topics[3]);
-				_topicStructure.setPhaseRoadMapId(topics[4]);
-
-				tokenizer = new StringTokenizer(elements[2], "/");
-
-				for (int index = 0; tokenizer.hasMoreTokens(); index++) {
-					messages[index] = tokenizer.nextToken().toString();
-				}
-
-				_topicStructure.setCurrentMsg(messages[0]);
-
-				if ((null == messages[0]) || (messages[0].length() == 0)) {
-					return;
-				}
-
-			} else if (elements[0].equals("proceed")) {
-				tokenizer = new StringTokenizer(elements[1], "/");
-				for (int index = 0; tokenizer.hasMoreTokens(); index++) {
-					topics[index] = tokenizer.nextToken().toString();
-					if (topics[index] == null || (topics[index].length() == 0)) {
-						return;
-					}
-				}
-				_topicStructure.setCorporationName(topics[0]);
-				_topicStructure.setServerId(topics[1]);
-				_topicStructure.setBrokerId(topics[2]);
-				_topicStructure.setDeviceId(topics[3]);
-				_topicStructure.setPhaseRoadMapId(topics[4]);
-				_topicStructure.setPhaseId(topics[5]);
-				_topicStructure.setCurrentMapId(topics[6]);
-				_topicStructure.setPreviousMapId(topics[7]);
-
-				tokenizer = new StringTokenizer(elements[2], "/");
-
-				for (int index = 0; tokenizer.hasMoreTokens(); index++) {
-					messages[index] = tokenizer.nextToken().toString();
-				}
-				_topicStructure.setCurrentMsg(messages[0]);
-				_topicStructure.setPreviousMsg(messages[1]);
-
-				if (((null == messages[0]) || (messages[0].length() == 0))
-						|| ((null == messages[1]) || (messages[0].length() == 1))) {
+				if (_jsonObject.containsKey("ack") && _jsonObject.containsKey("proceed")
+						&& _jsonObject.containsKey("corporationName") && _jsonObject.containsKey("serverId")
+						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("deviceId")
+						&& _jsonObject.containsKey("phaseRoadMapId")) {
+				} else {
+					// init = true 일 경우 필요한 값이 다 안 들어 왔다.
 					return;
 				}
 			} else {
-
+				if (_jsonObject.containsKey("ack") && _jsonObject.containsKey("proceed")
+						&& _jsonObject.containsKey("corporationName") && _jsonObject.containsKey("serverId")
+						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("deviceId")
+						&& _jsonObject.containsKey("phaseRoadMapId") && _jsonObject.containsKey("phaseId")
+						&& _jsonObject.containsKey("mapId") && _jsonObject.containsKey("message")
+						&& _jsonObject.containsKey("waitingPeer") && _jsonObject.containsKey("outingPeer")
+						&& _jsonObject.containsKey("subsequentInitPeer") && _jsonObject.containsKey("incomingPeer")) {
+				} else {
+					// init = false 일 경우 필요한 값이 다 안 들어 왔다.
+					return;
+				}
 			}
-		} catch (NullPointerException e) {
-			// 들어와야 되는 값이 모두가 들어오지 않았습니다.
-			return;
+		} catch (ParseException e1) {
+			// JSONParseException 발
+			e1.printStackTrace();
+			_jsonObject = null;
 		}
-		*/
+
+		if ((boolean) _jsonObject.get("ack")) {
+			/////////// ack일 경우 저장해놓은 hash map에 존재하지 않는다면 return
+
+		} else {
+			////////// ack가 아닐 경우 그냥 지나 간다.
+
+		}
 
 		collector.emit(new Values(_jsonObject));
 		try {

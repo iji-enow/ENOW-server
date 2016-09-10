@@ -11,6 +11,9 @@ import org.apache.storm.tuple.Values;
 import org.json.simple.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import com.enow.dto.TopicStructure;
+
+import com.enow.storm.Connect;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -29,10 +32,10 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		props.put("producer.type", "sync");
 		props.put("batch.size", "1");
 		props.put("bootstrap.servers", "localhost:9092");
-		props.put("key.serializer", "org.apache.kafka.connect.json.JsonSerializer");
-		props.put("value.serializer", "org.apache.kafka.connect.json.JsonSerializer");
-		//props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		//props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		//props.put("key.serializer", "org.apache.kafka.connect.json.JsonSerializer");
+		//props.put("value.serializer", "org.apache.kafka.connect.json.JsonSerializer");
+		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 	}
 
 	@Override
@@ -60,14 +63,12 @@ public class CallingTriggerBolt extends BaseRichBolt {
 					producer.send(data);
 					collector.emit(new Values(tmpJsonObject.toJSONString()));
 				}else{
-					/*
 					ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger","error : " + "serverIdCheck = " + serverIdCheck + " brokerIdCheck = " + brokerIdCheck
 							+ " machinIdCheck = " + deviceIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck
 							+ " mapIdCheck = " + mapIdCheck);
 					producer.send(data);
-					*/
-					collector.emit(new Values(tmpJsonObject.toJSONString()));
 					
+					collector.emit(new Values(tmpJsonObject.toJSONString()));				
 				}
 			}else if((boolean)tmpJsonObject.get("ack")){
 				
