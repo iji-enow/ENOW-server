@@ -10,6 +10,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -32,21 +33,21 @@ public class ProvisioningBolt extends BaseRichBolt {
 
         JSONObject _jsonObject;
 
-        if ((null == input.toString()) || (input.toString().length() == 0)) {
-            return;
-        }
-
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        // message 받는거 처리
-        String message = (String) input.getValueByField("message");
-
-       if ((Boolean) _jsonObject.get("proceed")) {
+        JSONObject messageJSON = (JSONObject) input.getValueByField("message");
+        String message = (String) messageJSON.get("message");
+        Boolean proceed = (Boolean) _jsonObject.get("proceed");
+        if (proceed) {
             _jsonObject.put("ack", true);
+        } else {
+            _jsonObject.put("ack", false);
         }
-
-        String[] outingPeers = (String[]) _jsonObject.get("outingPeer");
-        if (outingPeers[0] != "0"){
-            message
+        JSONArray outingJSON = (JSONArray) _jsonObject.get("incomingPeer");
+        String[] outingPeers = new String[outingJSON.size()];
+        for(int i = 0; i<outingJSON.size(); i++ )
+            outingPeers[i] = (String)outingJSON.get(i);
+        if (outingPeers[0] != "0") {
+            _jsonObject.put("message", message);
         }
 
         System.out.println(_jsonObject.toJSONString());
