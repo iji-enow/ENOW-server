@@ -183,171 +183,176 @@ public class StagingBolt2 extends BaseRichBolt {
 								JSONObject deviceIdList = (JSONObject) deviceId.get(n);
 								String jsonString = _jsonObject.toJSONString();
 
-								try {
-									if (deviceIdList.get("mapId").toString().equals("1")) {
-										mapIdCheck = true;
+								if (deviceIdList.get("mapId").toString().equals("1")) {
+									mapIdCheck = true;
 
-										JSONObject tmpJsonObject = new JSONObject();
-										JSONArray tmpJsonArray = new JSONArray();
-										tmpJsonObject = (JSONObject) parser.parse(jsonString);
-										tmpJsonObject.put("mapId", "1");
+									JSONObject tmpJsonObject = new JSONObject();
+									JSONArray tmpJsonArray = new JSONArray();
+									tmpJsonObject = (JSONObject) parser.parse(jsonString);
+									tmpJsonObject.put("mapId", "1");
 
-										tmpJsonObject.put("incomimgPeer", null);
+									tmpJsonObject.put("incomimgPeer", null);
 
-										if (outingPeer.containsKey("1")) {
-											outingPeerArray = (JSONArray) outingPeer.get("1");
+									if (outingPeer.containsKey("1")) {
+										outingPeerArray = (JSONArray) outingPeer.get("1");
 
-											tmpJsonObject.put("outingPeer", outingPeerArray);
-										}
-
-										if (waitingPeerPhase.contains("1")) {
-											tmpJsonObject.put("waitingPeer", waitingPeerPhase);
-											tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
-										} else {
-											tmpJsonObject.put("waitingPeer", null);
-											tmpJsonObject.put("subsequentInitPeer", null);
-										}
-
-										_jsonArray.add(tmpJsonObject);
-									} else {
+										tmpJsonObject.put("outingPeer", outingPeerArray);
 									}
 
-									if (deviceIdList.get("mapId").toString().equals("3")) {
-										mapIdCheck = true;
-
-										JSONObject tmpJsonObject = new JSONObject();
-										tmpJsonObject = (JSONObject) parser.parse(jsonString);
-										tmpJsonObject.put("mapId", "3");
-
-										tmpJsonObject.put("incomimgPeer", null);
-
-										if (outingPeer.containsKey("3")) {
-											outingPeerArray = (JSONArray) outingPeer.get("3");
-
-											tmpJsonObject.put("outingPeer", outingPeerArray);
-										}
-										
-										if (waitingPeerPhase.contains("3")) {
-											tmpJsonObject.put("waitingPeer", waitingPeerPhase);
-											tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
-										} else {
-											tmpJsonObject.put("waitingPeer", null);
-											tmpJsonObject.put("subsequentInitPeer", null);
-										}
-
-										_jsonArray.add(tmpJsonObject);
+									if (waitingPeerPhase.contains("1")) {
+										tmpJsonObject.put("waitingPeer", waitingPeerPhase);
+										tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
 									} else {
+										tmpJsonObject.put("waitingPeer", null);
+										tmpJsonObject.put("subsequentInitPeer", null);
 									}
 
-									if (deviceIdList.get("mapId").toString().equals("5")) {
-										mapIdCheck = true;
+									_jsonArray.add(tmpJsonObject);
+								} else {
+								}
 
-										JSONObject tmpJsonObject = new JSONObject();
-										tmpJsonObject = (JSONObject) parser.parse(jsonString);
-										tmpJsonObject.put("mapId", "5");
-										
-										tmpJsonObject.put("incomimgPeer", null);
+								if (deviceIdList.get("mapId").toString().equals("3")) {
+									mapIdCheck = true;
 
-										if (outingPeer.containsKey("5")) {
-											outingPeerArray = (JSONArray) outingPeer.get("5");
+									JSONObject tmpJsonObject = new JSONObject();
+									tmpJsonObject = (JSONObject) parser.parse(jsonString);
+									tmpJsonObject.put("mapId", "3");
 
-											tmpJsonObject.put("outingPeer", outingPeerArray);
-										}
+									tmpJsonObject.put("incomimgPeer", null);
 
-										if (waitingPeerPhase.contains("5")) {
-											tmpJsonObject.put("waitingPeer", waitingPeerPhase);
-											tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
-										} else {
-											tmpJsonObject.put("waitingPeer", null);
-											tmpJsonObject.put("subsequentInitPeer", null);
-										}
+									if (outingPeer.containsKey("3")) {
+										outingPeerArray = (JSONArray) outingPeer.get("3");
 
-										_jsonArray.add(tmpJsonObject);
-									} else {
+										tmpJsonObject.put("outingPeer", outingPeerArray);
 									}
 
-									if (deviceIdList.get("mapId").toString().equals("7")) {
-										mapIdCheck = true;
-
-										JSONObject tmpJsonObject = new JSONObject();
-										tmpJsonObject = (JSONObject) parser.parse(jsonString);
-										tmpJsonObject.put("mapId", "7");
-										
-										tmpJsonObject.put("incomimgPeer", null);
-
-										if (outingPeer.containsKey("7")) {
-											outingPeerArray = (JSONArray) outingPeer.get("7");
-
-											tmpJsonObject.put("outingPeer", outingPeerArray);
-										}
-
-										if (waitingPeerPhase.contains("7")) {
-											tmpJsonObject.put("waitingPeer", waitingPeerPhase);
-											tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
-										} else {
-											tmpJsonObject.put("waitingPeer", null);
-											tmpJsonObject.put("subsequentInitPeer", null);
-										}
-
-										_jsonArray.add(tmpJsonObject);
+									if (waitingPeerPhase.contains("3")) {
+										tmpJsonObject.put("waitingPeer", waitingPeerPhase);
+										tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
 									} else {
+										tmpJsonObject.put("waitingPeer", null);
+										tmpJsonObject.put("subsequentInitPeer", null);
 									}
 
-									if (deviceIdList.get("mapId").toString().equals("9")) {
-										mapIdCheck = true;
+									_jsonArray.add(tmpJsonObject);
+								} else {
+								}
 
-										JSONObject tmpJsonObject = new JSONObject();
-										tmpJsonObject = (JSONObject) parser.parse(jsonString);
-										tmpJsonObject.put("mapId", "9");
-										
-										tmpJsonObject.put("incomimgPeer", null);
+								if (deviceIdList.get("mapId").toString().equals("5")) {
+									mapIdCheck = true;
 
-										if (outingPeer.containsKey("9")) {
-											outingPeerArray = (JSONArray) outingPeer.get("9");
+									JSONObject tmpJsonObject = new JSONObject();
+									tmpJsonObject = (JSONObject) parser.parse(jsonString);
+									tmpJsonObject.put("mapId", "5");
 
-											tmpJsonObject.put("outingPeer", outingPeerArray);
-										}
+									tmpJsonObject.put("incomimgPeer", null);
 
-										if (waitingPeerPhase.contains("9")) {
-											tmpJsonObject.put("waitingPeer", waitingPeerPhase);
-											tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
-										} else {
-											tmpJsonObject.put("waitingPeer", null);
-											tmpJsonObject.put("subsequentInitPeer", null);
-										}
+									if (outingPeer.containsKey("5")) {
+										outingPeerArray = (JSONArray) outingPeer.get("5");
 
-										_jsonArray.add(tmpJsonObject);
-									} else {
+										tmpJsonObject.put("outingPeer", outingPeerArray);
 									}
-								} catch (NumberFormatException e) {
-									// 우리가 mapId에 숫자가 아닌 값을 넣었다. 우리의 잘못.
-									mapIdCheck = false;
+
+									if (waitingPeerPhase.contains("5")) {
+										tmpJsonObject.put("waitingPeer", waitingPeerPhase);
+										tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
+									} else {
+										tmpJsonObject.put("waitingPeer", null);
+										tmpJsonObject.put("subsequentInitPeer", null);
+									}
+
+									_jsonArray.add(tmpJsonObject);
+								} else {
+								}
+
+								if (deviceIdList.get("mapId").toString().equals("7")) {
+									mapIdCheck = true;
+
+									JSONObject tmpJsonObject = new JSONObject();
+									tmpJsonObject = (JSONObject) parser.parse(jsonString);
+									tmpJsonObject.put("mapId", "7");
+
+									tmpJsonObject.put("incomimgPeer", null);
+
+									if (outingPeer.containsKey("7")) {
+										outingPeerArray = (JSONArray) outingPeer.get("7");
+
+										tmpJsonObject.put("outingPeer", outingPeerArray);
+									}
+
+									if (waitingPeerPhase.contains("7")) {
+										tmpJsonObject.put("waitingPeer", waitingPeerPhase);
+										tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
+									} else {
+										tmpJsonObject.put("waitingPeer", null);
+										tmpJsonObject.put("subsequentInitPeer", null);
+									}
+
+									_jsonArray.add(tmpJsonObject);
+								} else {
+								}
+
+								if (deviceIdList.get("mapId").toString().equals("9")) {
+									mapIdCheck = true;
+
+									JSONObject tmpJsonObject = new JSONObject();
+									tmpJsonObject = (JSONObject) parser.parse(jsonString);
+									tmpJsonObject.put("mapId", "9");
+
+									tmpJsonObject.put("incomimgPeer", null);
+
+									if (outingPeer.containsKey("9")) {
+										outingPeerArray = (JSONArray) outingPeer.get("9");
+
+										tmpJsonObject.put("outingPeer", outingPeerArray);
+									}
+
+									if (waitingPeerPhase.contains("9")) {
+										tmpJsonObject.put("waitingPeer", waitingPeerPhase);
+										tmpJsonObject.put("subsequentInitPeer", subsequentInitPeerPhase);
+									} else {
+										tmpJsonObject.put("waitingPeer", null);
+										tmpJsonObject.put("subsequentInitPeer", null);
+									}
+
+									_jsonArray.add(tmpJsonObject);
+								} else {
 								}
 							}
 						} catch (ParseException e) {
-							// iterable.first().toJson() 이 json형식의 string이 아닌 경우
-							// 발생
-							// 하지만
-							// tojson이기에 그럴 일은 발생하지 않은 것이라 가정.
+							// iterable.first().toJson() 이 json형식의 string이 아닌 경우 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정 
 							e.printStackTrace();
 							mapIdCheck = false;
 						}
 					} catch (NullPointerException e) {
 						e.getMessage();
 						mapIdCheck = false;
-						// topicStructure.getDeviceId() 가 phase1에 있는 deviceId중
-						// 없는 경
+						// _jsonObject.get("deviceId")가 phase1에 있는 deviceId 중 없는 경우
 					}
 				} else {
 					// serverIdCheck,brokerIdCheck,deviceIdCheck,phaseRoadMapIdCheck
 					// 중에 false값이 존재하는 상태.
+					_jsonArray = null;
 				}
 			} else {
 				// init = true인데 ack = true인 상태.console에서 json값을 잘못 보냈다.
 			}
 		} else {
+			// init = false인 상태
+			if (!(boolean) _jsonObject.get("ack")) {
+				if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck) {
 
+				} else {
+					// serverIdCheck,brokerIdCheck,deviceIdCheck,phaseRoadMapIdCheck
+					// 중에 false값이 존재하는 상태.
+					_jsonArray = null;
+				}
+			} else {
+				// ack가 true인 상태로 그냥 지나간다.
+				_jsonArray.add(_jsonObject);
+			}
 		}
+		
 		/*
 		 * if (!(boolean)_jsonObject.get("ack")) { if (serverIdCheck &&
 		 * brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck) { try {

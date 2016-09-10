@@ -75,7 +75,7 @@ public class IndexingBolt extends BaseRichBolt {
 			/////////// ack일 경우 저장해놓은 hash map에 존재하지 않는다면 return
 
 		} else {
-			////////// ack가 아닐 경우 그냥 지나 간다.
+			////////// ack가 아닐 경우 hash map에 저장해놓고 그냥 지나 간다.
 
 		}
 
