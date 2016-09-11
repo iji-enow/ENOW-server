@@ -17,7 +17,7 @@ class runtime:
             _args : A string containing a list of parameter for executing the source program
             _payloads : A string containing the payload for the source program. Usually json string.
     '''
-    def run(self, _args, _payloads):
+    def run(self, _args, _payloads, _previousData):
         
         fileDir = os.path.dirname(os.path.realpath('__file__'))
         sourceDir = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
@@ -34,8 +34,10 @@ class runtime:
                     bufsize=1)
         
         print >> process.stdin, _payloads
-        print >> process.stdin, "end\n"
+        print >> process.stdin, "endl\n"
         print >> process.stdin, _args
+        print >> process.stdin, "endl\n"
+        print >> process.stdin, _previousData
         process.stdin.close()
         for line in iter(process.stdout.readline, ''):
             self.resultString += line

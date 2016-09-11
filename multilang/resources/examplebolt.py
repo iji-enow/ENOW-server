@@ -40,36 +40,29 @@ class CountBolt(storm.BasicBolt):
         # storm.logInfo("Emitting %s" %(word))
         # Emit the word and count
 
-        jsonstring = r'''{
-       "PARAMETER" : "-ls -t",
-       "SOURCE" : "def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")\n\ta=10\n\tcallback[\"returned\"] = str(a)\n",
-       "PAYLOAD" : {"identification" : "original"}
-       }'''
-
         jsonObject = json.loads(word, strict=False)
 
         dictPayload = jsonObject["PAYLOAD"]
         rawPayload = json.dumps(dictPayload)
         rawSource = jsonObject["SOURCE"]
         rawParameter = jsonObject["PARAMETER"]
+        arrayPreviousData = jsonObject["previousData"]
+        rawPreviousData = json.dumps(arrayPreviousData)
 
         payload = rawPayload.replace("\r", "")
         source = rawSource.replace("\r", "")
         parameter = rawParameter.replace("\r", "")
+        previousData = rawPreviousData.replace("\r", "")
 
         self.Building.setParameter(parameter.decode("utf-8").encode("ascii"))
         self.Building.setcode(source.decode("utf-8").encode("ascii"))
         self.Building.setPayload(payload.decode("utf-8").encode("ascii"))
+        self.Building.setPreviousData(previousData.decode("utf-8").encode("ascii"))
         tmp = self.Building.run()
+        
+        jsonResult = json.loads(tmp, strict = False)
 
-        '''
-       self.Building.setParameter("-ls -t")
-       self.Building.setcode("def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")\n\ta=10\n\tcallback[\"returned\"] = str(a)\n")
-       self.Building.setPayload("{\"identification\" : \"original\"}")
-       tmp = self.Building.run()
-       '''
-
-        storm.emit([tmp])
+        storm.emit([jsonResult])
 
 # Start the bolt when it's invoked
 CountBolt().run()

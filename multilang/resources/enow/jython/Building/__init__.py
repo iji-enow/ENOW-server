@@ -14,6 +14,7 @@ class Building():
     code = ""
     parameter = ""
     payload = ""
+    previousData = None
 
     def __init__(self):
         time.sleep(0.000001)
@@ -36,6 +37,12 @@ class Building():
             return self.payload
         else:
             return ""
+        
+    def getPreviousData(self):
+        if self.previousData is not None:
+            return self.previousData
+        else:
+            return ""
 
     def setcode(self, _code):
         self.code = _code
@@ -45,6 +52,9 @@ class Building():
 
     def setPayload(self, _payload):
         self.payload = _payload
+        
+    def setPreviousData(self, _previousData):
+        self.previousData = _previousData
 
     def run(self):
         '''
@@ -56,7 +66,8 @@ class Building():
             #             print("Running Jython program")
             self.main = runtimeMain(_source=self.code,
                                     _parameter=self.parameter,
-                                    _payload=self.payload)
+                                    _payload=self.payload,
+                                    _previousData = self.previousData)
             self.main.controllSource()
             self.result = self.main.run()
             return self.result

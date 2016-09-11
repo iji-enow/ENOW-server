@@ -63,13 +63,14 @@ def Main():
     
     jsonDump = ""
     parameterDump = ""
+    previousDataDump = ""
     while True:
         string = sys.stdin.readline()
         
         if not string:
             break
         
-        if string == "end\n":
+        if string == "endl\n":
             break
         
         jsonDump += str(string)
@@ -80,14 +81,26 @@ def Main():
         if not string:
             break
         
-        if string == "end\n":
+        if string == "endl\n":
             break
         
         parameterDump += str(string)
     
+    while True:
+        string = sys.stdin.readline()
+        
+        if not string:
+            break
+        
+        if string == "endl\n":
+            break
+        
+        previousDataDump += str(string)
+    
     _event = json.loads(jsonDump)
     _context = dict()
     _callback = dict()
+    _previousData = json.loads(previousDataDump)
     """
     context object written in json
     ATTRIBUTES:
@@ -103,6 +116,7 @@ def Main():
     _context["topicName"] = ""
     _context["deviceID"] = ""
     _context["parameter"] = parameterDump
+    _context["previousData"] = _previousData
     
     """
     setting up a thread for executing a body code

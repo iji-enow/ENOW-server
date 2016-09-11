@@ -13,10 +13,11 @@ Class : main
 '''
 
 class runtimeMain:
-    def __init__(self, _source, _parameter, _payload):
+    def __init__(self, _source, _parameter, _payload, _previousData):
         self.source = _source
         self.parameter = _parameter
         self.payload = _payload
+        self.previousData = _previousData
         self.runtime = None
         self.sourceControl = None
         self.result = None
@@ -35,7 +36,8 @@ class runtimeMain:
     def run(self):
         self.runtime = runtime() 
         self.runtime.run(_args=self.parameter,
-                         _payloads = self.payload)
+                         _payloads = self.payload,
+                         _previousData = self.previousData)
         self.result = self.runtime.getResult()
         return self.result
         
