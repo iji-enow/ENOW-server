@@ -78,7 +78,7 @@ Topologies
 ###### ProvisioningBolt :
 
 - `waitingPeer`값을 확인하여, `result`값들 `previousData`로써 `ConcurrentHashMap`에 `phaseRoadMapId/mapId`를 키값으로 저장해둔다.
-- 
+-
 - ~~`proceed`값을 확인하여 `ack` 값을 `false`로 바꿀지 `true`로 바꿀지 결정한다.~~
 - ~~만약 해당 `mapId`의 `peerOut`값이 없다면 비어있는 채 `CallingFeedBolt`로 결과만 넘겨주고 `peerOut`값이 있다면 `ExecutingBolt`에서 받은 `payload`를 `message`에 추가하여 `CallingFeedBolt`로 넘겨준다.~~
 
@@ -121,13 +121,34 @@ Status
  "PARAMETER" : "STRING",
  "PAYLOAD" : "JSON STRING",
  "SOURCE" : "STRING",
- "PREVIOUS RESULT" : [
+ "previousData" : [
    {"RESULT 1" : "JSON STRING"},
    {"RESULT 2" : "JSON STRING"},
    {"RESULT N" : "JSON STRING"}
  ]
 }
 ```
+- _"previousData"_ : 이전에 실행했던 `ExecutingBolt` 에서의 결과값을 담고 있다. `RESULT N` 에서의 넘버링은 _스택_ 의 규칙을 따르며 넘버링이 클 수록 최근의 결과값이다.
+- _"PARAMETER"_ : 실행에 필요한 파라미터를 세팅하여 넘겨준다.
+
+  __i.e)__ -> _"-l --profile"_
+
+- _"PAYLOAD"_ : 실행에 필요한 입력값을 전달해 준다.
+
+  __i.e)__ ->
+  _"{
+    'led on' : 1,
+    'match object' : 'cat'}
+  }"_
+
+- _"SOURCE"_ : 실행에 필요한 소스(__PYTHON__)를 전달해 준다.
+
+  __i.e)__ -> _"def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")"_
+
+  실행에 필요한 소스의 기본형은 다음과 같다.
+
+  __def eventHandler(event, context, callback):__
+    
 References
 ----------
 
