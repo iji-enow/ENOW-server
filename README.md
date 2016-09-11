@@ -128,12 +128,12 @@ Status
  ]
 }
 ```
-- _"previousData"_ : 이전에 실행했던 `ExecutingBolt` 에서의 결과값을 담고 있다. `RESULT N` 에서의 넘버링은 _스택_ 의 규칙을 따르며 넘버링이 클 수록 최근의 결과값이다.
-- _"PARAMETER"_ : 실행에 필요한 파라미터를 세팅하여 넘겨준다.
+- `_"previousData"_` : 이전에 실행했던 `ExecutingBolt` 에서의 결과값을 담고 있다. `RESULT N` 에서의 넘버링은 _스택_ 의 규칙을 따르며 넘버링이 클 수록 최근의 결과값이다.
+- `_"PARAMETER"_` : 실행에 필요한 파라미터를 세팅하여 넘겨준다.
 
   __i.e)__ -> _"-l --profile"_
 
-- _"PAYLOAD"_ : 실행에 필요한 입력값을 전달해 준다.
+- `_"PAYLOAD"_` : 실행에 필요한 입력값을 전달해 준다.
 
   __i.e)__ ->
   _"{
@@ -141,14 +141,14 @@ Status
     'match object' : 'cat'}
   }"_
 
-- _"SOURCE"_ : 실행에 필요한 소스(__PYTHON__)를 전달해 준다.
+- `_"SOURCE"_` : 실행에 필요한 소스(`PYTHON`)를 전달해 준다.
 
   __i.e)__ -> _"def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")"_
 
   실행에 필요한 소스의 기본형은 다음과 같다.
 
-  __def eventHandler(event, context, callback):__
-    
+  `def eventHandler(event, context, callback):`
+
 References
 ----------
 
