@@ -11,19 +11,16 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.util.Map;
 
 public class ProvisioningBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
     private OutputCollector _collector;
-    private JSONParser _parser;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
-        _parser = new JSONParser();
     }
 
     @Override
@@ -32,21 +29,22 @@ public class ProvisioningBolt extends BaseRichBolt {
         JSONObject _jsonObject;
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        JSONObject messageJSON = (JSONObject) input.getValueByField("message");
-        String message = (String) messageJSON.get("message");
-        Boolean proceed = (Boolean) _jsonObject.get("proceed");
-        if (proceed) {
-            _jsonObject.put("ack", true);
-        } else {
-            _jsonObject.put("ack", false);
+        Boolean ack = (Boolean) _jsonObject.get("ack");
+
+        // ack switcher
+        ack = (ack) ? false : true;
+        _jsonObject.put("ack", ack);
+
+        JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
+        String[] outingPeers = null;
+        if(outingJSON != null){
+            outingPeers = new String[outingJSON.size()];
+            for (int i = 0; i < outingJSON.size(); i++)
+                outingPeers[i] = (String) outingJSON.get(i);
         }
 
-        JSONArray outingJSON = (JSONArray) _jsonObject.get("incomingPeer");
-        String[] outingPeers = new String[outingJSON.size()];
-        for(int i = 0; i<outingJSON.size(); i++ )
-            outingPeers[i] = (String)outingJSON.get(i);
-        if (outingPeers[0] != "0") {
-            _jsonObject.put("message", message);
+        if (outingPeers != null) {
+
         }
 
         System.out.println(_jsonObject.toJSONString());

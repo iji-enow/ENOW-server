@@ -19,9 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SchedulingBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(SchedulingBolt.class);
-    ConcurrentHashMap<String[], Boolean> _peerNode = new ConcurrentHashMap<>();
-    ConcurrentHashMap<String, JSONObject> _visitedNode = new ConcurrentHashMap<>();
-    ConcurrentHashMap<String, JSONObject> _previousData = new ConcurrentHashMap<>();
+    static ConcurrentHashMap<String[], Boolean> _peerNode = new ConcurrentHashMap<>();
+    static ConcurrentHashMap<String, JSONObject> _visitedNode = new ConcurrentHashMap<>();
+    static ConcurrentHashMap<String, JSONObject> _previousData = new ConcurrentHashMap<>();
     private OutputCollector _collector;
     private JSONParser _parser;
 
@@ -33,7 +33,7 @@ public class SchedulingBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
-
+        _LOG.info("Entering SchedulingBolt");
         JSONObject _jsonObject;
 
         if ((null == input.toString()) || (input.toString().length() == 0)) {
@@ -51,21 +51,26 @@ public class SchedulingBolt extends BaseRichBolt {
             _collector.fail(input);
             return;
         }
-
         System.out.println(_jsonObject.toJSONString());
 
         JSONArray waitingJSON = (JSONArray) _jsonObject.get("waitingPeer");
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingPeer");
-        String[] waitingPeers = new String[waitingJSON.size()];
-        String[] incomingPeers = new String[incomingJSON.size()];
-
-        for (int i = 0; i < waitingJSON.size(); i++)
-            waitingPeers[i] = (String) waitingJSON.get(i);
-        for (int i = 0; i < incomingJSON.size(); i++)
-            incomingPeers[i] = (String) incomingJSON.get(i);
+        String[] waitingPeers = null;
+        String[] incomingPeers = null;
+        if(waitingJSON != null){
+            waitingPeers = new String[waitingJSON.size()];
+            for (int i = 0; i < waitingJSON.size(); i++)
+                waitingPeers[i] = (String) waitingJSON.get(i);
+        }
+        if(incomingJSON != null){
+            incomingPeers = new String[incomingJSON.size()];
+            for (int i = 0; i < incomingJSON.size(); i++)
+                incomingPeers[i] = (String) incomingJSON.get(i);
+        }
 
         if ((Boolean) _jsonObject.get("ack")) {
             // Acknowledge ack = true
+            _LOG.info("Acknowledge ack = true");
             Boolean proceed = false;
             if (waitingPeers != null) {
                 if (_peerNode.containsKey(waitingPeers))
@@ -80,6 +85,7 @@ public class SchedulingBolt extends BaseRichBolt {
             } else _jsonObject.put("proceed", true);
         } else {
             // Execution Cycle : ack = false
+            _LOG.info("Execution Cycle : ack = false");
             // 새로 들어온 `mapId`인지 확인
             String currentMapId = (String) _jsonObject.get("mapId");
             if (_visitedNode.containsKey(currentMapId)) {
@@ -94,7 +100,6 @@ public class SchedulingBolt extends BaseRichBolt {
                 if (waitingPeers != null) { // waitingPeers exist
                     if ( _peerNode.containsKey(waitingPeers)) ;  // 이미 다른 peer로 부터 자신의 currentId가 저장됨
                     else _peerNode.put(waitingPeers, false);
-
                 }
                 if (incomingPeers != null) { // incomingPeers exist
                     JSONArray _jsonArray = new JSONArray();
@@ -103,7 +108,7 @@ public class SchedulingBolt extends BaseRichBolt {
                         _jsonArray.add(i++, _visitedNode.get(peer).get("message"));
                     }
                     _jsonObject.put("previousData", _jsonArray);
-                    _peerNode.remove(waitingPeers);
+                    _peerNode.remove(incomingPeers);
                 }
             }
         }

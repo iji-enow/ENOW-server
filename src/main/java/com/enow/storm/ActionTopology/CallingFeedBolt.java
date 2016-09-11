@@ -20,13 +20,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CallingFeedBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
-    ConcurrentHashMap<String, JSONObject> _executedNode = new ConcurrentHashMap<>();
+    static ConcurrentHashMap<String, JSONObject> _ackedNode = new ConcurrentHashMap<>();
     private OutputCollector _collector;
     private Producer<String, String> producer;
     private Properties props;
 
     @Override
-
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
         props = new Properties();
@@ -44,16 +43,43 @@ public class CallingFeedBolt extends BaseRichBolt {
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
         Boolean proceed = (Boolean) _jsonObject.get("proceed");
-        String temp;
+        Boolean ack = (Boolean) _jsonObject.get("ack");
         String mapId = (String) _jsonObject.get("mapId");
+        String temp;
+        
         if (proceed) {
             JSONArray waitingJSON = (JSONArray) _jsonObject.get("waitingPeer");
-            String[] waitingPeers = new String[waitingJSON.size()];
-            if (waitingPeers != null) {
+            JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
+            String[] waitingPeers = null;
+            String[] outingPeers = null;
+            _ackedNode.put(mapId, _jsonObject);
+            if(waitingJSON != null){
+                waitingPeers = new String[waitingJSON.size()];
                 for (int i = 0; i < waitingJSON.size(); i++)
                     waitingPeers[i] = (String) waitingJSON.get(i);
+            }
+            if (waitingPeers != null) {
                 for (String waitingPeer : waitingPeers) {
-                    temp = _executedNode.get(waitingPeer).toJSONString();
+                    temp = _ackedNode.get(waitingPeer).toJSONString();
+                    _ackedNode.remove(waitingPeer);
+                    ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
+                    producer.send(peerData);
+                }
+            } else {
+                temp = _ackedNode.get(mapId).toJSONString();
+                _ackedNode.remove(mapId);
+                ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
+                producer.send(peerData);
+            }
+
+            if(outingJSON != null){
+                outingPeers = new String[outingJSON.size()];
+                for (int i = 0; i < outingJSON.size(); i++)
+                    outingPeers[i] = (String) outingJSON.get(i);
+            }
+            if (waitingPeers != null) {
+                for (String waitingPeer : waitingPeers) {
+                    temp = _ackedNode.get(waitingPeer).toJSONString();
                     ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
                     producer.send(peerData);
                 }
@@ -61,7 +87,13 @@ public class CallingFeedBolt extends BaseRichBolt {
             ProducerRecord<String, String> data = new ProducerRecord<>("feed", _jsonObject.toJSONString());
             producer.send(data);
         } else {
-            _executedNode.put(mapId, _jsonObject);
+            _ackedNode.put(mapId, _jsonObject);
+            if(ack){
+
+            } else {
+                ProducerRecord<String, String> data = new ProducerRecord<>("feed", _jsonObject.toJSONString());
+                producer.send(data);
+            }
         }
         _collector.emit(new Values(_jsonObject));
         try {
@@ -72,6 +104,5 @@ public class CallingFeedBolt extends BaseRichBolt {
         }
     }
     @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    }
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {}
 }

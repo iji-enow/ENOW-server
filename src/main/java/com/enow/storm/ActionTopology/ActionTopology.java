@@ -17,12 +17,12 @@ public class ActionTopology {
         // Trigger Kafka setting
         String topicTrigger = "trigger";
         SpoutConfig triggerConfig = new SpoutConfig(brokerHosts,topicTrigger, "/"+topicTrigger, "storm");
-        triggerConfig.scheme = new SchemeAsMultiScheme(new JsonScheme());
+        triggerConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         triggerConfig.startOffsetTime = -1;
         // Status Kafka setting
         String topicStatus = "status";
         SpoutConfig statusConfig = new SpoutConfig(brokerHosts,topicStatus, "/"+topicStatus, "storm");
-        statusConfig.scheme = new SchemeAsMultiScheme(new JsonScheme());
+        statusConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         statusConfig.startOffsetTime = -1;
         // Build Topology
         TopologyBuilder builder = new TopologyBuilder();

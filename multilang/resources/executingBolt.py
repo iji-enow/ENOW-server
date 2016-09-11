@@ -72,7 +72,7 @@ class ExecutingBolt(storm.BasicBolt):
             tmp = self.Building.run()
             '''
 
-            storm.emit([tup, tmp])
+            storm.emit([jsonObject])
         else:
             tmp = ""
             storm.emit([tup, tmp])

@@ -13,7 +13,6 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 import java.util.Map;
 
@@ -48,8 +47,17 @@ public class ExecutingBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
+        JSONObject _jsonObject;
+        JSONObject _message = new JSONObject();
+        _jsonObject = (JSONObject) input.getValueByField("jsonObject");
+        Boolean ack = (Boolean) _jsonObject.get("ack");
+        _message.put("succeed", "great!");
+        if(!ack) {
+            _jsonObject.put("message",_message);
+        }
 
-        _collector.emit(new Values(input));
+        _collector.emit(new Values(_jsonObject));
+
         try {
             _LOG.debug("input = [" + input + "]");
             _collector.ack(input);
