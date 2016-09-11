@@ -46,19 +46,22 @@ public class CallingFeedBolt extends BaseRichBolt {
         Boolean ack = (Boolean) _jsonObject.get("ack");
         String mapId = (String) _jsonObject.get("mapId");
         String temp;
-        
+        // 다음으로 나아갈 허가가 떨어짐
         if (proceed) {
             JSONArray waitingJSON = (JSONArray) _jsonObject.get("waitingPeer");
             JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
             String[] waitingPeers = null;
             String[] outingPeers = null;
             _ackedNode.put(mapId, _jsonObject);
-            if(waitingJSON != null){
+
+            // 기다려야할 Peer들 처리
+            if (waitingJSON != null) {
                 waitingPeers = new String[waitingJSON.size()];
                 for (int i = 0; i < waitingJSON.size(); i++)
                     waitingPeers[i] = (String) waitingJSON.get(i);
             }
             if (waitingPeers != null) {
+                // waitingPeers 존재
                 for (String waitingPeer : waitingPeers) {
                     temp = _ackedNode.get(waitingPeer).toJSONString();
                     _ackedNode.remove(waitingPeer);
@@ -66,18 +69,20 @@ public class CallingFeedBolt extends BaseRichBolt {
                     producer.send(peerData);
                 }
             } else {
+                // 자기자신만 보내면 됨
                 temp = _ackedNode.get(mapId).toJSONString();
                 _ackedNode.remove(mapId);
                 ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
                 producer.send(peerData);
             }
 
-            if(outingJSON != null){
+            // 나가야할 Peer들 처리리
+           if (outingJSON != null) {
                 outingPeers = new String[outingJSON.size()];
                 for (int i = 0; i < outingJSON.size(); i++)
                     outingPeers[i] = (String) outingJSON.get(i);
             }
-            if (waitingPeers != null) {
+            if (outingPeers != null) {
                 for (String waitingPeer : waitingPeers) {
                     temp = _ackedNode.get(waitingPeer).toJSONString();
                     ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
@@ -88,7 +93,7 @@ public class CallingFeedBolt extends BaseRichBolt {
             producer.send(data);
         } else {
             _ackedNode.put(mapId, _jsonObject);
-            if(ack){
+            if (ack) {
 
             } else {
                 ProducerRecord<String, String> data = new ProducerRecord<>("feed", _jsonObject.toJSONString());
@@ -103,6 +108,8 @@ public class CallingFeedBolt extends BaseRichBolt {
             _collector.fail(input);
         }
     }
+
     @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {}
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    }
 }

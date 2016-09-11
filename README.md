@@ -59,59 +59,41 @@ Topologies
 
 ###### SchedulingBolt :
 
-- `triggerKafka`에서 `jsonObject`를 받아 스케줄링을 해준다.
-- `ack = true`일 때, 자신과 함께 저장된 `peer`들의 `Key`값을 `_peerNode`에서 확인하고, `peer` 들이 모두 `_visitedNode`에 저장되어 있다면, `_visitedNode`의 `value`를 `true`로 전환하고, 디바이스에서 `ack` 값을 보낼 준비를 한다.
-- `ack = false`일 때, 새로 들어온 `mapId`인지 확인하고, 새로 들어온 `mapId`면 `_peerNode`에 `peer`들의 `mapId`와 함께 `String[]`형으로 저장된다.(`peer`중 하나라도 `_peerNode`의 저장을 초래한 적이 있다면 무시된다) 또한 `incomingPeer`값이 존재하면 아이디 값들을 `_visitedNode`에 존재하는 키(`mapId`)값별 `jsonObject`의 `message`를 참조하여 해당 `jsonObject`의 `previousData`에 넣어준다.
-- 모든 작업이 완료되면 수정된 `jsonObject`를 `ExecutingBolt`로 `emit`한다.
+- `triggerKafka`에서 `jsonObject`를 받고, `statusKafka`와 스케줄링을 해준다.
+- `triggerKafka`에서 받은 데이터로 `phaseRoadMapId/mapId`로 `primaryKey`를 생성 후 `ConcurrentHashMap`에 저장한다.
+- `phaseRoadMapId/mapId`이 중복되어 `triggerKafka`에서 넘어오면 무시한다.
+- 저장된 `phaseRoadMapId/mapId`이 `statusKafka`의 센서값과 만나면, 센서값을 `jsonObject`에 추가하고 `ExecutingBolt`로 `emit`한다
+
+
+
+- ~~`ack = true`일 때, 자신과 함께 저장된 `peer`들의 `Key`값을 `_peerNode`에서 확인하고, `peer` 들이 모두 `_visitedNode`에 저장되어 있다면, `_visitedNode`의 `value`를 `true`로 전환하고, 디바이스에서 `ack` 값을 보낼 준비를 한다.~~
+- ~~`ack = false`일 때, 새로 들어온 `mapId`인지 확인하고, 새로 들어온 `mapId`면 `_peerNode`에 `peer`들의 `mapId`와 함께 `String[]`형으로 저장된다.(`peer`중 하나라도 `_peerNode`의 저장을 초래한 적이 있다면 무시된다) 또한 `incomingPeer`값이 존재하면 아이디 값들을 `_visitedNode`에 존재하는 키(`mapId`)값별 `jsonObject`의 `message`를 참조하여 해당 `jsonObject`의 `previousData`에 넣어준다.~~
+- ~~모든 작업이 완료되면 수정된 `jsonObject`를 `ExecutingBolt`로 `emit`한다.~~
 
 ###### ExecutingBolt :
-
-- `SchdulingBolt`에서 받은 `message` 값과 console에서 설정한 `parameter`값으로 console에서 작성한 `source code`를 실행시킨다.
-- `source code`를 실행하고 산출된 `result`를 `SchedulingBolt`에서 받은 토픽과 함께 `provisioningBolt`로 `emit`한다.
+- `MongoDB`에서 Source Code 와 Parameter를 받아온다.
+- ~~`SchdulingBolt`에서 받은 `message` 값과 console에서 설정한 `parameter`값으로 console에서 작성한 `source code`를 실행시킨다.~~
+- ~~`source code`를 실행하고 산출된 `result`를 `SchedulingBolt`에서 받은 토픽과 함께 `provisioningBolt`로 `emit`한다.~~
 
 ###### ProvisioningBolt :
 
-`proceed` :
-
-- `proceed`값을 확인하여 `ack` 값을 `false`로 바꿀지 `true`로 바꿀지 결정한다.
-- 만약 해당 `mapId`의 `peerOut`값이 없다면 비어있는 채 `CallingFeedBolt`로 결과만 넘겨주고 `peerOut`값이 있다면 `ExecutingBolt`에서 받은 `payload`를 `message`에 추가하여 `CallingFeedBolt`로 넘겨준다.
+- `waitingPeer`값을 확인하여, `result`값들 `previousData`로써 `ConcurrentHashMap`에 `phaseRoadMapId/mapId`를 키값으로 저장해둔다.
+- 
+- ~~`proceed`값을 확인하여 `ack` 값을 `false`로 바꿀지 `true`로 바꿀지 결정한다.~~
+- ~~만약 해당 `mapId`의 `peerOut`값이 없다면 비어있는 채 `CallingFeedBolt`로 결과만 넘겨주고 `peerOut`값이 있다면 `ExecutingBolt`에서 받은 `payload`를 `message`에 추가하여 `CallingFeedBolt`로 넘겨준다.~~
 
 ###### CallingFeedBolt :
 
+- `outingPeer`값을 확인하여, `반복문`을 통해
 - `peerIn` 이 없는 `Phase`의 init 노드들의 리스트들에 시동을 걸어준다.(시뮬레이션용)
 - `ProvisioningBolt`에서 받은 토픽과 메세지를 `feedKafka`로 넘겨준다.
 
 Payload
 -------
 
-- __Acknowledge cycle__</br>
+- __Cycle__</br>
 ```JSON
-{
-    "corporationName":"enow",
-    "serverId":"serverId1",
-    "brokerId":"brokerId1",
-    "deviceId":"deviceId1",
-    "phaseRoadMapId":"1",
-    "phaseId":"phaseId1",
-    "mapId":"1",
-    "message":{
-        "PARAMETER" : "-ls -t",
-        "SOURCE" : "def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")\n\ta=10\n\tcallback[\"returned\"] = str(a)\n",
-        "PAYLOAD" : {"identification" : "original"}
-    },
-    "init":true,
-    "ack":true,
-    "procced":true,
-    "waitingPeer":["1", "2"],
-    "incomingPeer":null,
-    "outingPeer":["11", "13"],
-    "subsequentInitPeer":["15"],
-    "previousData":{}
-}
-```
-
-- __Execution cycle__</br>
-```JSON
+Event
 {
     "corporationName":"enow",
     "serverId":"serverId1",
@@ -120,22 +102,32 @@ Payload
     "phaseRoadMapId":"1",
     "phaseId":"phaseId1",
     "mapId":1,
-    "message":{
-        "PARAMETER" : "-ls -t",
-        "SOURCE" : "def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")\n\ta=10\n\tcallback[\"returned\"] = str(a)\n",
-        "PAYLOAD" : {"identification" : "original"}
-    },
-    "init":false,
-    "ack":false,
     "procced":false,
     "waitingPeer":["1", "2"],
     "incomingPeer":null,
     "outingPeer":["11", "13"],
     "subsequentInitPeer":["15"],
-    "previousData":{}
+    "previousData":[{},{},{}],
+    "payload":[]
+}
+Status
+{
+  "topic":"enow/serverId1/brokerId1/deviceId1"
 }
 ```
-
+- __ExecutingBolt__</br>
+```JSON
+{
+ "PARAMETER" : "STRING",
+ "PAYLOAD" : "JSON STRING",
+ "SOURCE" : "STRING",
+ "PREVIOUS RESULT" : [
+   {"RESULT 1" : "JSON STRING"},
+   {"RESULT 2" : "JSON STRING"},
+   {"RESULT N" : "JSON STRING"}
+ ]
+}
+```
 References
 ----------
 
