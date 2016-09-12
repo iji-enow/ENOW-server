@@ -26,11 +26,11 @@ Todo List
 Elements
 ========
 
-#### Peers
+#### Nodes
 
-- outingPeer
-- incomingPeer
-- Peers
+- outingNode
+- incomingNode
+- Nodes
 
 ####
 
@@ -40,30 +40,50 @@ Topologies
 TriggerTopology
 ---------------
 ### IndexingBolt :
-1. `eventKafka` 토픽에서 들어온 `JSON`꼴의 `String`을 `jsonObject`로 바꿔준다.
-- `ack = false`일 경우 `HashMap`에 해당 토픽을 저장해놓는다.
-- `ack = true`일 경우 `HashMap`에 해당하는 토픽이 있는지 확인 후 있다면 넘겨주고 없다면 무시한다.
+INPUT:
+ > `eventKafka` ⇨ `jsonObject(Event)`
+ <br>`proceedKafka` ⇨ `jsonObject(Proceed)`
+
+PROCESSING:
+ > `eventKafka`에서 `Console`에서 `Init node`의 정보를 받아온다.
+ <br><br>`proceedKafka`에서는 `ActionTopology`에서 `running node`의 정보를 받아온다.
+ <br><br>`eventKafka`와 `proceedKafka`에서 받아온 `jsonObject`가 필요한 모든 <br>`key value`를 갖고 있는지 확인한다.
+ <br><br>`eventKafka`와 `proceedKafka`에서 받아온 `jsonObject`의 `serverId`,`brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
+
+ OUTPUT:
+ > `jsonObject` ⇨ `StagingBolt`
+
 
 ### StagingBolt :
-1. 현재 노드에 해당하는 `serverId`, `brokerId`, `deviceId`, `phaseRoadMapId`의 값들이 유효한 값인지 검증한다.
-- 현재 노드에 해당하는 `mapId`와 `phaseId`를 추출하여 `jsonObject`에 추가시켜준다.
-- `ack = true`일 경우 현재 노드의 `peerOut`, `peerIn` 값들을 확인하여 `jsonObject`에 저장한다.
-- `ack = true`일 경우 현재 노드의 `phaseLastNode`과 다음 `phase`의 `phaseInitNode` 값들을 확인하여 `jsonObject`에 저장한다.
-- `JSON`과 위에서 거친 검증 값에 따라 `CallingTriggerBolt`로 넘겨 준다.
+INPUT:
+> `IndexingBolt` ⇨ `jsonObject`
+
+PROCESSING:
+> `"init" = true`라면 받은 `jsonObject` 그대로 `CallingTriggerBolt`로 넘겨준다.
+<br><br>`"init" = flase`라면 받은 `jsonObject`의 `MapID`값에 해당하는 `deviceId`,`waitingNode`,`outingNode`의 값을 `MongoDB`에서 받아와 갱신시켜준다.
+
+OUTPUT:
+> `jsonObject` ⇨ `CallingTriggerBolt`
 
 ### CallingTriggerBolt :
-1. `StagingBolt`에서 넘겨준 `jsonObject`를 받아 `triggerKafka`로 넘겨준다.
+INPUT:
+> `StagingBolt` ⇨ `jsonObject`
+
+PROCESSING:
+> `StagingBolt`에서 받은 `jsonObject`를 `Trigger topic`으로 보내준다.
+
+OUTPUT:
+> `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Trigger`
 
 ActionTopology
 --------------
 ### SchedulingBolt :
 INPUT:
-> `triggerKafka` ⇨ `jsonObject(Trigger)`<br>
- `statusKafka` ⇨ `jsonObject(Status)`
+> `triggerKafka` ⇨ `jsonObject(Trigger)`
+<br>`statusKafka` ⇨ `jsonObject(Status)`
 
 PROCESSING:
-> 현재 노드가 다수의 `incomingPeer`들을 가질 때, 이를 `Redis`에 저장한다. <br>(추후, 해당 노드에 대해선 CallingFeed가 일어나지 않는다.)<br>
- When node needs multiple `previousData`, wait for all of `incomingPeers`
+> 현재 노드가 다수의 `incomingNode`들을 가질 때, 이를 `Redis`에 저장한다. <br>When node needs multiple `previousData`, wait for all of `incomingNodes`
 
 OUTPUT:
 > `jsonObject` ⇨ `ExecutingBolt`
@@ -83,7 +103,7 @@ INPUT:
 > `ExecutingBolt` ⇨ `jsonObject`
 
 PROCESSING:
-> 현재 노드가 다수의 `outingPeer`들을 가질 때, 이를 `Redis`에 저장한다.
+> 현재 노드가 다수의 `outingNode`들을 가질 때, 이를 `Redis`에 저장한다.
 
 OUTPUT:
 > `jsonObject` ⇨ `CallingFeedBolt`
@@ -94,7 +114,7 @@ INPUT:
 
 PROCESSING:
 > `ProvisioningBolt`를 참고하여 `KafkaProducer`를 호출한다.<br>
-  `outingPeer`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.
+  `outingNode`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.
 
 OUTPUT:
 > `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
@@ -113,10 +133,11 @@ __JsonObject :__</br>
     "roadMapId":"1",
     "mapId":1,
     "procced":false,
-    "waitingPeer":["2", "4"],
-    "outingPeer":["11", "13"],
+    "waitingNode":["2", "4"],
+    "outingNode":["11", "13"],
     "previousData":[{},{},{}],
-    "payload":[]
+    "payload":[],
+    "init":false
 }
 ```
 __Status :__ </br>

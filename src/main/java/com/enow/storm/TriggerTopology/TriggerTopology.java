@@ -45,7 +45,6 @@ public class TriggerTopology {
         
         MongoMapper callingTriggerMapper = new SimpleMongoMapper().withFields("triggerTopologyResult");
         InsertMongoBolt callingTriggerDBBolt = new InsertMongoBolt(url, "callingTriggerBolt", callingTriggerMapper);
-        
 
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("event-spout", new KafkaSpout(kafkaConfig));
