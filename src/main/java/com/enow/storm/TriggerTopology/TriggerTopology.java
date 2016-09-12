@@ -14,8 +14,6 @@ import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
 import com.enow.persistence.mongodb.InsertMongoBolt;
-import com.enow.persistence.mongodb.mapper.SimpleMongoMapper;
-
 
 
 public class TriggerTopology {

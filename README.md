@@ -27,9 +27,9 @@ Elements
 
 #### Peers
 
-- peerOut
-- peerIn
-- virtualPeer
+- outingPeer
+- incomingPeer
+- Peers
 
 ####
 
@@ -60,14 +60,22 @@ INPUT:
 - `statusKafka` ⇨ `status`
 
 PROCESSING:
-- 현제 노드가 다수의 `incomingPeer`들을 가질 때, 이를 저장하고 기다린다.
+- 현재 노드가 다수의 `incomingPeer`들을 가질 때, 이를 `Redis`에 저장한다. <br>(추후, 해당 노드에 대해선 CallingFeed가 일어나지 않는다.)
+-
 - When node needs multiple `previousData`, wait for all of `incomingPeers`
 
 OUTPUT:
 - `jsonObject` ⇨ `ExecutingBolt`
 
 ##### ExecutingBolt :
+INPUT:
+- `SchedulingBolt` ⇨ `jsonObject`
+
+PROCESSING:
 - `MongoDB`에서 Source Code 와 Parameter를 받아온다.
+
+OUTPUT:
+- `jsonObject` ⇨ `ProvisioningBolt`
 
 ##### ProvisioningBolt :
 

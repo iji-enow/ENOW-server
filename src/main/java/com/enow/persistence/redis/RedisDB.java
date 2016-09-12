@@ -30,7 +30,7 @@ public class RedisDB implements IRedisDB {
     }
 
     public RedisDB() {
-        connection = new Jedis("45.55.178.18", 6379);
+        connection = new Jedis("127.0.0.1", 6379);
     }
 
     public void setTestDb() {
