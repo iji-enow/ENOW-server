@@ -33,7 +33,7 @@ public class IndexingBolt extends BaseRichBolt {
 		JSONParser parser = new JSONParser();
 		JSONObject _jsonObject;
 
-		if ((null == input.toString()) || (input.toString().length() == 0)) {
+		if (input.toString().length() == 0) {
 			return;
 		}
 
@@ -52,6 +52,27 @@ public class IndexingBolt extends BaseRichBolt {
 					// init = true 일 경우 필요한 값이 다 안 들어 왔다.
 					return;
 				}
+				
+				/*
+				Event
+				{
+				    "corporationName":"enow",
+				    "serverId":"serverId1",
+				    "brokerId":"brokerId1",
+				    "deviceId":"deviceId1",
+				    "phaseRoadMapId":"1",
+				    "phaseId":"phaseId1",
+				    "mapId":1,
+				    "procced":false,
+				    "waitingPeer":["1", "2"],
+				    "incomingPeer":null,
+				    "outingPeer":["11", "13"],
+				    "subsequentInitPeer":["15"],
+				    "previousData":[{},{},{}],
+				    "payload":[]
+				}
+				*/
+				
 			} else {
 				if (_jsonObject.containsKey("ack") && _jsonObject.containsKey("proceed")
 						&& _jsonObject.containsKey("corporationName") && _jsonObject.containsKey("serverId")
@@ -59,7 +80,8 @@ public class IndexingBolt extends BaseRichBolt {
 						&& _jsonObject.containsKey("phaseRoadMapId") && _jsonObject.containsKey("phaseId")
 						&& _jsonObject.containsKey("mapId") && _jsonObject.containsKey("message")
 						&& _jsonObject.containsKey("waitingPeer") && _jsonObject.containsKey("outingPeer")
-						&& _jsonObject.containsKey("subsequentInitPeer") && _jsonObject.containsKey("incomingPeer")) {
+						&& _jsonObject.containsKey("subsequentInitPeer") && _jsonObject.containsKey("incomingPeer")
+						&& _jsonObject.containsKey("previousData")) {
 				} else {
 					// init = false 일 경우 필요한 값이 다 안 들어 왔다.
 					return;
@@ -68,15 +90,7 @@ public class IndexingBolt extends BaseRichBolt {
 		} catch (ParseException e1) {
 			// JSONParseException 발
 			e1.printStackTrace();
-			_jsonObject = null;
-		}
-
-		if ((boolean) _jsonObject.get("ack")) {
-			/////////// ack일 경우 저장해놓은 hash map에 존재하지 않는다면 return
-
-		} else {
-			////////// ack가 아닐 경우 hash map에 저장해놓고 그냥 지나 간다.
-
+			return;
 		}
 
 		collector.emit(new Values(_jsonObject));

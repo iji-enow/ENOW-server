@@ -4,6 +4,7 @@ package com.enow.storm.TriggerTopology;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
+import org.apache.storm.StormSubmitter;
 import org.apache.storm.kafka.BrokerHosts;
 import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.SpoutConfig;
@@ -13,7 +14,9 @@ import org.apache.storm.mongodb.common.mapper.MongoMapper;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
-import com.enow.persistence.mongodb.InsertMongoBolt;
+import com.enow.storm.mapper.mongodb.InsertMongoBolt;
+import com.enow.storm.mapper.mongodb.SimpleMongoMapper;
+
 
 
 public class TriggerTopology {
@@ -33,10 +36,11 @@ public class TriggerTopology {
         
         String url = "mongodb://127.0.0.1:27017/log";
 
-        MongoMapper indexingMapper = new SimpleMongoMapper().withFields("spoutSource","topicStructure");
+        MongoMapper indexingMapper = new SimpleMongoMapper().withFields("jsonObject");
         InsertMongoBolt indexingDBBolt = new InsertMongoBolt(url, "indexingBolt", indexingMapper);
         
-        MongoMapper stagingMapper = new SimpleMongoMapper().withFields("spoutSource","topicStructureArray","serverIdCheck" ,"brokerIdCheck","deviceIdCheck", "phaseRoadMapIdCheck", "mapIdCheck");
+        MongoMapper stagingMapper = new SimpleMongoMapper().withFields("jsonArray", "serverIdCheck", "brokerIdCheck", "deviceIdCheck",
+				"phaseRoadMapIdCheck", "mapIdCheck");
         InsertMongoBolt stagingDBBolt = new InsertMongoBolt(url, "stagingBolt", stagingMapper);
         
         MongoMapper callingTriggerMapper = new SimpleMongoMapper().withFields("triggerTopologyResult");
@@ -46,11 +50,11 @@ public class TriggerTopology {
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("event-spout", new KafkaSpout(kafkaConfig));
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
-        //builder.setBolt("indexing-db-bolt", indexingDBBolt).allGrouping("indexing-bolt");
+        builder.setBolt("indexing-db-bolt", indexingDBBolt).allGrouping("indexing-bolt");
         builder.setBolt("staging-bolt", new StagingBolt2()).allGrouping("indexing-bolt");
-        //builder.setBolt("staging-db-bolt", stagingDBBolt).allGrouping("staging-bolt");
+        builder.setBolt("staging-db-bolt", stagingDBBolt).allGrouping("staging-bolt");
         builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
-        //builder.setBolt("calling-trigger-db-bolt", callingTriggerDBBolt).allGrouping("calling-trigger-bolt");
+        builder.setBolt("calling-trigger-db-bolt", callingTriggerDBBolt).allGrouping("calling-trigger-bolt");
 
         /*
         config.setNumWorkers(2);

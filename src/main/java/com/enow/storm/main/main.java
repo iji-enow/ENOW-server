@@ -82,7 +82,7 @@ public class main {
         eventConfig.startOffsetTime = -1;
         builder.setSpout("event-spout", new KafkaSpout(eventConfig));
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
-        builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
+        builder.setBolt("staging-bolt", new StagingBolt2()).allGrouping("indexing-bolt");
         builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
         return builder.createTopology();
     }
