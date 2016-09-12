@@ -57,8 +57,8 @@ hihihi
 
 ##### SchedulingBolt :
 INPUT:
-- `triggerKafka` ⇨ `jsonObject`
-- `statusKafka` ⇨ `status`
+- `triggerKafka` ⇨ `jsonObject(Trigger)`
+- `statusKafka` ⇨ `jsonObject(Status)`
 
 PROCESSING:
 - 현재 노드가 다수의 `incomingPeer`들을 가질 때, 이를 `Redis`에 저장한다. <br>(추후, 해당 노드에 대해선 CallingFeed가 일어나지 않는다.)
@@ -93,7 +93,7 @@ INPUT:
 
 PROCESSING:
 - `ProvisioningBolt`를 참고하여 `KafkaProducer`를 호출한다.
-- `outingPeer`의 `MapID`별로 `KafkaProducer`를 호출한다.
+- `outingPeer`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.
 
 OUTPUT:
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
@@ -121,7 +121,8 @@ __JsonObject :__</br>
 __Status :__ </br>
 ```JSON
 {
-  "topic":"enow/serverId1/brokerId1/deviceId1"
+  "topic":"enow/serverId1/brokerId1/deviceId1",
+  "payload":"JSON STRING"
 }
 ```
 __ExecutingBolt :__ </br>
@@ -159,8 +160,14 @@ References
 
 Test project for enow-storm based on information provided in and referenced by:
 
+Apache Storm & Kafka:
 - [https://github.com/nathanmarz/storm-contrib/blob/master/storm-kafka/src/jvm/storm/kafka/TestTopology.java](https://github.com/nathanmarz/storm-contrib/blob/master/storm-kafka/src/jvm/storm/kafka/TestTopology.java)
 - [https://github.com/nathanmarz/storm/wiki/Trident-tutorial](https://github.com/nathanmarz/storm/wiki/Trident-tutorial)
 - [https://github.com/nathanmarz/storm/wiki/Trident-state](https://github.com/nathanmarz/storm/wiki/Trident-state)
 - [https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+Producer+Example](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+Producer+Example)
 - [https://github.com/wurstmeister/storm-kafka-0.8-plus-test](https://github.com/wurstmeister/storm-kafka-0.8-plus-test)
+
+Redis:
+- [https://github.com/CaptBoscho/SOC-Redis-Plugin/blob/master/src/main/java/daos/UserDAO.java](https://github.com/CaptBoscho/SOC-Redis-Plugin/blob/master/src/main/java/daos/UserDAO.java)
+
+MongoDB:
