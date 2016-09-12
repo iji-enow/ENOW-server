@@ -36,67 +36,68 @@ Elements
 
 Topologies
 ==========
-hihihi
-#### TriggerTopology
-##### IndexingBolt :
+
+TriggerTopology
+---------------
+### IndexingBolt :
 1. `eventKafka` 토픽에서 들어온 `JSON`꼴의 `String`을 `jsonObject`로 바꿔준다.
 - `ack = false`일 경우 `HashMap`에 해당 토픽을 저장해놓는다.
 - `ack = true`일 경우 `HashMap`에 해당하는 토픽이 있는지 확인 후 있다면 넘겨주고 없다면 무시한다.
 
-##### StagingBolt :
+### StagingBolt :
 1. 현재 노드에 해당하는 `serverId`, `brokerId`, `deviceId`, `phaseRoadMapId`의 값들이 유효한 값인지 검증한다.
 - 현재 노드에 해당하는 `mapId`와 `phaseId`를 추출하여 `jsonObject`에 추가시켜준다.
 - `ack = true`일 경우 현재 노드의 `peerOut`, `peerIn` 값들을 확인하여 `jsonObject`에 저장한다.
 - `ack = true`일 경우 현재 노드의 `phaseLastNode`과 다음 `phase`의 `phaseInitNode` 값들을 확인하여 `jsonObject`에 저장한다.
 - `JSON`과 위에서 거친 검증 값에 따라 `CallingTriggerBolt`로 넘겨 준다.
 
-##### CallingTriggerBolt :
+### CallingTriggerBolt :
 1. `StagingBolt`에서 넘겨준 `jsonObject`를 받아 `triggerKafka`로 넘겨준다.
 
-#### ActionTopology
-
-##### SchedulingBolt :
+ActionTopology
+--------------
+### SchedulingBolt :
 INPUT:
-- `triggerKafka` ⇨ `jsonObject(Trigger)`
-- `statusKafka` ⇨ `jsonObject(Status)`
+> `triggerKafka` ⇨ `jsonObject(Trigger)`<br>
+ `statusKafka` ⇨ `jsonObject(Status)`
 
 PROCESSING:
-- 현재 노드가 다수의 `incomingPeer`들을 가질 때, 이를 `Redis`에 저장한다. <br>(추후, 해당 노드에 대해선 CallingFeed가 일어나지 않는다.)
-- When node needs multiple `previousData`, wait for all of `incomingPeers`
+> 현재 노드가 다수의 `incomingPeer`들을 가질 때, 이를 `Redis`에 저장한다. <br>(추후, 해당 노드에 대해선 CallingFeed가 일어나지 않는다.)<br>
+ When node needs multiple `previousData`, wait for all of `incomingPeers`
 
 OUTPUT:
-- `jsonObject` ⇨ `ExecutingBolt`
+> `jsonObject` ⇨ `ExecutingBolt`
 
-##### ExecutingBolt :
+### ExecutingBolt :
 INPUT:
-- `SchedulingBolt` ⇨ `jsonObject`
+> `SchedulingBolt` ⇨ `jsonObject`
 
 PROCESSING:
-- `MongoDB`에서 Source Code 와 Parameter를 받아온다.
+> `MongoDB`에서 Source Code 와 Parameter를 받아온다.
 
 OUTPUT:
-- `jsonObject` ⇨ `ProvisioningBolt`
+> `jsonObject` ⇨ `ProvisioningBolt`
 
-##### ProvisioningBolt :
+### ProvisioningBolt :
 INPUT:
-- `ExecutingBolt` ⇨ `jsonObject`
+> `ExecutingBolt` ⇨ `jsonObject`
 
 PROCESSING:
-- 현재 노드가 다수의 `outingPeer`들을 가질 때, 이를 `Redis`에 저장한다.
+> 현재 노드가 다수의 `outingPeer`들을 가질 때, 이를 `Redis`에 저장한다.
 
 OUTPUT:
-- `jsonObject` ⇨ `CallingFeedBolt`
+> `jsonObject` ⇨ `CallingFeedBolt`
 
-###### CallingFeedBolt :
+### CallingFeedBolt :
 INPUT:
-- `ProvisioningBolt` ⇨ `jsonObject`
+> `ProvisioningBolt` ⇨ `jsonObject`
 
 PROCESSING:
-- `ProvisioningBolt`를 참고하여 `KafkaProducer`를 호출한다.
-- `outingPeer`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.
+> `ProvisioningBolt`를 참고하여 `KafkaProducer`를 호출한다.<br>
+  `outingPeer`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.
 
 OUTPUT:
-- `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
+> `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
 
 Payload
 =======
@@ -141,15 +142,15 @@ __ExecutingBolt :__ </br>
 
 > `_"previousData"_` : 이전에 실행했던 `ExecutingBolt` 에서의 결과값을 담고 있다. `RESULT N` 에서의 넘버링은 _스택_ 의 규칙을 따르며 넘버링이 클 수록 최근의 결과값이다.<br><br>
 `_"PARAMETER"_` : 실행에 필요한 파라미터를 세팅하여 넘겨준다.<br><br>
-__i.e)__ -> _"-l --profile"_<br><br>
+__i.e)__ ⇨ _"-l --profile"_<br><br>
 `_"PAYLOAD"_` : 실행에 필요한 입력값을 전달해 준다.<br><br>
-  __i.e)__ ->
+  __i.e)__ ⇨
   _"{
     'led on' : 1,
     'match object' : 'cat'}
   }"_<br><br>
 `_"SOURCE"_` : 실행에 필요한 소스(`PYTHON`)를 전달해 준다.<br><br>
-__i.e)__ -> _"def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")"_
+__i.e)__ ⇨ _"def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")"_
 
   실행에 필요한 소스의 기본형은 다음과 같다.
 
