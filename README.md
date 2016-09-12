@@ -35,7 +35,7 @@ Elements
 
 Topologies
 ==========
-
+hihihi
 #### TriggerTopology
 ##### IndexingBolt :
 1. `eventKafka` 토픽에서 들어온 `JSON`꼴의 `String`을 `jsonObject`로 바꿔준다.
@@ -60,8 +60,8 @@ INPUT:
 - `statusKafka` ⇨ `status`
 
 PROCESSING:
+- 현제 노드가 다수의 `incomingPeer`들을 가질 때, 이를 저장하고 기다린다.
 - When node needs multiple `previousData`, wait for all of `incomingPeers`
-- 
 
 OUTPUT:
 - `jsonObject` ⇨ `ExecutingBolt`

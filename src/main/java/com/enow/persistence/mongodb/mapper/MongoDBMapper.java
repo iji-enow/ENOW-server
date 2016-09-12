@@ -1,4 +1,4 @@
-package com.enow.storm.mapper.mongodb;
+package com.enow.persistence.mongodb.mapper;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -11,7 +11,7 @@ import org.bson.Document;
 import com.enow.dto.TopicStructure;
 
 
-public class mongoDBMapper implements MongoMapper {
+public class MongoDBMapper implements MongoMapper {
 	private String[] fields;
 	private TopicStructure topicStructure = new TopicStructure();
 
@@ -32,7 +32,7 @@ public class mongoDBMapper implements MongoMapper {
 		return document;
 	}
 
-	public mongoDBMapper withFields(String... fields) {
+	public MongoDBMapper withFields(String... fields) {
 		this.fields = fields;
 		return this;
 	}

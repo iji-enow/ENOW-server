@@ -1,4 +1,4 @@
-package com.enow.storm.mapper.mongodb;
+package com.enow.persistence.mongodb;
 
 import java.util.LinkedList;
 import java.util.List;
