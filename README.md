@@ -92,7 +92,8 @@ INPUT:
 - `ProvisioningBolt` ⇨ `jsonObject`
 
 PROCESSING:
-- 
+- `ProvisioningBolt`를 참고하여 `KafkaProducer`를 호출한다.
+- `outingPeer`의 `MapID`별로 `KafkaProducer`를 호출한다.
 
 OUTPUT:
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
