@@ -38,12 +38,12 @@ public interface IPeerDAO {
     void updatePeer(PeerDTO dto);
 
     /**
-     * Deletes all games
+     * Deletes all peers
      */
     void deleteAllPeers();
 
     /**
-     * Deletes a game
+     * Deletes a peer
      */
     void deletePeer(int peerID);
 }

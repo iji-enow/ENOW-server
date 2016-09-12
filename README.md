@@ -18,6 +18,7 @@ Todo List
 - [x] ~~Syncronizing data stream with `ConcurrentHashMap`~~
 - [x] ~~Create test Document on MongoDB~~
 - [x] ~~Connect Apache Storm to MongoDB~~
+- [x] ~~Connect Apache Storm to Redis for storing status of server~~
 - [ ] Connect Apache Storm to Console
 - [ ] Connect Apache Storm to Devices
 - [ ] Build on `StormSubmitter`
@@ -61,7 +62,6 @@ INPUT:
 
 PROCESSING:
 - 현재 노드가 다수의 `incomingPeer`들을 가질 때, 이를 `Redis`에 저장한다. <br>(추후, 해당 노드에 대해선 CallingFeed가 일어나지 않는다.)
--
 - When node needs multiple `previousData`, wait for all of `incomingPeers`
 
 OUTPUT:
@@ -78,9 +78,24 @@ OUTPUT:
 - `jsonObject` ⇨ `ProvisioningBolt`
 
 ##### ProvisioningBolt :
+INPUT:
+- `ExecutingBolt` ⇨ `jsonObject`
 
+PROCESSING:
+- 현재 노드가 다수의 `outingPeer`들을 가질 때, 이를 `Redis`에 저장한다.
+
+OUTPUT:
+- `jsonObject` ⇨ `CallingFeedBolt`
 
 ###### CallingFeedBolt :
+INPUT:
+- `ProvisioningBolt` ⇨ `jsonObject`
+
+PROCESSING:
+- 
+
+OUTPUT:
+- `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
 
 Payload
 =======

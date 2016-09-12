@@ -8,9 +8,9 @@ import com.enow.daos.redisDAO.IPeerDAO;
 
 public interface IDAOFacility {
     /**
-     * Creates a new EnowRedisDAO
+     * Creates a new PeerDAO
      *
-     * @return EnowRedisDAO
+     * @return PeerDAO
      */
     IPeerDAO createPeerDAO();
 }
