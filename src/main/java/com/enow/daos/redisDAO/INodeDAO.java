@@ -4,57 +4,57 @@ package com.enow.daos.redisDAO;
  * Created by writtic on 2016. 9. 12..
  */
 
-import com.enow.persistence.dto.PeerDTO;
+import com.enow.persistence.dto.NodeDTO;
 import org.json.simple.JSONObject;
 
 import java.util.List;
 
-public interface IPeerDAO {
+public interface INodeDAO {
     String toID(String roadMapID, String mapID);
     /**
-     * change jsonObject to PeerDTO,
+     * change jsonObject to NodeDTO,
      *
      * @param jsonObject
      */
-    PeerDTO jsonObjectToPeer(JSONObject jsonObject);
+    NodeDTO jsonObjectToNode(JSONObject jsonObject);
     /**
-     * Handles adding a peer,
+     * Handles adding a node,
      * adding a roadMapID
      * adding a mapID
      * adding a topic
-     * adding a payload
+     * adding data
      *
      * @param dto
      */
-    String addPeer(PeerDTO dto);
+    String addNode(NodeDTO dto);
 
     /**
-     * Handles verifying peer which returns peerID
+     * Handles verifying node which returns nodeID
      * Getting the current roadMapID
      * Getting the current mapID
      * Getting a list of topic
-     * Getting a list of payload
+     * Getting a list of data
      *
      * @return
      */
-    PeerDTO getPeer(String ID);
+    NodeDTO getNode(String ID);
 
-    List<PeerDTO> getAllPeers();
+    List<NodeDTO> getAllNodes();
 
     /**
      * mostly be used for updating the peer relevant to current node
      *
      * @param dto
      */
-    void updatePeer(PeerDTO dto);
+    void updateNode(NodeDTO dto);
 
     /**
-     * Deletes all peers
+     * Deletes all nodes
      */
-    void deleteAllPeers();
+    void deleteAllNodes();
 
     /**
-     * Deletes a peer
+     * Deletes a node
      */
-    void deletePeer(String roadMapID, String mapID);
+    void deleteNode(String ID);
 }

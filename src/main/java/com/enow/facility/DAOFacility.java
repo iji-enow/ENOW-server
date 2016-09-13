@@ -1,7 +1,7 @@
 package com.enow.facility;
 
-import com.enow.daos.redisDAO.IPeerDAO;
-import com.enow.daos.redisDAO.PeerDAO;
+import com.enow.daos.redisDAO.INodeDAO;
+import com.enow.daos.redisDAO.NodeDAO;
 
 /**
  * Created by writtic on 2016. 9. 12..
@@ -29,13 +29,13 @@ public class DAOFacility implements IDAOFacility {
     }
 
     /**
-     * Creates a new PeerDAO
+     * Creates a new NodeDAO
      *
-     * @return PeerDAO that implements IPeerDAO
+     * @return NodeDAO that implements INodeDAO
      */
     @Override
-    public IPeerDAO createPeerDAO() {
-        return new PeerDAO();
+    public INodeDAO createPeerDAO() {
+        return new NodeDAO();
     }
 
 }

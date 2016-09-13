@@ -4,7 +4,7 @@ package com.enow.plugin;
  * Created by writtic on 2016. 9. 12..
  */
 
-import com.enow.daos.redisDAO.IPeerDAO;
+import com.enow.daos.redisDAO.INodeDAO;
 
 /**
  * Created by Kyle 'TMD' Cornelison on 4/2/2016.
@@ -37,11 +37,11 @@ public interface IRedisPlugin {
     void endTransaction(boolean commitTransaction);
 
     /**
-     * Creates a new PeerDAO
+     * Creates a new NodeDAO
      *
-     * @return PeerDAO
+     * @return NodeDAO
      */
-    IPeerDAO createPeerDAO();
+    INodeDAO createPeerDAO();
 
     //endregion
 }

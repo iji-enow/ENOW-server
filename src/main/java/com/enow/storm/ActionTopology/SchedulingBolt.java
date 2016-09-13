@@ -1,8 +1,8 @@
 package com.enow.storm.ActionTopology;
 
-import com.enow.daos.redisDAO.IPeerDAO;
+import com.enow.daos.redisDAO.INodeDAO;
 import com.enow.facility.DAOFacility;
-import com.enow.persistence.dto.PeerDTO;
+import com.enow.persistence.dto.NodeDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -18,11 +18,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SchedulingBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(SchedulingBolt.class);
-    private IPeerDAO _dao;
+    private INodeDAO _dao;
     private OutputCollector _collector;
     private JSONParser _parser;
 
@@ -58,19 +57,23 @@ public class SchedulingBolt extends BaseRichBolt {
             }
             System.out.println("_jsonObject: " + _jsonObject.toJSONString());
 
-            JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingPeer");
-            String[] incomingPeers = null;
+            JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
+            String[] incomingNodes = null;
             if(incomingJSON != null){
-                incomingPeers = new String[incomingJSON.size()];
+                incomingNodes = new String[incomingJSON.size()];
                 for (int i = 0; i < incomingJSON.size(); i++)
-                    incomingPeers[i] = (String) incomingJSON.get(i);
+                    incomingNodes[i] = (String) incomingJSON.get(i);
             }
 
-            if(incomingPeers != null) {
+            if(incomingNodes != null) {
                 String roadMapId = (String) _jsonObject.get("roadMapId");
-                String mapId = (String) _jsonObject.get("mapId");
-                String id = _dao.toID(roadMapId, mapId);
-                _dao.addPeer(id);
+                JSONObject tmp = new JSONObject();
+                for(String peerId : incomingNodes) {
+                    String id = _dao.toID(roadMapId, peerId);
+                    NodeDTO dto = _dao.getNode(id);
+                    tmp.put(peerId, dto.getData());
+                }
+                _jsonObject.put("previousData", tmp);
             }
             _collector.emit(new Values(_jsonObject));
             try {

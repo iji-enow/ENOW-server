@@ -3,8 +3,8 @@ package com.enow.persistence.redis;
 /**
  * Created by writtic on 2016. 9. 12..
  */
-import com.enow.persistence.dto.PeerDTO;
-import com.enow.daos.redisDAO.IPeerDAO;
+import com.enow.daos.redisDAO.INodeDAO;
+import com.enow.persistence.dto.NodeDTO;
 import com.enow.facility.DAOFacility;
 import redis.clients.jedis.Jedis;
 
@@ -49,14 +49,14 @@ public class RedisDB implements IRedisDB {
     }
 
     @Override
-    public int addPeer(PeerDTO dto) {
-        IPeerDAO dao = DAOFacility.getInstance().createPeerDAO();
+    public int addPeer(NodeDTO dto) {
+        INodeDAO dao = DAOFacility.getInstance().createPeerDAO();
         return dao.addPeer(dto);
     }
 
     @Override
-    public List<PeerDTO> getAllPeers() {
-        IPeerDAO dao = DAOFacility.getInstance().createPeerDAO();
+    public List<NodeDTO> getAllPeers() {
+        INodeDAO dao = DAOFacility.getInstance().createPeerDAO();
         return dao.getAllPeers();
     }
 }

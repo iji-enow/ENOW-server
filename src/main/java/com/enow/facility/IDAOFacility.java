@@ -1,6 +1,6 @@
 package com.enow.facility;
 
-import com.enow.daos.redisDAO.IPeerDAO;
+import com.enow.daos.redisDAO.INodeDAO;
 
 /**
  * Created by writtic on 2016. 9. 12..
@@ -8,9 +8,9 @@ import com.enow.daos.redisDAO.IPeerDAO;
 
 public interface IDAOFacility {
     /**
-     * Creates a new PeerDAO
+     * Creates a new NodeDAO
      *
-     * @return PeerDAO
+     * @return NodeDAO
      */
-    IPeerDAO createPeerDAO();
+    INodeDAO createPeerDAO();
 }

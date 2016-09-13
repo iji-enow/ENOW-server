@@ -4,7 +4,7 @@ package com.enow.plugin;
  * Created by writtic on 2016. 9. 12..
  */
 
-import com.enow.daos.redisDAO.IPeerDAO;
+import com.enow.daos.redisDAO.INodeDAO;
 import com.enow.facility.DAOFacility;
 import com.enow.facility.IDAOFacility;
 
@@ -60,12 +60,12 @@ public class Plugin implements IRedisPlugin {
     }
 
     /**
-     * Creates a new PeerDAO
+     * Creates a new NodeDAO
      *
-     * @return PeerDAO
+     * @return NodeDAO
      */
     @Override
-    public IPeerDAO createPeerDAO() {
+    public INodeDAO createPeerDAO() {
         return factory.createPeerDAO();
     }
 

@@ -6,16 +6,15 @@ package com.enow.daos.redisDAO;
 
 import java.util.*;
 
+import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.redis.RedisDB;
-import com.enow.persistence.dto.PeerDTO;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import redis.clients.jedis.Jedis;
 
 
-public class PeerDAO implements IPeerDAO {
+public class NodeDAO implements INodeDAO {
 
-    private static final String PEER_PREFIX = "peer-";
+    private static final String PEER_PREFIX = "node-";
 
     @Override
     public String toID(String roadMapID, String mapID) {
@@ -24,88 +23,89 @@ public class PeerDAO implements IPeerDAO {
     }
 
     @Override
-    public PeerDTO jsonObjectToPeer(JSONObject jsonObject){
+    public NodeDTO jsonObjectToNode(JSONObject jsonObject){
 
         String roadMapID = (String) jsonObject.get("roadMapId");
         String mapID = (String) jsonObject.get("mapId");
         String topic = (String) jsonObject.get("topic");
-        String payload = (String) jsonObject.get("payload");
+        String data = (String) jsonObject.get("data");
 
-        PeerDTO dto = new PeerDTO(roadMapID, mapID, topic, payload);
+        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, data);
         return dto;
     }
 
     @Override
-    public String addPeer(PeerDTO dto) {
+    public String addNode(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getMapID();
 
-        Set<String> keys = jedis.keys("peer-*");
+        Set<String> keys = jedis.keys("node-*");
         Iterator<String> iter = keys.iterator();
         ArrayList<String> ids = new ArrayList<>();
 
-        boolean peerExists = false;
+        boolean nodeExists = false;
 
         while(iter.hasNext()) {
             String key = iter.next();
             key = key.substring(5, key.length());
             ids.add(key);
             if(key.equals(id)) {
-                peerExists = true;
+                nodeExists = true;
             }
         }
-        if(!peerExists) {
-            jedis.lpush("peer-" + id, dto.getPayload());
+        if(!nodeExists) {
+            jedis.lpush("node-" + id, dto.getTopic());
+            jedis.lpush("node-" + id, dto.getData());
             return id + " overwrited";
         } else {
-            jedis.lpush("peer-" + id, dto.getPayload());
+            jedis.lpush("node-" + id, dto.getTopic());
+            jedis.lpush("node-" + id, dto.getData());
             return id;
         }
     }
     @Override
-    public List<PeerDTO> getAllPeers() {
+    public List<NodeDTO> getAllNodes() {
         Jedis jedis = RedisDB.getConnection();
-        List<PeerDTO> peers = new ArrayList<>();
-        Set<String> keys = jedis.keys("peer-*");
+        List<NodeDTO> nodes = new ArrayList<>();
+        Set<String> keys = jedis.keys("node-*");
 
         for (String key : keys) {
             key = key.substring(5, key.length());
-            peers.add(getPeer(key));
+            nodes.add(getNode(key));
         }
-        return peers;
+        return nodes;
     }
     @Override
-    public PeerDTO getPeer(String ID) {
+    public NodeDTO getNode(String ID) {
         Jedis jedis = RedisDB.getConnection();
         StringTokenizer tokenizer = new StringTokenizer(ID, "-");
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + mapID;
         List<String> result = jedis.lrange(PEER_PREFIX + id, 0, 1);
-        PeerDTO dto = new PeerDTO(roadMapID, mapID, result.get(1), result.get(2));
+        NodeDTO dto = new NodeDTO(roadMapID, mapID, result.get(1), result.get(2));
         return dto;
     }
 
     @Override
-    public void updatePeer(PeerDTO dto) {
+    public void updateNode(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getMapID();
         jedis.rpop(PEER_PREFIX + id);
-        jedis.rpush(PEER_PREFIX + id, dto.getPayload());
+        jedis.rpush(PEER_PREFIX + id, dto.getData());
     }
     @Override
-    public void deleteAllPeers() {
+    public void deleteAllNodes() {
         Jedis jedis = RedisDB.getConnection();
-        Set<String> keys = jedis.keys("peer-*");
+        Set<String> keys = jedis.keys("node-*");
         Iterator<String> iter = keys.iterator();
         while (iter.hasNext()) {
             jedis.del(iter.next());
         }
     }
     @Override
-    public void deletePeer(String roadMapID, String mapID) {
+    public void deleteNode(String ID) {
         Jedis jedis = RedisDB.getConnection();
-        String id = roadMapID + "-" + mapID;
-        jedis.del(PEER_PREFIX + id);
+        jedis.del(PEER_PREFIX + ID);
     }
 }
