@@ -135,7 +135,7 @@ __JsonObject :__</br>
     "procced":false,
     "incomingNode":["2", "4"],
     "outingNode":["11", "13"],
-    "previousData":{"mapIds" : "value1", "mapIds" : "value2"},
+    "previousData":{"2" : "value1", "4" : "value2"},
     "payload": {},
     "init":false
 }
@@ -148,6 +148,17 @@ __Status :__ </br>
 }
 ```
 __ExecutingBolt :__ </br>
+result: <br>
+```JSON
+
+{
+    "callback": "{}",
+    "event": "{\"identification\": \"modified\"}",
+    "context": "{\"previousData\": {\"key\": \"value\"}, \"topicName\": \"\", \"deviceID\": \"\", \"invoked_ERN\": \"\", \"function_name\": \"\", \"parameter\": \"\\n-ls -t\\n\", \"function_version\": \"\", \"memory_limit_in_mb\": 64}"
+}
+```
+
+
 ```JSON
 {
  "PARAMETER" : "STRING",

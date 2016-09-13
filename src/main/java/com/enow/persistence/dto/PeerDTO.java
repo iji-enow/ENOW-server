@@ -7,9 +7,9 @@ public class PeerDTO {
     private String roadMapID;
     private String mapID;
     private String state;
-    private String[] payload;
+    private String payload;
 
-    public PeerDTO(String roadMapID, String mapID, String[] payload) {
+    public PeerDTO(String roadMapID, String mapID, String payload) {
         this.roadMapID = roadMapID;
         this.mapID = mapID;
         this.payload = payload;
@@ -31,11 +31,11 @@ public class PeerDTO {
         this.mapID = mapID;
     }
 
-    public String[] getPayload() {
+    public String getPayload() {
         return payload;
     }
 
-    public void setPayload(String[] payload) {
+    public void setPayload(String payload) {
         this.payload = payload;
     }
 }

@@ -28,14 +28,7 @@ public class PeerDAO implements IPeerDAO {
 
         String roadMapID = (String) jsonObject.get("roadMapId");
         String mapID = (String) jsonObject.get("mapId");
-        String[] payload = null;
-
-        JSONArray payloadJSON = (JSONArray) jsonObject.get("payload");
-        if(payloadJSON != null){
-            payload = new String[payloadJSON.size()];
-            for (int i = 0; i < payloadJSON.size(); i++)
-                payload[i] = (String) payloadJSON.get(i);
-        }
+        String payload = (String) jsonObject.get("payload");
         PeerDTO dto = new PeerDTO(roadMapID, mapID, payload);
         return dto;
     }
