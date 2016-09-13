@@ -31,11 +31,12 @@ public class ActionTopology {
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
-                .fieldsGrouping("trigger-spout", new Fields("jsonObject"))
+                .fieldsGrouping("trigger-spout", new Fields("jsonObject"));
+        builder.setBolt("status-bolt", new StatusBolt())
                 .fieldsGrouping("status-spout", new Fields("status"));
-        builder.setBolt("executing-bolt", new ExecutingBolt()).allGrouping("scheduling-bolt");
-        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("executing-bolt");
-        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
+        builder.setBolt("executing-bolt", new ExecutingBolt()).fieldsGrouping("scheduling-bolt", new Fields("jsonObject"));
+        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).fieldsGrouping("executing-bolt", new Fields("jsonObject"));
+        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).fieldsGrouping("provisioning-bolt", new Fields("jsonObject"));
         LocalCluster cluster = new LocalCluster();
 
         //BasicConfigurator.configure();

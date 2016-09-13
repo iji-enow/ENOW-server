@@ -5,6 +5,7 @@ package com.enow.plugin;
  */
 
 import com.enow.daos.redisDAO.INodeDAO;
+import com.enow.daos.redisDAO.IStatusDAO;
 import com.enow.facility.DAOFacility;
 import com.enow.facility.IDAOFacility;
 
@@ -20,7 +21,7 @@ public class Plugin implements IRedisPlugin {
      * Constructor
      */
     public Plugin() {
-        // TODO: 4/2/2016 Set up the plugin, eg: database, etc.
+        // TODO: 12/9/2016 Set up the plugin, eg: redisdb, mongodb, etc.
     }
 
     /**
@@ -65,8 +66,18 @@ public class Plugin implements IRedisPlugin {
      * @return NodeDAO
      */
     @Override
-    public INodeDAO createPeerDAO() {
-        return factory.createPeerDAO();
+    public INodeDAO createNodeDAO() {
+        return factory.createNodeDAO();
+    }
+
+    /**
+     * Creates a new StatusDAO
+     *
+     * @return StatusDAO
+     */
+    @Override
+    public IStatusDAO createStatusDAO() {
+        return factory.createStatusDAO();
     }
 
 }

@@ -5,6 +5,7 @@ package com.enow.plugin;
  */
 
 import com.enow.daos.redisDAO.INodeDAO;
+import com.enow.daos.redisDAO.IStatusDAO;
 
 /**
  * Created by Kyle 'TMD' Cornelison on 4/2/2016.
@@ -41,7 +42,12 @@ public interface IRedisPlugin {
      *
      * @return NodeDAO
      */
-    INodeDAO createPeerDAO();
-
+    INodeDAO createNodeDAO();
+    /**
+     * Creates a new StatusDAO
+     *
+     * @return StatusDAO
+     */
+    IStatusDAO createStatusDAO();
     //endregion
 }

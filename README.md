@@ -126,10 +126,7 @@ __JsonObject :__</br>
 ```JSON
 
 {
-    "corporationName":"enow",
-    "serverId":"serverId1",
-    "brokerId":"brokerId1",
-    "deviceId":"deviceId1",
+    "topic":"enow/serverId1/brokerId1/deviceId1",
     "roadMapId":"1",
     "mapId":1,
     "procced":false,
@@ -152,7 +149,6 @@ __Status :__ </br>
 __ExecutingBolt :__ </br>
 result: <br>
 ```JSON
-
 {
     "callback": "{}",
     "event": "{\"identification\": \"modified\"}",

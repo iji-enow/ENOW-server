@@ -4,8 +4,10 @@ package com.enow.persistence.redis;
  * Created by writtic on 2016. 9. 12..
  */
 import com.enow.daos.redisDAO.INodeDAO;
+import com.enow.daos.redisDAO.IStatusDAO;
 import com.enow.persistence.dto.NodeDTO;
 import com.enow.facility.DAOFacility;
+import com.enow.persistence.dto.StatusDTO;
 import redis.clients.jedis.Jedis;
 
 import java.util.Iterator;
@@ -49,14 +51,26 @@ public class RedisDB implements IRedisDB {
     }
 
     @Override
-    public int addPeer(NodeDTO dto) {
-        INodeDAO dao = DAOFacility.getInstance().createPeerDAO();
-        return dao.addPeer(dto);
+    public String addNode(NodeDTO dto) {
+        INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        return dao.addNode(dto);
     }
 
     @Override
-    public List<NodeDTO> getAllPeers() {
-        INodeDAO dao = DAOFacility.getInstance().createPeerDAO();
-        return dao.getAllPeers();
+    public List<NodeDTO> getAllNodes() {
+        INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        return dao.getAllNodes();
+    }
+
+    @Override
+    public String addStatus(StatusDTO dto) {
+        IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        return dao.addStatus(dto);
+    }
+
+    @Override
+    public List<StatusDTO> getAllStatus() {
+        IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        return dao.getAllStatus();
     }
 }

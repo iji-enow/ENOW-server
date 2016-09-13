@@ -55,7 +55,16 @@ public class SchedulingBolt extends BaseRichBolt {
                 _collector.fail(input);
                 return;
             }
+
             System.out.println("_jsonObject: " + _jsonObject.toJSONString());
+
+            String roadMapId = (String) _jsonObject.get("roadMapId");
+            String mapId = (String) _jsonObject.get("mapId");
+            String corpName = (String) _jsonObject.get("corporationName");
+            String serverId = (String) _jsonObject.get("serverId");
+            String brokerId = (String) _jsonObject.get("brokerId");
+            String deviceId = (String) _jsonObject.get("deviceId");
+            String topic = corpName + "/" + serverId + "/" + brokerId + "/" + deviceId;
 
             JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
             String[] incomingNodes = null;
@@ -64,14 +73,12 @@ public class SchedulingBolt extends BaseRichBolt {
                 for (int i = 0; i < incomingJSON.size(); i++)
                     incomingNodes[i] = (String) incomingJSON.get(i);
             }
-
             if(incomingNodes != null) {
-                String roadMapId = (String) _jsonObject.get("roadMapId");
                 JSONObject tmp = new JSONObject();
                 for(String peerId : incomingNodes) {
                     String id = _dao.toID(roadMapId, peerId);
                     NodeDTO dto = _dao.getNode(id);
-                    tmp.put(peerId, dto.getData());
+
                 }
                 _jsonObject.put("previousData", tmp);
             }
@@ -93,11 +100,19 @@ public class SchedulingBolt extends BaseRichBolt {
                 return;
             }
             System.out.println("_status: " + _status.toJSONString());
+
+            _collector.emit(new Values(input));
+            try {
+                _LOG.debug("input = [" + input + "]");
+                _collector.ack(input);
+            } catch (Exception e) {
+                _collector.fail(input);
+            }
+
         } else {
             _LOG.warn("Fail in recieving the messages from Source Component");
             return;
         }
-
 
         /*
         if ((Boolean) _jsonObject.get("ack")) {
@@ -149,6 +164,6 @@ public class SchedulingBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("jsonObject"));
+        declarer.declare(new Fields("jsonObject", "status"));
     }
 }

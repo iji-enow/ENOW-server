@@ -14,7 +14,7 @@ import redis.clients.jedis.Jedis;
 
 public class NodeDAO implements INodeDAO {
 
-    private static final String PEER_PREFIX = "node-";
+    private static final String NODE_PREFIX = "node-";
 
     @Override
     public String toID(String roadMapID, String mapID) {
@@ -28,9 +28,11 @@ public class NodeDAO implements INodeDAO {
         String roadMapID = (String) jsonObject.get("roadMapId");
         String mapID = (String) jsonObject.get("mapId");
         String topic = (String) jsonObject.get("topic");
-        String data = (String) jsonObject.get("data");
+        String payload = (String) jsonObject.get("payload");
+        String incomingNode = (String) jsonObject.get("incomingNode");
+        String outingNode = (String) jsonObject.get("outingNode");
 
-        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, data);
+        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload, incomingNode, outingNode);
         return dto;
     }
 
@@ -55,14 +57,36 @@ public class NodeDAO implements INodeDAO {
         }
         if(!nodeExists) {
             jedis.lpush("node-" + id, dto.getTopic());
-            jedis.lpush("node-" + id, dto.getData());
+            jedis.lpush("node-" + id, dto.getPayload());
+            jedis.lpush("node-" + id, dto.getIncomingNode());
+            jedis.lpush("node-" + id, dto.getOutingNode());
             return id + " overwrited";
         } else {
             jedis.lpush("node-" + id, dto.getTopic());
-            jedis.lpush("node-" + id, dto.getData());
+            jedis.lpush("node-" + id, dto.getPayload());
+            jedis.lpush("node-" + id, dto.getIncomingNode());
+            jedis.lpush("node-" + id, dto.getOutingNode());
             return id;
         }
     }
+    @Override
+    public NodeDTO getNode(String ID) {
+        Jedis jedis = RedisDB.getConnection();
+        StringTokenizer tokenizer = new StringTokenizer(ID, "-");
+        String roadMapID = tokenizer.nextToken();
+        String mapID = tokenizer.nextToken();
+        String id = roadMapID + mapID;
+        List<String> result = jedis.lrange(NODE_PREFIX + id, 0, 3);
+        if (result != null) {
+            NodeDTO dto = new NodeDTO(roadMapID, mapID,
+                    result.get(1), result.get(2),
+                    result.get(3), result.get(4));
+            return dto;
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public List<NodeDTO> getAllNodes() {
         Jedis jedis = RedisDB.getConnection();
@@ -75,24 +99,13 @@ public class NodeDAO implements INodeDAO {
         }
         return nodes;
     }
-    @Override
-    public NodeDTO getNode(String ID) {
-        Jedis jedis = RedisDB.getConnection();
-        StringTokenizer tokenizer = new StringTokenizer(ID, "-");
-        String roadMapID = tokenizer.nextToken();
-        String mapID = tokenizer.nextToken();
-        String id = roadMapID + mapID;
-        List<String> result = jedis.lrange(PEER_PREFIX + id, 0, 1);
-        NodeDTO dto = new NodeDTO(roadMapID, mapID, result.get(1), result.get(2));
-        return dto;
-    }
 
     @Override
     public void updateNode(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getMapID();
-        jedis.rpop(PEER_PREFIX + id);
-        jedis.rpush(PEER_PREFIX + id, dto.getData());
+        jedis.rpop(NODE_PREFIX + id);
+        jedis.rpush(NODE_PREFIX + id, dto.getPayload());
     }
     @Override
     public void deleteAllNodes() {
@@ -106,6 +119,6 @@ public class NodeDAO implements INodeDAO {
     @Override
     public void deleteNode(String ID) {
         Jedis jedis = RedisDB.getConnection();
-        jedis.del(PEER_PREFIX + ID);
+        jedis.del(NODE_PREFIX + ID);
     }
 }
