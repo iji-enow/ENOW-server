@@ -39,49 +39,26 @@ public class CallingTriggerBolt extends BaseRichBolt {
 	public void execute(Tuple input) {
 		Producer<String, String> producer = new KafkaProducer<String, String>(props);
 		String spoutSource;
-		boolean serverIdCheck;
-		boolean brokerIdCheck;
-		boolean deviceIdCheck;
-		boolean phaseRoadMapIdCheck;
-		boolean mapIdCheck;
+
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
 		_jsonArray = (ArrayList<JSONObject>) input.getValueByField("jsonArray");
-		deviceIdCheck = input.getBooleanByField("deviceIdCheck");
-		phaseRoadMapIdCheck = input.getBooleanByField("phaseRoadMapIdCheck");
-		mapIdCheck = input.getBooleanByField("mapIdCheck");
-		serverIdCheck = input.getBooleanByField("serverIdCheck");
-		brokerIdCheck = input.getBooleanByField("brokerIdCheck");
 
 		if (_jsonArray == null) {
 			ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
-					"error : " + "serverIdCheck = " + serverIdCheck + " brokerIdCheck = " + brokerIdCheck
-							+ " machinIdCheck = " + deviceIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck
-							+ " mapIdCheck = " + mapIdCheck);
+					"error : _jsonArray == null");
 			producer.send(data);
 
 			collector.emit(new Values("error"));
 		} else {
 			for (JSONObject tmpJsonObject : _jsonArray) {
-				if (!(boolean) tmpJsonObject.get("ack")) {
-					if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck && mapIdCheck) {
-						ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
-								tmpJsonObject.toJSONString());
-						producer.send(data);
-						collector.emit(new Values(tmpJsonObject.toJSONString()));
-					} else {
-						ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
-								"error : " + "serverIdCheck = " + serverIdCheck + " brokerIdCheck = " + brokerIdCheck
-										+ " machinIdCheck = " + deviceIdCheck + " phaseRoadMapIdCheck = "
-										+ phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck);
-						producer.send(data);
 
-						collector.emit(new Values("error"));
-					}
-				} else {
-
-				}
+				ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
+						tmpJsonObject.toJSONString());
+				producer.send(data);
+				collector.emit(new Values(tmpJsonObject.toJSONString()));
 			}
+
 		}
 		/*
 		 * if (spoutSource.equals("trigger")) { if (serverIdCheck &&

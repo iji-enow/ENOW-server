@@ -17,6 +17,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.enow.storm.Connect;
+import com.mongodb.MongoClient;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 
 public class IndexingBolt extends BaseRichBolt {
 	protected static final Logger LOG = LogManager.getLogger(IndexingBolt.class);
@@ -32,6 +36,14 @@ public class IndexingBolt extends BaseRichBolt {
 	public void execute(Tuple input) {
 		JSONParser parser = new JSONParser();
 		JSONObject _jsonObject;
+		boolean deviceIdCheck = false;
+		boolean roadMapIdCheck = false;
+		boolean mapIdCheck = false;
+		boolean brokerIdCheck = false;
+		boolean serverIdCheck = false;
+		
+		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
+		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 
 		if (input.toString().length() == 0) {
 			return;
@@ -41,59 +53,115 @@ public class IndexingBolt extends BaseRichBolt {
 
 		try {
 			_jsonObject = (JSONObject) parser.parse(msg);
-
 			if (_jsonObject.containsKey("init")) {
-
-				if (_jsonObject.containsKey("ack") && _jsonObject.containsKey("proceed")
-						&& _jsonObject.containsKey("corporationName") && _jsonObject.containsKey("serverId")
-						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("deviceId")
-						&& _jsonObject.containsKey("phaseRoadMapId")) {
+				if ((boolean)_jsonObject.get("init")) {
+					if (_jsonObject.containsKey("corporationName") && _jsonObject.containsKey("serverId")
+							&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("deviceId")
+							&& _jsonObject.containsKey("roadMapId")) {
+					} else {
+						// init = true 일 경우 필요한 값이 다 안 들어 왔다.
+						return;
+					}
 				} else {
-					// init = true 일 경우 필요한 값이 다 안 들어 왔다.
-					return;
+					if (_jsonObject.containsKey("proceed") && _jsonObject.containsKey("corporationName")
+							&& _jsonObject.containsKey("serverId") && _jsonObject.containsKey("brokerId")
+							&& _jsonObject.containsKey("deviceId") && _jsonObject.containsKey("roadMapId")
+							&& _jsonObject.containsKey("mapId") && _jsonObject.containsKey("payload")
+							&& _jsonObject.containsKey("waitingNode") && _jsonObject.containsKey("outingNode")
+							&& _jsonObject.containsKey("previousData")) {
+					} else {
+						// init = false 일 경우 필요한 값이 다 안 들어 왔다.
+						return;
+					}
 				}
-				
-				/*
-				Event
-				{
-				    "corporationName":"enow",
-				    "serverId":"serverId1",
-				    "brokerId":"brokerId1",
-				    "deviceId":"deviceId1",
-				    "phaseRoadMapId":"1",
-				    "phaseId":"phaseId1",
-				    "mapId":1,
-				    "procced":false,
-				    "waitingPeer":["1", "2"],
-				    "incomingPeer":null,
-				    "outingPeer":["11", "13"],
-				    "subsequentInitPeer":["15"],
-				    "previousData":[{},{},{}],
-				    "payload":[]
-				}
-				*/
-				
-			} else {
-				if (_jsonObject.containsKey("ack") && _jsonObject.containsKey("proceed")
-						&& _jsonObject.containsKey("corporationName") && _jsonObject.containsKey("serverId")
-						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("deviceId")
-						&& _jsonObject.containsKey("phaseRoadMapId") && _jsonObject.containsKey("phaseId")
-						&& _jsonObject.containsKey("mapId") && _jsonObject.containsKey("message")
-						&& _jsonObject.containsKey("waitingPeer") && _jsonObject.containsKey("outingPeer")
-						&& _jsonObject.containsKey("subsequentInitPeer") && _jsonObject.containsKey("incomingPeer")
-						&& _jsonObject.containsKey("previousData")) {
-				} else {
-					// init = false 일 경우 필요한 값이 다 안 들어 왔다.
-					return;
-				}
+			}else{
+				//init자체가 안들어왔다. 
+				return;
 			}
 		} catch (ParseException e1) {
 			// JSONParseException 발
 			e1.printStackTrace();
 			return;
 		}
+		
+		
+		MongoDatabase dbWrite = mongoClient.getDatabase("lists");
 
-		collector.emit(new Values(_jsonObject));
+		MongoCollection<Document> serverListCollection = dbWrite.getCollection("server");
+
+		if (serverListCollection.count(new Document("serverId", (String) _jsonObject.get("serverId"))) == 0) {
+			// There isn't deviceId that matches input signal from
+			// device
+			serverIdCheck = false;
+		} else if (serverListCollection
+				.count(new Document("serverId", (String) _jsonObject.get("serverId"))) == 1) {
+			// There is deviceId that matches input signal from device
+			serverIdCheck = true;
+		} else {
+			serverIdCheck = false;
+			LOG.debug("There are more than two server ID on MongoDB");
+		}
+
+		// Get device collection for matching input signal from device
+		MongoCollection<Document> brokerListCollection = dbWrite.getCollection("broker");
+
+		if (brokerListCollection.count(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 0) {
+			// There isn't deviceId that matches input signal from
+			// device
+			brokerIdCheck = false;
+		} else if (brokerListCollection
+				.count(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 1) {
+			// There is deviceId that matches input signal from device
+			brokerIdCheck = true;
+
+		} else {
+			brokerIdCheck = false;
+			LOG.debug("There are more than two broker ID on MongoDB");
+		}
+
+		// Get device collection for matching input signal from device
+		MongoCollection<Document> deviceListCollection = dbWrite.getCollection("device");
+
+		if (deviceListCollection.count(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 0) {
+			// There isn't deviceId that matches input signal from
+			// device
+			deviceIdCheck = false;
+		} else if (deviceListCollection
+				.count(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 1) {
+			// There is deviceId that matches input signal from device
+			deviceIdCheck = true;
+		} else {
+			deviceIdCheck = false;
+			LOG.debug("There are more than two machine ID on MongoDB");
+		}
+		// Check Phase Road-map ID
+
+		dbWrite = mongoClient.getDatabase("enow");
+
+		MongoCollection<Document> roadMapCollection = dbWrite.getCollection("roadMap");
+
+		if (roadMapCollection
+				.count(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 0) {
+			// There isn't phaseRoadMapId that matches input signal from
+			// device
+			roadMapIdCheck = false;
+		} else if (roadMapCollection
+				.count(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 1) {
+			// There is phaseRoadMapId that matches input signal from
+			// device
+			roadMapIdCheck = true;
+
+		} else {
+			roadMapIdCheck = false;
+			LOG.debug("There are more than two Phase Road-map Id on MongoDB");
+		}
+
+		if(serverIdCheck && brokerIdCheck && deviceIdCheck && roadMapIdCheck){
+			collector.emit(new Values(_jsonObject));
+		}else{
+			return;
+		}
+		
 		try {
 			LOG.debug("input = [" + input + "]");
 			collector.ack(input);

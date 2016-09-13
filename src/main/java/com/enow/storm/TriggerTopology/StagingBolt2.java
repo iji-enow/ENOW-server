@@ -46,27 +46,26 @@ public class StagingBolt2 extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		JSONObject _jsonObject = null;
-		boolean deviceIdCheck = false;
-		boolean phaseRoadMapIdCheck = false;
 		boolean mapIdCheck = false;
-		boolean brokerIdCheck = false;
-		boolean serverIdCheck = false;
 		FindIterable<Document> iterable;
 		JSONParser jsonParser = new JSONParser();
-		JSONObject phaseRoadMapId;
-		JSONObject phases;
+		JSONObject roadMapId;
+		JSONObject mapIds;
+		JSONObject mapId;
 		JSONObject phaseId;
 		JSONObject devices;
-		JSONObject incomingPeer;
-		JSONObject outingPeer;
-		JSONObject waitingPeer;
+		JSONObject outingNode;
+		JSONObject waitingNode;
 		JSONObject subsequentInitPeer;
 		JSONArray deviceId;
-		JSONArray waitingPeerPhase;
+		JSONArray waitingNodeArray;
 		JSONArray subsequentInitPeerPhase;
-		JSONArray outingPeerArray;
+		JSONArray outingNodeArray;
 		JSONArray incomingPeerArray;
+		JSONArray initNode;
 		JSONParser parser = new JSONParser();
+		
+		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 		ConcurrentHashMap<String, JSONObject> ackSchdueling = new ConcurrentHashMap<>();
 		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -78,102 +77,95 @@ public class StagingBolt2 extends BaseRichBolt {
 		// json.put("text", "2");
 		// webhook = con.post(con.getURL(), json);
 
-		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
-
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
-		if ((boolean) _jsonObject.get("ack")) {
-			if (ackSchdueling.containsKey(_jsonObject.get("mapId"))) {
-				if (ackSchdueling.get("mapId") == _jsonObject) {
-					ackSchdueling.remove("mapId");
-					_jsonArray.add(_jsonObject);
-					collector.emit(new Values(_jsonArray, serverIdCheck, brokerIdCheck, deviceIdCheck,
-							phaseRoadMapIdCheck, mapIdCheck));
-				} else {
-					// mapId만 똑같고 들어 있는 값이 달러?!! 들어 오자마자 장난이냐??
-					return;
+		if((boolean)_jsonObject.get("init")){
+			MongoDatabase dbWrite = mongoClient.getDatabase("enow");
+			MongoCollection<Document> roadMapCollection = dbWrite.getCollection("roadMap");
+			try{
+			iterable = roadMapCollection
+					.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
+			
+			try {
+				roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
+				
+				mapIds = (JSONObject) roadMapId.get("mapIds");
+				initNode = (JSONArray)roadMapId.get("initNode");
+				waitingNode = (JSONObject) roadMapId.get("waitingNode");
+				outingNode = (JSONObject) roadMapId.get("outingNode");
+				String jsonString = _jsonObject.toJSONString();
+				
+				for(int i = 0 ; i<initNode.size() ; i++){
+					String InitMapId = (String)initNode.get(i);
+					mapIds = (JSONObject)mapIds.get(InitMapId);
+					
+					JSONObject tmpJsonObject = new JSONObject();
+					JSONArray tmpJsonArray = new JSONArray();
+					tmpJsonObject = (JSONObject) parser.parse(jsonString);
+					tmpJsonObject.put("mapId", InitMapId);
+
+					if (outingNode.containsKey(InitMapId)) {
+						outingNodeArray = (JSONArray) outingNode.get(InitMapId);
+
+						tmpJsonObject.put("outingPeer", outingNodeArray);
+					}else{
+						tmpJsonObject.put("outingPeer", null);
+					}
+					
+					if (waitingNode.containsKey(InitMapId)) {
+						waitingNodeArray = (JSONArray) waitingNode.get(InitMapId);
+
+						tmpJsonObject.put("outingPeer", waitingNodeArray);
+					}else{
+						tmpJsonObject.put("outingPeer", null);
+					}
+					
+					tmpJsonObject.put("init", false);
+					_jsonArray.add(tmpJsonObject);
 				}
-			} else {
-				// excute cycle을 돌지도 아났는데 ack를 보내고 있어. 그람 안되는거 안배웠으??
+			} catch (ParseException e) {
+				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
+				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
+				e.printStackTrace();
 				return;
+				
 			}
+			} catch (NullPointerException e) {
+				e.getMessage();
+				return;
+				// _jsonObject.get("deviceId")가 phase1에 있는 deviceId 중 없는
+				// 경우
+			}
+
+
+		}else{
+			
+			
+		}
+		
+		
+		
+		
+		
+		//////////////////////////////////////////////////////////////////////////////////
+		
+		
+		
+		
+		/*
+		if ((boolean) _jsonObject.get("ack")) {
 		} else {
 			if ((boolean) _jsonObject.get("init")) {
 				// Connect MongoDB
 				// Get enow database
 				MongoDatabase dbWrite = mongoClient.getDatabase("lists");
 
-				MongoCollection<Document> serverListCollection = dbWrite.getCollection("server");
-
-				if (serverListCollection.count(new Document("serverId", (String) _jsonObject.get("serverId"))) == 0) {
-					// There isn't deviceId that matches input signal from
-					// device
-					serverIdCheck = false;
-				} else if (serverListCollection
-						.count(new Document("serverId", (String) _jsonObject.get("serverId"))) == 1) {
-					// There is deviceId that matches input signal from device
-					serverIdCheck = true;
-				} else {
-					LOG.debug("There are more than two server ID on MongoDB");
-					// this should not happen it's our mistake
-				}
-
-				// Get device collection for matching input signal from device
-				MongoCollection<Document> brokerListCollection = dbWrite.getCollection("broker");
-
-				if (brokerListCollection.count(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 0) {
-					// There isn't deviceId that matches input signal from
-					// device
-					brokerIdCheck = false;
-				} else if (brokerListCollection
-						.count(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 1) {
-					// There is deviceId that matches input signal from device
-					brokerIdCheck = true;
-
-				} else {
-					// machineIdCheck = "device id : now we have a problem";
-					LOG.debug("There are more than two broker ID on MongoDB");
-				}
-
-				// Get device collection for matching input signal from device
-				MongoCollection<Document> deviceListCollection = dbWrite.getCollection("device");
-
-				if (deviceListCollection.count(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 0) {
-					// There isn't deviceId that matches input signal from
-					// device
-					deviceIdCheck = false;
-				} else if (deviceListCollection
-						.count(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 1) {
-					// There is deviceId that matches input signal from device
-					deviceIdCheck = true;
-				} else {
-					// machineIdCheck = "device id : now we have a problem";
-					LOG.debug("There are more than two machine ID on MongoDB");
-				}
-				// Check Phase Road-map ID
-
 				dbWrite = mongoClient.getDatabase("enow");
 
 				MongoCollection<Document> phaseRoadMapCollection = dbWrite.getCollection("phaseRoadMap");
 
-				if (phaseRoadMapCollection
-						.count(new Document("phaseRoadMapId", (String) _jsonObject.get("phaseRoadMapId"))) == 0) {
-					// There isn't phaseRoadMapId that matches input signal from
-					// device
-					phaseRoadMapIdCheck = false;
-				} else if (phaseRoadMapCollection
-						.count(new Document("phaseRoadMapId", (String) _jsonObject.get("phaseRoadMapId"))) == 1) {
-					// There is phaseRoadMapId that matches input signal from
-					// device
-					phaseRoadMapIdCheck = true;
 
-				} else {
-					// phaseRoadMapIdCheck = "phase road map id : now we have a
-					// problem";
-					LOG.debug("There are more than two Phase Road-map Id on MongoDB");
-				}
-
-				if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck) {
+				if (true) {
 					try {
 						iterable = phaseRoadMapCollection
 								.find(new Document("phaseRoadMapId", (String) _jsonObject.get("phaseRoadMapId")));
@@ -373,10 +365,6 @@ public class StagingBolt2 extends BaseRichBolt {
 					return;
 				}
 				
-				serverIdCheck = true;
-				brokerIdCheck = true;
-				deviceIdCheck = true;
-				phaseRoadMapIdCheck = true;
 				
 				try {
 					MongoDatabase dbWrite = mongoClient.getDatabase("enow");
@@ -468,7 +456,7 @@ public class StagingBolt2 extends BaseRichBolt {
 				}
 			}
 
-			if (serverIdCheck && brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck && mapIdCheck) {
+			if (true) {
 				for (int i = 0; i < _jsonArray.size(); i++) {
 					JSONObject tmpJsonObject = _jsonArray.get(i);
 					if (ackSchdueling.containsKey(tmpJsonObject.get("mapId"))) {
@@ -484,6 +472,7 @@ public class StagingBolt2 extends BaseRichBolt {
 				return;
 			}
 		}
+		*/
 
 		collector.emit(new Values(_jsonArray));
 

@@ -49,11 +49,11 @@ public class TriggerTopology {
         TopologyBuilder builder = new TopologyBuilder();
         builder.setSpout("event-spout", new KafkaSpout(kafkaConfig));
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
-        builder.setBolt("indexing-db-bolt", indexingDBBolt).allGrouping("indexing-bolt");
-        builder.setBolt("staging-bolt", new StagingBolt2()).allGrouping("indexing-bolt");
-        builder.setBolt("staging-db-bolt", stagingDBBolt).allGrouping("staging-bolt");
+        //builder.setBolt("indexing-db-bolt", indexingDBBolt).allGrouping("indexing-bolt");
+        builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
+        //builder.setBolt("staging-db-bolt", stagingDBBolt).allGrouping("staging-bolt");
         builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
-        builder.setBolt("calling-trigger-db-bolt", callingTriggerDBBolt).allGrouping("calling-trigger-bolt");
+        //builder.setBolt("calling-trigger-db-bolt", callingTriggerDBBolt).allGrouping("calling-trigger-bolt");
 
         /*
         config.setNumWorkers(2);
