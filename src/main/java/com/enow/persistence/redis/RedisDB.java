@@ -19,7 +19,6 @@ public class RedisDB implements IRedisDB {
 
     public static RedisDB getInstance() {
         if(instance == null) {
-
             instance = new RedisDB();
         }
         return instance;
@@ -33,9 +32,7 @@ public class RedisDB implements IRedisDB {
         connection = new Jedis("127.0.0.1", 6379);
     }
 
-    public void setTestDb() {
-        connection.select(10);
-    }
+    // public void setTestDb() {connection.select(10);}
 
     @Override
     public void clear() {

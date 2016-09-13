@@ -4,21 +4,23 @@ package com.enow.persistence.dto;
  * Created by writtic on 2016. 9. 12..
  */
 public class PeerDTO {
-    private int peerID;
+    private String roadMapID;
     private String mapID;
     private String state;
     private String payload;
 
-    public PeerDTO(int peerID, String mapID, String state, String payload) {
-        this.peerID = peerID;
+    public PeerDTO(String roadMapID, String mapID, String state, String payload) {
+        this.roadMapID = roadMapID;
         this.mapID = mapID;
         this.state = state;
         this.payload = payload;
     }
 
-    public int getPeerID() {
-        return peerID;
+    public String getRoadMapID() {
+        return roadMapID;
     }
+
+    public void setRoadMapID(String roadMapID) { this.roadMapID = roadMapID; }
 
     public String getMapID() {
         return mapID;

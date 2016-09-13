@@ -4,10 +4,7 @@ package com.enow.daos.redisDAO;
  * Created by writtic on 2016. 9. 12..
  */
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import com.enow.persistence.redis.RedisDB;
 import com.enow.persistence.dto.PeerDTO;
@@ -19,31 +16,29 @@ public class PeerDAO implements IPeerDAO {
     private static final String PEER_PREFIX = "peer-";
 
     @Override
-    public int addPeer(PeerDTO dto) {
+    public String addPeer(PeerDTO dto) {
         Jedis jedis = RedisDB.getConnection();
+        String id = dto.getRoadMapID() + "-" + dto.getMapID();
+
         Set<String> keys = jedis.keys("peer-*");
         Iterator<String> iter = keys.iterator();
-        boolean peerExists = false;
         ArrayList<String> ids = new ArrayList<>();
+
+        boolean peerExists = false;
+
         while(iter.hasNext()) {
             String key = iter.next();
             key = key.substring(5, key.length());
             ids.add(key);
-            if(Integer.parseInt(key) == dto.getPeerID()) {
+            if(key.equals(id)) {
                 peerExists = true;
             }
         }
         if(!peerExists) {
-            jedis.lpush("peer-" + dto.getPeerID(), dto.getMapID());
-            jedis.lpush("peer-" + dto.getPeerID(), dto.getState());
-            jedis.lpush("peer-" + dto.getPeerID(), dto.getPayload());
-            return dto.getPeerID();
+            jedis.lpush("peer-" + id, dto.getState());
+            jedis.lpush("peer-" + id, dto.getPayload());
+            return id + " overwrited";
         } else {
-            int id = dto.getPeerID();
-            while(ids.contains(id + "")) {
-                id++;
-            }
-            jedis.lpush("peer-" + id, dto.getMapID());
             jedis.lpush("peer-" + id, dto.getState());
             jedis.lpush("peer-" + id, dto.getPayload());
             return id;
@@ -54,25 +49,32 @@ public class PeerDAO implements IPeerDAO {
         Jedis jedis = RedisDB.getConnection();
         List<PeerDTO> peers = new ArrayList<>();
         Set<String> keys = jedis.keys("peer-*");
+
         for (String key : keys) {
             key = key.substring(5, key.length());
-            peers.add(getPeer(Integer.parseInt(key)));
+            peers.add(getPeer(key));
         }
         return peers;
     }
     @Override
-    public PeerDTO getPeer(int peerID) {
+    public PeerDTO getPeer(String roadMapIDAndMapID) {
         Jedis jedis = RedisDB.getConnection();
-        List<String> result = jedis.lrange(PEER_PREFIX + peerID, 0, 2);
-        PeerDTO dto = new PeerDTO(peerID, result.get(0), result.get(1), result.get(2));
+        StringTokenizer tokenizer = new StringTokenizer(roadMapIDAndMapID, "-");
+        String roadMapID = tokenizer.nextToken();
+        String mapID = tokenizer.nextToken();
+        String id = roadMapID + mapID;
+        List<String> result = jedis.lrange(PEER_PREFIX + id, 0, 1);
+        PeerDTO dto = new PeerDTO(roadMapID, mapID, result.get(1), result.get(2));
         return dto;
     }
 
     @Override
     public void updatePeer(PeerDTO dto) {
         Jedis jedis = RedisDB.getConnection();
-        jedis.rpop(PEER_PREFIX + dto.getPeerID());
-        jedis.rpush(PEER_PREFIX + dto.getPeerID(), dto.getState());
+        String id = dto.getRoadMapID() + "-" + dto.getMapID();
+        jedis.rpop(PEER_PREFIX + id);
+        jedis.rpush(PEER_PREFIX + id, dto.getState());
+        jedis.rpush(PEER_PREFIX + id, dto.getPayload());
     }
     @Override
     public void deleteAllPeers() {
@@ -84,8 +86,9 @@ public class PeerDAO implements IPeerDAO {
         }
     }
     @Override
-    public void deletePeer(int peerID) {
+    public void deletePeer(String roadMapID, String mapID) {
         Jedis jedis = RedisDB.getConnection();
-        jedis.del(PEER_PREFIX + peerID);
+        String id = roadMapID + "-" + mapID;
+        jedis.del(PEER_PREFIX + id);
     }
 }
