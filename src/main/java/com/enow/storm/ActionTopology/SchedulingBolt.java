@@ -1,5 +1,8 @@
 package com.enow.storm.ActionTopology;
 
+import com.enow.daos.redisDAO.IPeerDAO;
+import com.enow.facility.DAOFacility;
+import com.enow.persistence.dto.PeerDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -19,55 +22,73 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SchedulingBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(SchedulingBolt.class);
-    static ConcurrentHashMap<String[], Boolean> _peerNode = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, JSONObject> _visitedNode = new ConcurrentHashMap<>();
-    static ConcurrentHashMap<String, JSONObject> _previousData = new ConcurrentHashMap<>();
+    private IPeerDAO _dao;
     private OutputCollector _collector;
     private JSONParser _parser;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
+        _dao = DAOFacility.getInstance().createPeerDAO();
         _collector = collector;
         _parser = new JSONParser();
     }
 
     @Override
     public void execute(Tuple input) {
+
         _LOG.info("Entering SchedulingBolt");
+
         JSONObject _jsonObject;
+        JSONObject _status;
 
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
+        String source = input.getSourceComponent();
+        String jsonString = input.getStringByField("jsonObject").toString().substring(1, input.getValues().toString().length() - 1);
+        if(source.equals("trigger-spout")) {
+            try {
+                _jsonObject = (JSONObject) _parser.parse(jsonString);
+                _LOG.info("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
+            } catch (ParseException e1) {
+                e1.printStackTrace();
+                _LOG.warn("Fail in inserting messages to _jsonObject");
+                _collector.fail(input);
+                return;
+            }
+            System.out.println("_jsonObject: " + _jsonObject.toJSONString());
 
-        String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
+            JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingPeer");
+            String[] incomingPeers = null;
+            if(incomingJSON != null){
+                incomingPeers = new String[incomingJSON.size()];
+                for (int i = 0; i < incomingJSON.size(); i++)
+                    incomingPeers[i] = (String) incomingJSON.get(i);
+            }
 
-        try {
-            _jsonObject = (JSONObject) _parser.parse(msg);
-            _LOG.warn("Succeed in inserting messages to JSONObject : \n" + _jsonObject.toJSONString());
-        } catch (ParseException e1) {
-            e1.printStackTrace();
-            _LOG.warn("Fail in inserting messages to JSONObject");
-            _collector.fail(input);
-            return;
+            if(incomingPeers != null) {
+                String roadMapId = (String) _jsonObject.get("roadMapId");
+                String mapId = (String) _jsonObject.get("mapId");
+                String id = _dao.toID(roadMapId, mapId);
+                _dao.addPeer(id);
+            }
+        } else {
+            try {
+                _status = (JSONObject) _parser.parse(jsonString);
+                _LOG.info("Succeed in inserting messages to _status : \n" + _status.toJSONString());
+            } catch (ParseException e1) {
+                e1.printStackTrace();
+                _LOG.warn("Fail in inserting messages to _status");
+                _collector.fail(input);
+                return;
+            }
+            System.out.println("_status: " + _status.toJSONString());
         }
-        System.out.println(_jsonObject.toJSONString());
 
-        JSONArray waitingJSON = (JSONArray) _jsonObject.get("waitingPeer");
-        JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingPeer");
-        String[] waitingPeers = null;
-        String[] incomingPeers = null;
-        if(waitingJSON != null){
-            waitingPeers = new String[waitingJSON.size()];
-            for (int i = 0; i < waitingJSON.size(); i++)
-                waitingPeers[i] = (String) waitingJSON.get(i);
-        }
-        if(incomingJSON != null){
-            incomingPeers = new String[incomingJSON.size()];
-            for (int i = 0; i < incomingJSON.size(); i++)
-                incomingPeers[i] = (String) incomingJSON.get(i);
-        }
 
+
+
+        /*
         if ((Boolean) _jsonObject.get("ack")) {
             // Acknowledge ack = true
             _LOG.info("Acknowledge ack = true");
@@ -112,6 +133,7 @@ public class SchedulingBolt extends BaseRichBolt {
                 }
             }
         }
+        */
         _collector.emit(new Values(_jsonObject));
         try {
             _LOG.debug("input = [" + input + "]");

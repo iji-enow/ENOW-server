@@ -8,6 +8,7 @@ import com.enow.persistence.dto.PeerDTO;
 import java.util.List;
 
 public interface IPeerDAO {
+    String toID(String roadMapID, String mapID);
     /**
      * Handles adding a peer,
      * adding a roadMapID
@@ -28,12 +29,12 @@ public interface IPeerDAO {
      *
      * @return
      */
-    PeerDTO getPeer(String roadMapIDAndMapID);
+    PeerDTO getPeer(String ID);
 
     List<PeerDTO> getAllPeers();
 
     /**
-     * mostly be used for updating the peer blob state
+     * mostly be used for updating the device status relevant to current node
      *
      * @param dto
      */

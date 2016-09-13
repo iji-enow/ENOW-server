@@ -8,12 +8,35 @@ import java.util.*;
 
 import com.enow.persistence.redis.RedisDB;
 import com.enow.persistence.dto.PeerDTO;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import redis.clients.jedis.Jedis;
 
 
 public class PeerDAO implements IPeerDAO {
 
     private static final String PEER_PREFIX = "peer-";
+
+    @Override
+    public String toID(String roadMapID, String mapID) {
+        String id = roadMapID + "-" + mapID;
+        return id;
+    }
+
+    @Override
+    public PeerDTO jsonObjectToPeer(JSONObject jsonObject){
+        String roadMapID = (String) jsonObject.get("roadMapId");
+        String mapID = (String) jsonObject.get("mapId");
+        String[] payload = null;
+        String status =
+
+        JSONArray payloadJSON = (JSONArray) jsonObject.get("payload");
+        if(payloadJSON != null){
+            payload = new String[payloadJSON.size()];
+            for (int i = 0; i < payloadJSON.size(); i++)
+                payload[i] = (String) payloadJSON.get(i);
+        }
+    }
 
     @Override
     public String addPeer(PeerDTO dto) {
@@ -57,9 +80,9 @@ public class PeerDAO implements IPeerDAO {
         return peers;
     }
     @Override
-    public PeerDTO getPeer(String roadMapIDAndMapID) {
+    public PeerDTO getPeer(String ID) {
         Jedis jedis = RedisDB.getConnection();
-        StringTokenizer tokenizer = new StringTokenizer(roadMapIDAndMapID, "-");
+        StringTokenizer tokenizer = new StringTokenizer(ID, "-");
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + mapID;

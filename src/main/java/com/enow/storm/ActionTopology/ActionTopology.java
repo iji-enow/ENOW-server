@@ -6,6 +6,7 @@ import org.apache.storm.LocalCluster;
 import org.apache.storm.kafka.*;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
 
 public class ActionTopology {
     public static void main(String[] args) throws Exception {
@@ -16,12 +17,13 @@ public class ActionTopology {
         BrokerHosts brokerHosts = new ZkHosts(zkConnString);
         // Trigger Kafka setting
         String topicTrigger = "trigger";
-        SpoutConfig triggerConfig = new SpoutConfig(brokerHosts,topicTrigger, "/"+topicTrigger, "storm");
+        SpoutConfig triggerConfig = new SpoutConfig(brokerHosts, topicTrigger, "/"+topicTrigger, "storm");
+
         triggerConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         triggerConfig.startOffsetTime = -1;
         // Status Kafka setting
         String topicStatus = "status";
-        SpoutConfig statusConfig = new SpoutConfig(brokerHosts,topicStatus, "/"+topicStatus, "storm");
+        SpoutConfig statusConfig = new SpoutConfig(brokerHosts, topicStatus, "/"+topicStatus, "storm");
         statusConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         statusConfig.startOffsetTime = -1;
         // Build Topology
@@ -29,8 +31,8 @@ public class ActionTopology {
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
-                .allGrouping("trigger-spout")
-                .allGrouping("status-spout");
+                .fieldsGrouping("trigger-spout", new Fields("jsonObject"))
+                .fieldsGrouping("status-spout", new Fields("status"));
         builder.setBolt("executing-bolt", new ExecutingBolt()).allGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("executing-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");

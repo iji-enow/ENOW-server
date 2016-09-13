@@ -135,7 +135,8 @@ __JsonObject :__</br>
     "procced":false,
     "waitingNode":["2", "4"],
     "outingNode":["11", "13"],
-    "previousData":[{},{},{}],
+    "previousData":{"key1" : "value1", "key2" : "value2"}, 
+    "topic"
     "payload":[],
     "init":false
 }
@@ -144,7 +145,7 @@ __Status :__ </br>
 ```JSON
 {
   "topic":"enow/serverId1/brokerId1/deviceId1",
-  "payload":"JSON STRING"
+  "payload": {"haha": "haha","hoo":"hoo"}
 }
 ```
 __ExecutingBolt :__ </br>

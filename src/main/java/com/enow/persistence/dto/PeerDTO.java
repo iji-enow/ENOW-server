@@ -20,7 +20,9 @@ public class PeerDTO {
         return roadMapID;
     }
 
-    public void setRoadMapID(String roadMapID) { this.roadMapID = roadMapID; }
+    public void setRoadMapID(String roadMapID) {
+        this.roadMapID = roadMapID;
+    }
 
     public String getMapID() {
         return mapID;
@@ -38,7 +40,11 @@ public class PeerDTO {
         this.state = state;
     }
 
-    public String getPayload() { return payload; }
+    public String getPayload() {
+        return payload;
+    }
 
-    public void setPayload(String payload) { this.payload = payload; }
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
 }
