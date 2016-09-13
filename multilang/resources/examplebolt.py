@@ -42,12 +42,12 @@ class CountBolt(storm.BasicBolt):
 
         jsonObject = json.loads(word, strict=False)
 
-        dictPayload = jsonObject["PAYLOAD"]
+        dictPayload = jsonObject["payload"]
         rawPayload = json.dumps(dictPayload)
         rawSource = jsonObject["SOURCE"]
         rawParameter = jsonObject["PARAMETER"]
-        arrayPreviousData = jsonObject["previousData"]
-        rawPreviousData = json.dumps(arrayPreviousData)
+        previousDataObject = jsonObject["previousData"]
+        rawPreviousData = json.dumps(previousDataObject)
 
         payload = rawPayload.replace("\r", "")
         source = rawSource.replace("\r", "")
@@ -59,7 +59,7 @@ class CountBolt(storm.BasicBolt):
         self.Building.setPayload(payload.decode("utf-8").encode("ascii"))
         self.Building.setPreviousData(previousData.decode("utf-8").encode("ascii"))
         tmp = self.Building.run()
-        
+
         jsonResult = json.loads(tmp, strict = False)
 
         storm.emit([jsonResult])
