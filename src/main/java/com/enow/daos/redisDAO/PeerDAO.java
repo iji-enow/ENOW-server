@@ -28,8 +28,10 @@ public class PeerDAO implements IPeerDAO {
 
         String roadMapID = (String) jsonObject.get("roadMapId");
         String mapID = (String) jsonObject.get("mapId");
+        String topic = (String) jsonObject.get("topic");
         String payload = (String) jsonObject.get("payload");
-        PeerDTO dto = new PeerDTO(roadMapID, mapID, payload);
+
+        PeerDTO dto = new PeerDTO(roadMapID, mapID, topic, payload);
         return dto;
     }
 
@@ -79,8 +81,8 @@ public class PeerDAO implements IPeerDAO {
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + mapID;
-        List<String> result = jedis.lrange(PEER_PREFIX + id, 0, 0);
-        PeerDTO dto = new PeerDTO(roadMapID, mapID, result.get(1));
+        List<String> result = jedis.lrange(PEER_PREFIX + id, 0, 1);
+        PeerDTO dto = new PeerDTO(roadMapID, mapID, result.get(1), result.get(2));
         return dto;
     }
 

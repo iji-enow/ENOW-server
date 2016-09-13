@@ -6,12 +6,13 @@ package com.enow.persistence.dto;
 public class PeerDTO {
     private String roadMapID;
     private String mapID;
-    private String state;
+    private String topic;
     private String payload;
 
-    public PeerDTO(String roadMapID, String mapID, String payload) {
+    public PeerDTO(String roadMapID, String mapID, String topic, String payload) {
         this.roadMapID = roadMapID;
         this.mapID = mapID;
+        this.topic = topic;
         this.payload = payload;
     }
 
@@ -29,6 +30,14 @@ public class PeerDTO {
 
     public void setMapID(String mapID) {
         this.mapID = mapID;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 
     public String getPayload() {

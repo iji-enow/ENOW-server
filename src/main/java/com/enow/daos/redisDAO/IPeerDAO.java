@@ -21,7 +21,7 @@ public interface IPeerDAO {
      * Handles adding a peer,
      * adding a roadMapID
      * adding a mapID
-     * adding a status
+     * adding a topic
      * adding a payload
      *
      * @param dto
@@ -32,7 +32,7 @@ public interface IPeerDAO {
      * Handles verifying peer which returns peerID
      * Getting the current roadMapID
      * Getting the current mapID
-     * Getting a list of status
+     * Getting a list of topic
      * Getting a list of payload
      *
      * @return
@@ -42,7 +42,7 @@ public interface IPeerDAO {
     List<PeerDTO> getAllPeers();
 
     /**
-     * mostly be used for updating the device status relevant to current node
+     * mostly be used for updating the peer relevant to current node
      *
      * @param dto
      */

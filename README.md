@@ -135,13 +135,13 @@ __JsonObject :__</br>
     "procced":false,
     "incomingNode":["2", "4"],
     "outingNode":["11", "13"],
-    "source" : "STRING",
-    "parameter" : "STRING",
     "previousData":{"2" : "value1", "4" : "value2"},
     "payload": {},
     "init":false
 }
 ```
+
+source, parameter 들은 따로 MongoDB를 통해 Console로부터 값을 받아온다.
 __Status :__ </br>
 ```JSON
 {
