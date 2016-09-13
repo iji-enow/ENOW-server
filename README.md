@@ -135,9 +135,8 @@ __JsonObject :__</br>
     "procced":false,
     "incomingNode":["2", "4"],
     "outingNode":["11", "13"],
-    "previousData":{"key1" : "value1", "key2" : "value2"},
-    "topic"
-    "payload":[],
+    "previousData":{"mapIds" : "value1", "mapIds" : "value2"},
+    "payload": {},
     "init":false
 }
 ```
@@ -145,7 +144,7 @@ __Status :__ </br>
 ```JSON
 {
   "topic":"enow/serverId1/brokerId1/deviceId1",
-  "payload": {"haha": "haha","hoo":"hoo"}
+  "payload": {"humidity": "60", "brightness": "231"}
 }
 ```
 __ExecutingBolt :__ </br>

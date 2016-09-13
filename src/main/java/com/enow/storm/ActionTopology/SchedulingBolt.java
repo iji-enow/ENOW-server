@@ -72,7 +72,14 @@ public class SchedulingBolt extends BaseRichBolt {
                 String id = _dao.toID(roadMapId, mapId);
                 _dao.addPeer(id);
             }
-        } else {
+            _collector.emit(new Values(_jsonObject));
+            try {
+                _LOG.debug("input = [" + input + "]");
+                _collector.ack(input);
+            } catch (Exception e) {
+                _collector.fail(input);
+            }
+        } else if(source.equals("status-spout")){
             try {
                 _status = (JSONObject) _parser.parse(jsonString);
                 _LOG.info("Succeed in inserting messages to _status : \n" + _status.toJSONString());
@@ -83,14 +90,9 @@ public class SchedulingBolt extends BaseRichBolt {
                 return;
             }
             System.out.println("_status: " + _status.toJSONString());
-        }
-
-        _collector.emit(new Values(_jsonObject));
-        try {
-            _LOG.debug("input = [" + input + "]");
-            _collector.ack(input);
-        } catch (Exception e) {
-            _collector.fail(input);
+        } else {
+            _LOG.warn("Fail in recieving the messages from Source Component");
+            return;
         }
 
 

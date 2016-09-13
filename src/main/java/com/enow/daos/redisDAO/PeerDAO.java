@@ -86,7 +86,7 @@ public class PeerDAO implements IPeerDAO {
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + mapID;
-        List<String[]> result = jedis.lrange(PEER_PREFIX + id, 0, 0);
+        List<String> result = jedis.lrange(PEER_PREFIX + id, 0, 0);
         PeerDTO dto = new PeerDTO(roadMapID, mapID, result.get(1));
         return dto;
     }
