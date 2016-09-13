@@ -27,7 +27,7 @@ public class SchedulingBolt extends BaseRichBolt {
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
-        _dao = DAOFacility.getInstance().createPeerDAO();
+        _dao = DAOFacility.getInstance().createNodeDAO();
         _collector = collector;
         _parser = new JSONParser();
     }

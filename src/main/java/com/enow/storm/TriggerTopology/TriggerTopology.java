@@ -4,7 +4,6 @@ package com.enow.storm.TriggerTopology;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
-import org.apache.storm.StormSubmitter;
 import org.apache.storm.kafka.BrokerHosts;
 import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.SpoutConfig;
@@ -15,7 +14,7 @@ import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
 import com.enow.persistence.mongodb.InsertMongoBolt;
-import com.enow.storm.mapper.mongodb.SimpleMongoMapper;
+import com.enow.persistence.mongodb.mapper.SimpleMongoMapper;
 
 
 

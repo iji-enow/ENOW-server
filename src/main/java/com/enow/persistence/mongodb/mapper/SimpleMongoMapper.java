@@ -1,15 +1,12 @@
-package com.enow.storm.mapper.mongodb;
+package com.enow.persistence.mongodb.mapper;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.storm.mongodb.common.mapper.MongoMapper;
 import org.apache.storm.tuple.ITuple;
-import org.apache.storm.tuple.Values;
 import org.bson.Document;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 public class SimpleMongoMapper implements MongoMapper {
