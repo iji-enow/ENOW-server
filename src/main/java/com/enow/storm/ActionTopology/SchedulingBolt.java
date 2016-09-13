@@ -85,7 +85,13 @@ public class SchedulingBolt extends BaseRichBolt {
             System.out.println("_status: " + _status.toJSONString());
         }
 
-
+        _collector.emit(new Values(_jsonObject));
+        try {
+            _LOG.debug("input = [" + input + "]");
+            _collector.ack(input);
+        } catch (Exception e) {
+            _collector.fail(input);
+        }
 
 
         /*
@@ -134,13 +140,6 @@ public class SchedulingBolt extends BaseRichBolt {
             }
         }
         */
-        _collector.emit(new Values(_jsonObject));
-        try {
-            _LOG.debug("input = [" + input + "]");
-            _collector.ack(input);
-        } catch (Exception e) {
-            _collector.fail(input);
-        }
     }
 
     @Override

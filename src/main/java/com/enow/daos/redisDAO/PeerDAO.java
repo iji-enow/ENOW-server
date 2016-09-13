@@ -25,10 +25,10 @@ public class PeerDAO implements IPeerDAO {
 
     @Override
     public PeerDTO jsonObjectToPeer(JSONObject jsonObject){
+
         String roadMapID = (String) jsonObject.get("roadMapId");
         String mapID = (String) jsonObject.get("mapId");
         String[] payload = null;
-        String status =
 
         JSONArray payloadJSON = (JSONArray) jsonObject.get("payload");
         if(payloadJSON != null){
@@ -36,6 +36,8 @@ public class PeerDAO implements IPeerDAO {
             for (int i = 0; i < payloadJSON.size(); i++)
                 payload[i] = (String) payloadJSON.get(i);
         }
+        PeerDTO dto = new PeerDTO(roadMapID, mapID, payload);
+        return dto;
     }
 
     @Override
@@ -58,11 +60,9 @@ public class PeerDAO implements IPeerDAO {
             }
         }
         if(!peerExists) {
-            jedis.lpush("peer-" + id, dto.getState());
             jedis.lpush("peer-" + id, dto.getPayload());
             return id + " overwrited";
         } else {
-            jedis.lpush("peer-" + id, dto.getState());
             jedis.lpush("peer-" + id, dto.getPayload());
             return id;
         }
@@ -86,8 +86,8 @@ public class PeerDAO implements IPeerDAO {
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + mapID;
-        List<String> result = jedis.lrange(PEER_PREFIX + id, 0, 1);
-        PeerDTO dto = new PeerDTO(roadMapID, mapID, result.get(1), result.get(2));
+        List<String[]> result = jedis.lrange(PEER_PREFIX + id, 0, 0);
+        PeerDTO dto = new PeerDTO(roadMapID, mapID, result.get(1));
         return dto;
     }
 
@@ -96,7 +96,6 @@ public class PeerDAO implements IPeerDAO {
         Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getMapID();
         jedis.rpop(PEER_PREFIX + id);
-        jedis.rpush(PEER_PREFIX + id, dto.getState());
         jedis.rpush(PEER_PREFIX + id, dto.getPayload());
     }
     @Override

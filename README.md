@@ -133,9 +133,9 @@ __JsonObject :__</br>
     "roadMapId":"1",
     "mapId":1,
     "procced":false,
-    "waitingNode":["2", "4"],
+    "incomingNode":["2", "4"],
     "outingNode":["11", "13"],
-    "previousData":{"key1" : "value1", "key2" : "value2"}, 
+    "previousData":{"key1" : "value1", "key2" : "value2"},
     "topic"
     "payload":[],
     "init":false

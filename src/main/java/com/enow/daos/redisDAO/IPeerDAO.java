@@ -5,10 +5,18 @@ package com.enow.daos.redisDAO;
  */
 
 import com.enow.persistence.dto.PeerDTO;
+import org.json.simple.JSONObject;
+
 import java.util.List;
 
 public interface IPeerDAO {
     String toID(String roadMapID, String mapID);
+    /**
+     * change jsonObject to PeerDTO,
+     *
+     * @param jsonObject
+     */
+    PeerDTO jsonObjectToPeer(JSONObject jsonObject);
     /**
      * Handles adding a peer,
      * adding a roadMapID
