@@ -1,5 +1,6 @@
 package com.enow.storm.ActionTopology;
 
+import com.enow.daos.redisDAO.IStatusDAO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -11,6 +12,8 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.util.Map;
 
@@ -20,10 +23,13 @@ import java.util.Map;
 public class StatusBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
     private OutputCollector _collector;
+    private JSONParser _parser;
+    private IStatusDAO _dao;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
+        _parser = new JSONParser();
     }
 
     @Override
@@ -34,29 +40,21 @@ public class StatusBolt extends BaseRichBolt {
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
+        String jsonString = input.getStringByField("jsonObject").toString().substring(1, input.getValues().toString().length() - 1);
 
-        _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        Boolean ack = (Boolean) _jsonObject.get("ack");
-
-        // ack switcher
-        ack = (ack) ? false : true;
-        _jsonObject.put("ack", ack);
-
-        JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
-        String[] outingPeers = null;
-        if(outingJSON != null){
-            outingPeers = new String[outingJSON.size()];
-            for (int i = 0; i < outingJSON.size(); i++)
-                outingPeers[i] = (String) outingJSON.get(i);
+        try {
+            _jsonObject = (JSONObject) _parser.parse(jsonString);
+            _LOG.info("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
+        } catch (ParseException e1) {
+            e1.printStackTrace();
+            _LOG.warn("Fail in inserting messages to _jsonObject");
+            _collector.fail(input);
+            return;
         }
 
-        if (outingPeers != null) {
+        _dao.addStatus(_dao.jsonObjectToStatus(_jsonObject));
 
-        }
-
-        System.out.println(_jsonObject.toJSONString());
-
-        _collector.emit(new Values(_jsonObject));
+        _collector.emit(new Values(input));
         try {
             _LOG.debug("input = [" + input + "]");
             _collector.ack(input);

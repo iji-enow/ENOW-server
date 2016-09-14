@@ -43,7 +43,7 @@ public class SchedulingBolt extends BaseRichBolt {
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
-        String source = input.getSourceComponent();
+
         String jsonString = input.getStringByField("jsonObject").toString().substring(1, input.getValues().toString().length() - 1);
         if(source.equals("trigger-spout")) {
             try {
@@ -55,8 +55,6 @@ public class SchedulingBolt extends BaseRichBolt {
                 _collector.fail(input);
                 return;
             }
-
-            System.out.println("_jsonObject: " + _jsonObject.toJSONString());
 
             String roadMapId = (String) _jsonObject.get("roadMapId");
             String mapId = (String) _jsonObject.get("mapId");

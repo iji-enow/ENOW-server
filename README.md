@@ -83,7 +83,9 @@ INPUT:
 <br>`statusKafka` ⇨ `jsonObject(Status)`
 
 PROCESSING:
-> 현재 노드가 다수의 `incomingNode`들을 가질 때, 이를 `Redis`에 저장한다. <br>When node needs multiple `previousData`, wait for all of `incomingNodes`
+> 현재 노드가 다수의 `incomingNode`들을 가질 때, 이를 `Redis`에 저장한다. <br>
+각각의 Trigger signal들을 Redis에 저장된 device 데이터들과 매칭시켜 jsonObject에 저장한다.
+<br>When node needs multiple `previousData`, wait for all of `incomingNodes`
 
 OUTPUT:
 > `jsonObject` ⇨ `ExecutingBolt`
@@ -118,6 +120,19 @@ PROCESSING:
 
 OUTPUT:
 > `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
+
+StatusTopology
+--------------
+
+### StatusBolt :
+INPUT:
+> `statusKafka` ⇨ `jsonObject(Status)`
+
+PROCESSING:
+> `Topic`별로 디바이스 정보를 `Redis`에 저장한다.
+
+OUTPUT:
+> `jsonObject` ⇨ `ExecutingBolt`
 
 Payload
 =======

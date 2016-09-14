@@ -31,9 +31,9 @@ public class ActionTopology {
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
-                .fieldsGrouping("trigger-spout", new Fields("jsonObject"));
+                .shuffleGrouping("trigger-spout");
         builder.setBolt("status-bolt", new StatusBolt())
-                .fieldsGrouping("status-spout", new Fields("status"));
+                .shuffleGrouping("status-spout");
         builder.setBolt("executing-bolt", new ExecutingBolt()).fieldsGrouping("scheduling-bolt", new Fields("jsonObject"));
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).fieldsGrouping("executing-bolt", new Fields("jsonObject"));
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).fieldsGrouping("provisioning-bolt", new Fields("jsonObject"));
