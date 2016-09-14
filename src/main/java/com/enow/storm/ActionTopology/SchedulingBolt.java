@@ -44,6 +44,9 @@ public class SchedulingBolt extends BaseRichBolt {
             return;
         }
 
+
+
+        /*
         String jsonString = input.getStringByField("jsonObject").toString().substring(1, input.getValues().toString().length() - 1);
         if(source.equals("trigger-spout")) {
             try {
@@ -111,6 +114,7 @@ public class SchedulingBolt extends BaseRichBolt {
             _LOG.warn("Fail in recieving the messages from Source Component");
             return;
         }
+        */
 
         /*
         if ((Boolean) _jsonObject.get("ack")) {

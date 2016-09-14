@@ -5,6 +5,7 @@ TEST-storm ![travis](https://travis-ci.org/ENOW-IJI/storm.svg?branch=master) [![
 
 Todo List
 ---------
+These are the new features you should expect in the coming months:
 - [x] ~~Constructing development enviroment of Apache Storm~~
 - [x] ~~Constructing development enviroment of Apache Kafka~~
 - [x] ~~Constructing development enviroment of Apache Zookeeper~~
@@ -26,19 +27,19 @@ Todo List
 Elements
 ========
 
-#### Nodes
-
+### Nodes
 - outingNode
 - incomingNode
 - Nodes
 
-####
-
 Topologies
 ==========
+To do realtime computation on Apache Storm for ENOW, we create what are called "topologies". A topology is a graph of computation. Each node in a topology contains processing logic, and links between nodes indicate how data should be passed around between nodes.
 
 TriggerTopology
 ---------------
+TriggerTopology literally can activate the component of Road-Map so that IoT devices are connected each other. before ordering devices, TriggerTopology refine the information of event and link refined one to database for using.
+
 ### IndexingBolt :
 INPUT:
  > `eventKafka` ⇨ `jsonObject(Event)`
@@ -60,7 +61,7 @@ INPUT:
 
 PROCESSING:
 > `"init" = true`라면 받은 `jsonObject` 그대로 `CallingTriggerBolt`로 넘겨준다.
-<br><br>`"init" = flase`라면 받은 `jsonObject`의 `MapID`값에 해당하는 `deviceId`,`waitingNode`,`outingNode`의 값을 `MongoDB`에서 받아와 갱신시켜준다.
+<br><br>`"init" = flase`라면 받은 `jsonObject`의 `MapID`값에 해당하는 `deviceId`, `waitingNode`, `outingNode`의 값을 `MongoDB`에서 받아와 갱신시켜준다.
 
 OUTPUT:
 > `jsonObject` ⇨ `CallingTriggerBolt`
@@ -77,14 +78,16 @@ OUTPUT:
 
 ActionTopology
 --------------
+ActionTopology schedules the enow server to run a Road-Map scheme and handles the executed source code from console pairing the result to devices and event came from TriggerTopology.
 ### SchedulingBolt :
 INPUT:
 > `triggerKafka` ⇨ `jsonObject(Trigger)`
 <br>`statusKafka` ⇨ `jsonObject(Status)`
 
 PROCESSING:
-> 현재 노드가 다수의 `incomingNode`들을 가질 때, 이를 `Redis`에 저장한다. <br>
-각각의 Trigger signal들을 Redis에 저장된 device 데이터들과 매칭시켜 jsonObject에 저장한다.
+> 현재 노드가 다수의 `incomingNode`들을 가질 때, 각각 노드들의 `payload` 정보를 `Redis`에서 읽어들여 `jsonObject`에 저장한다. <br>
+각각의 Trigger signal들을 Redis에 저장된 device 데이터들과 매칭시켜 jsonObject에 저장한다.<br>
+변경된 `jsonObject`를 `ExecutingBolt`로 `emit` 한다.
 <br>When node needs multiple `previousData`, wait for all of `incomingNodes`
 
 OUTPUT:
@@ -149,6 +152,8 @@ __JsonObject :__</br>
     "outingNode":["11", "13"],
     "previousData":{"2" : "value1", "4" : "value2"},
     "payload": {},
+    "lastNode":false,
+    "oneWay":false,
     "init":false
 }
 ```
