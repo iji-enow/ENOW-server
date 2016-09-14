@@ -2,6 +2,7 @@ package com.enow.daos.redisDAO;
 
 import com.enow.persistence.dto.StatusDTO;
 import com.enow.persistence.redis.RedisDB;
+import com.mongodb.util.JSON;
 import org.json.simple.JSONObject;
 import redis.clients.jedis.Jedis;
 
@@ -17,7 +18,8 @@ public class StatusDAO implements IStatusDAO{
     @Override
     public StatusDTO jsonObjectToStatus(JSONObject jsonObject){
         String topic = (String) jsonObject.get("topic");
-        String payload = (String) jsonObject.get("payload");
+        JSONObject temp = (JSONObject) jsonObject.get("payload");
+        String payload = temp.toJSONString();
 
         StatusDTO dto = new StatusDTO(topic, payload);
         return dto;

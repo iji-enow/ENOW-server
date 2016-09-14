@@ -153,7 +153,7 @@ __JsonObject :__</br>
     "previousData":{"2" : "value1", "4" : "value2"},
     "payload": {},
     "lastNode":false,
-    "oneWay":false,
+    "order":false,
     "init":false
 }
 ```
