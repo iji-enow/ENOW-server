@@ -39,17 +39,19 @@ public class SchedulingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        _LOG.info("Entering SchedulingBolt");
+        _LOG.debug("Entering SchedulingBolt");
 
         JSONObject _jsonObject;
 
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
+
+        // Parsing JSONString to JSONObject
         String jsonString = input.getStringByField("jsonObject").toString().substring(1, input.getValues().toString().length() - 1);
         try {
             _jsonObject = (JSONObject) _parser.parse(jsonString);
-            _LOG.info("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
+            _LOG.debug("Succeed in inserting messages to _jsonObject : " + _jsonObject.toJSONString());
         } catch (ParseException e1) {
             e1.printStackTrace();
             _LOG.warn("Fail in inserting messages to _jsonObject");
@@ -57,16 +59,16 @@ public class SchedulingBolt extends BaseRichBolt {
             return;
         }
 
-        Boolean order = (Boolean) _jsonObject.get("order");
+        String order = (String) _jsonObject.get("order");
         String topic = (String) _jsonObject.get("topic");
 
-        if(!order) {
-            // ready to get the status of device we need
+        if(order == "1") {
+            // Ready to get the status of device we need
             StatusDTO statusDTO = _statusDAO.getStatus(topic);
             String temp = statusDTO.getPayload();
             try {
                 _jsonObject.put("payload", _parser.parse(temp));
-                _LOG.info("Succeed in inserting status to _jsonObject : \n" + _jsonObject.toJSONString());
+                _LOG.debug("Succeed in inserting status to _jsonObject : " + _jsonObject.toJSONString());
             } catch (ParseException e1) {
                 e1.printStackTrace();
                 _LOG.warn("Fail in inserting status to _jsonObject");
@@ -77,11 +79,12 @@ public class SchedulingBolt extends BaseRichBolt {
         String roadMapId = (String) _jsonObject.get("roadMapId");
 
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
-        String[] incomingNodes = null;
+        String[] incomingNodes = new String[incomingJSON.size()];
         if(incomingJSON != null){
-            incomingNodes = new String[incomingJSON.size()];
+            // If this node have incoming nodes...
             for (int i = 0; i < incomingJSON.size(); i++)
                 incomingNodes[i] = (String) incomingJSON.get(i);
+            // Put the previous data incoming nodes have in _jsonObject
             if(incomingNodes != null) {
                 JSONObject tempJSON = new JSONObject();
                 for(String nodeId : incomingNodes) {
@@ -90,7 +93,17 @@ public class SchedulingBolt extends BaseRichBolt {
                     tempJSON.put(nodeId, nodeDTO.getPayload());
                 }
                 _jsonObject.put("previousData", tempJSON);
+                _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
             }
+        }
+        // Store this node for subsequent node
+        String result = "nothing";
+        try {
+            NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
+            result = _nodeDAO.addNode(dto);
+        } catch(Exception e) {
+            e.printStackTrace();
+            _LOG.warn("Succeed in inserting current node to Redis : " + result);
         }
 
         _collector.emit(new Values(_jsonObject));

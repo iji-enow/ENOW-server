@@ -1,5 +1,7 @@
 package com.enow.storm.ActionTopology;
 
+import com.enow.daos.redisDAO.INodeDAO;
+import com.enow.facility.DAOFacility;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -16,10 +18,12 @@ import java.util.Map;
 
 public class ProvisioningBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
+    private INodeDAO _nodeDAO;
     private OutputCollector _collector;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
+        _nodeDAO = DAOFacility.getInstance().createNodeDAO();
         _collector = collector;
     }
 
@@ -29,11 +33,6 @@ public class ProvisioningBolt extends BaseRichBolt {
         JSONObject _jsonObject;
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        Boolean ack = (Boolean) _jsonObject.get("ack");
-
-        // ack switcher
-        ack = (ack) ? false : true;
-        _jsonObject.put("ack", ack);
 
         JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
         String[] outingPeers = null;
@@ -46,7 +45,7 @@ public class ProvisioningBolt extends BaseRichBolt {
         if (outingPeers != null) {
 
         }
-
+        _nodeDAO.updateNode(_nodeDAO.jsonObjectToNode(_jsonObject));
         System.out.println(_jsonObject.toJSONString());
 
         _collector.emit(new Values(_jsonObject));

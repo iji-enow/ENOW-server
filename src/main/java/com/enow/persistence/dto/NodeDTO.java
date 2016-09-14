@@ -8,16 +8,12 @@ public class NodeDTO {
     private String mapID;
     private String topic;
     private String payload;
-    private String incomingNode;
-    private String outingNode;
 
-    public NodeDTO(String roadMapID, String mapID, String topic, String data, String incomingNode, String outingNode) {
+    public NodeDTO(String roadMapID, String mapID, String topic, String payload) {
         this.roadMapID = roadMapID;
         this.mapID = mapID;
         this.topic = topic;
         this.payload = payload;
-        this.incomingNode = incomingNode;
-        this.outingNode = outingNode;
     }
 
     public String getRoadMapID() {
@@ -50,21 +46,5 @@ public class NodeDTO {
 
     public void setPayload(String payload) {
         this.payload = payload;
-    }
-
-    public String getIncomingNode() {
-        return incomingNode;
-    }
-
-    public void setIncomingNode(String incomingNode) {
-        this.incomingNode = incomingNode;
-    }
-
-    public String getOutingNode() {
-        return outingNode;
-    }
-
-    public void setOutingNode(String outingNode) {
-        this.outingNode = outingNode;
     }
 }

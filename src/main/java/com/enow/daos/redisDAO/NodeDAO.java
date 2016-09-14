@@ -29,10 +29,8 @@ public class NodeDAO implements INodeDAO {
         String mapID = (String) jsonObject.get("mapId");
         String topic = (String) jsonObject.get("topic");
         String payload = (String) jsonObject.get("payload");
-        String incomingNode = (String) jsonObject.get("incomingNode");
-        String outingNode = (String) jsonObject.get("outingNode");
 
-        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload, incomingNode, outingNode);
+        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload);
         return dto;
     }
 
@@ -56,17 +54,15 @@ public class NodeDAO implements INodeDAO {
             }
         }
         if(!nodeExists) {
-            jedis.lpush("node-" + id, dto.getTopic());
-            jedis.lpush("node-" + id, dto.getPayload());
-            jedis.lpush("node-" + id, dto.getIncomingNode());
-            jedis.lpush("node-" + id, dto.getOutingNode());
-            return id + " overwrited";
-        } else {
-            jedis.lpush("node-" + id, dto.getTopic());
-            jedis.lpush("node-" + id, dto.getPayload());
-            jedis.lpush("node-" + id, dto.getIncomingNode());
-            jedis.lpush("node-" + id, dto.getOutingNode());
+            jedis.lpush(NODE_PREFIX + id, dto.getTopic());
+            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
             return id;
+        } else {
+            jedis.rpop(NODE_PREFIX + id);
+            jedis.rpop(NODE_PREFIX + id);
+            jedis.lpush(NODE_PREFIX + id, dto.getTopic());
+            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
+            return id + " overwrited";
         }
     }
     @Override
@@ -76,11 +72,10 @@ public class NodeDAO implements INodeDAO {
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + mapID;
-        List<String> result = jedis.lrange(NODE_PREFIX + id, 0, 3);
+        List<String> result = jedis.lrange(NODE_PREFIX + id, 0, 1);
         if (result != null) {
             NodeDTO dto = new NodeDTO(roadMapID, mapID,
-                    result.get(1), result.get(2),
-                    result.get(3), result.get(4));
+                    result.get(1), result.get(2));
             return dto;
         } else {
             return null;
