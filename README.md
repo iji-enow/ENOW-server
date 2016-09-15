@@ -108,7 +108,7 @@ INPUT:
 > `ExecutingBolt` ⇨ `jsonObject`
 
 PROCESSING:
-> 현재 노드가 다수의 `outingNode`들을 가질 때, 이를 `Redis`에 저장한다.
+> 갱신된 `result`를 해당 노드에 매칭된 `Redis`에 갱신한다.
 
 OUTPUT:
 > `jsonObject` ⇨ `CallingFeedBolt`
@@ -119,7 +119,8 @@ INPUT:
 
 PROCESSING:
 > `ProvisioningBolt`를 참고하여 `KafkaProducer`를 호출한다.<br>
-  `outingNode`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.
+  `outingNode`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.<br>
+  `order`값을 통해
 
 OUTPUT:
 > `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
@@ -153,10 +154,11 @@ __JsonObject :__</br>
     "previousData":{"2" : "value1", "4" : "value2"},
     "payload": {},
     "lastNode":false,
-    "order":false,
+    "order":2,
     "init":false
 }
 ```
+order 0: 반복되는 시퀸스
 
 source, parameter 들은 따로 MongoDB를 통해 Console로부터 값을 받아온다.
 __Status :__ </br>

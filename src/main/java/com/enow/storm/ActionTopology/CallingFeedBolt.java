@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CallingFeedBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
-    static ConcurrentHashMap<String, JSONObject> _ackedNode = new ConcurrentHashMap<>();
     private OutputCollector _collector;
     private Producer<String, String> producer;
     private Properties props;
@@ -43,61 +42,35 @@ public class CallingFeedBolt extends BaseRichBolt {
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
         Boolean proceed = (Boolean) _jsonObject.get("proceed");
-        Boolean ack = (Boolean) _jsonObject.get("ack");
-        String mapId = (String) _jsonObject.get("mapId");
+        Integer order = (Integer) _jsonObject.get("order");
         String temp;
-        // 다음으로 나아갈 허가가 떨어짐
+
         if (proceed) {
-            JSONArray waitingJSON = (JSONArray) _jsonObject.get("waitingPeer");
             JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
-            String[] waitingPeers = null;
-            String[] outingPeers = null;
-            _ackedNode.put(mapId, _jsonObject);
-
-            // 기다려야할 Peer들 처리
-            if (waitingJSON != null) {
-                waitingPeers = new String[waitingJSON.size()];
-                for (int i = 0; i < waitingJSON.size(); i++)
-                    waitingPeers[i] = (String) waitingJSON.get(i);
-            }
-            if (waitingPeers != null) {
-                // waitingPeers 존재
-                for (String waitingPeer : waitingPeers) {
-                    temp = _ackedNode.get(waitingPeer).toJSONString();
-                    _ackedNode.remove(waitingPeer);
-                    ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
-                    producer.send(peerData);
-                }
-            } else {
-                // 자기자신만 보내면 됨
-                temp = _ackedNode.get(mapId).toJSONString();
-                _ackedNode.remove(mapId);
-                ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
-                producer.send(peerData);
-            }
-
-            // 나가야할 Peer들 처리리
-           if (outingJSON != null) {
-                outingPeers = new String[outingJSON.size()];
+            String[] outingPeers = new String[outingJSON.size()];
+            if (outingJSON != null) {
                 for (int i = 0; i < outingJSON.size(); i++)
                     outingPeers[i] = (String) outingJSON.get(i);
             }
             if (outingPeers != null) {
-                for (String waitingPeer : waitingPeers) {
-                    temp = _ackedNode.get(waitingPeer).toJSONString();
-                    ProducerRecord<String, String> peerData = new ProducerRecord<>("feed", temp);
-                    producer.send(peerData);
+                // OutingNodes exist
+                for (String outingPeer : outingPeers) {
+                    // 맵 아이디 변환작업
+                    _jsonObject.put("mapId", outingPeer);
+                    temp = _jsonObject.toJSONString();
+                    ProducerRecord<String, String> nodeData = new ProducerRecord<>("feed", temp);
+                    producer.send(nodeData);
                 }
-            }
-            ProducerRecord<String, String> data = new ProducerRecord<>("feed", _jsonObject.toJSONString());
-            producer.send(data);
-        } else {
-            _ackedNode.put(mapId, _jsonObject);
-            if (ack) {
-
             } else {
-                ProducerRecord<String, String> data = new ProducerRecord<>("feed", _jsonObject.toJSONString());
-                producer.send(data);
+                // OutingNodes don't exist
+                // Maybe This node is the last node of sequence or alone
+                temp = _jsonObject.toJSONString();
+                ProducerRecord<String, String> nodeData = new ProducerRecord<>("feed", temp);
+                producer.send(nodeData);
+                if(order == 1 || order == 0){
+                    nodeData = new ProducerRecord<>("proceed", temp);
+                    producer.send(nodeData);
+                }
             }
         }
         _collector.emit(new Values(_jsonObject));

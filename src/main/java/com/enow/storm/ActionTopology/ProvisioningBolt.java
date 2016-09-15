@@ -34,17 +34,6 @@ public class ProvisioningBolt extends BaseRichBolt {
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
-        JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
-        String[] outingPeers = null;
-        if(outingJSON != null){
-            outingPeers = new String[outingJSON.size()];
-            for (int i = 0; i < outingJSON.size(); i++)
-                outingPeers[i] = (String) outingJSON.get(i);
-        }
-
-        if (outingPeers != null) {
-
-        }
         _nodeDAO.updateNode(_nodeDAO.jsonObjectToNode(_jsonObject));
         System.out.println(_jsonObject.toJSONString());
 
