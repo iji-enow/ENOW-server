@@ -154,7 +154,7 @@ __JsonObject :__</br>
     "payload": {},
     "lastNode":false,
     "order":false,
-    "varified":false
+    "verified":false
 }
 ```
 order 0: 반복되는 시퀸스

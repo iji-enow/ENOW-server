@@ -70,8 +70,9 @@ public class NodeDAO implements INodeDAO {
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + "-" + mapID;
-        List<String> result = jedis.lrange(NODE_PREFIX + id, 0, 1);
-        if (result != null) {
+        System.out.println(id);
+        List<String> result = jedis.lrange(NODE_PREFIX + id, 0, -1);
+        if (result.size() > 1) {
             NodeDTO dto = new NodeDTO(roadMapID, mapID, result.get(0), result.get(1));
             return dto;
         } else {

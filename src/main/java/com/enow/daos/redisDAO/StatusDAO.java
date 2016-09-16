@@ -59,7 +59,7 @@ public class StatusDAO implements IStatusDAO {
     public StatusDTO getStatus(String topic) {
         Jedis jedis = RedisDB.getConnection();
         List<String> result = jedis.lrange(STATUS_PREFIX + topic, 0, 0);
-        if (result != null) {
+        if (result.size() > 0) {
             StatusDTO dto = new StatusDTO(topic, result.get(0));
             return dto;
         } else {

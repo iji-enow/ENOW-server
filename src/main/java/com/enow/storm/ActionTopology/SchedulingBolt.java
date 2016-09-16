@@ -89,8 +89,9 @@ public class SchedulingBolt extends BaseRichBolt {
             if(incomingNodes != null) {
                 JSONObject tempJSON = new JSONObject();
                 List<NodeDTO> checker = new ArrayList<>();
+                String id;
                 for(String nodeId : incomingNodes) {
-                    String id = _nodeDAO.toID(roadMapId, nodeId);
+                    id = _nodeDAO.toID(roadMapId, nodeId);
                     NodeDTO tempDTO = _nodeDAO.getNode(id);
                     if(tempDTO != null) {
                         checker.add(tempDTO);
@@ -99,7 +100,7 @@ public class SchedulingBolt extends BaseRichBolt {
 
                 if(checker.size() == incomingJSON.size()) {
                     for(String nodeId : incomingNodes) {
-                        String id = _nodeDAO.toID(roadMapId, nodeId);
+                        id = _nodeDAO.toID(roadMapId, nodeId);
                         NodeDTO nodeDTO = _nodeDAO.getNode(id);
                         tempJSON.put(nodeId, nodeDTO.getPayload());
                         _jsonObject.put("previousData", tempJSON);
