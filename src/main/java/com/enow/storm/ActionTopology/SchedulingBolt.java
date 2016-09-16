@@ -19,6 +19,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class SchedulingBolt extends BaseRichBolt {
@@ -86,17 +88,27 @@ public class SchedulingBolt extends BaseRichBolt {
             // Put the previous data incoming nodes have in _jsonObject
             if(incomingNodes != null) {
                 JSONObject tempJSON = new JSONObject();
+                List<NodeDTO> checker = new ArrayList<>();
                 for(String nodeId : incomingNodes) {
                     String id = _nodeDAO.toID(roadMapId, nodeId);
-                    if(_nodeDAO.getNode(id) != null) {
+                    NodeDTO tempDTO = _nodeDAO.getNode(id);
+                    if(tempDTO != null) {
+                        checker.add(tempDTO);
+                    }
+                }
+
+                if(checker.size() == incomingJSON.size()) {
+                    for(String nodeId : incomingNodes) {
+                        String id = _nodeDAO.toID(roadMapId, nodeId);
                         NodeDTO nodeDTO = _nodeDAO.getNode(id);
                         tempJSON.put(nodeId, nodeDTO.getPayload());
                         _jsonObject.put("previousData", tempJSON);
                         _nodeDAO.deleteNode(id);
-                    } else {
-                        _jsonObject.put("varified", false);
                     }
+                } else {
+                    _jsonObject.put("varified", false);
                 }
+
                 _jsonObject.put("previousData", tempJSON);
                 _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
             }
@@ -106,10 +118,10 @@ public class SchedulingBolt extends BaseRichBolt {
         try {
             NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
             result = _nodeDAO.addNode(dto);
-            _nodeDAO.getNode(_nodeDAO.toID(dto.getRoadMapID(), dto.getMapID()));
+            _LOG.warn("Succeed in inserting current node to Redis : " + result);
         } catch(Exception e) {
             e.printStackTrace();
-            _LOG.warn("Succeed in inserting current node to Redis : " + result);
+            _LOG.warn("Fail in inserting current node to Redis : " + result);
         }
 
         _collector.emit(new Values(_jsonObject));
