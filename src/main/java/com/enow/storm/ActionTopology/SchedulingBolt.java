@@ -104,14 +104,13 @@ public class SchedulingBolt extends BaseRichBolt {
                         NodeDTO nodeDTO = _nodeDAO.getNode(id);
                         tempJSON.put(nodeId, nodeDTO.getPayload());
                         _jsonObject.put("previousData", tempJSON);
-                        _nodeDAO.deleteNode(id);
+                        _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
                     }
                 } else {
                     _jsonObject.put("verified", false);
                 }
 
-                _jsonObject.put("previousData", tempJSON);
-                _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
+
             }
         }
         // Store this node for subsequent node
