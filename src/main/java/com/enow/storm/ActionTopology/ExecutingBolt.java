@@ -48,10 +48,10 @@ public class ExecutingBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         JSONObject _jsonObject;
-        JSONObject _message = new JSONObject();
+        JSONObject _payload = new JSONObject();
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        _message.put("succeed", "great!");
-        _jsonObject.put("message",_message);
+        _payload.put("succeed", "great!");
+        _jsonObject.put("payload",_payload);
 
 
         _collector.emit(new Values(_jsonObject));
