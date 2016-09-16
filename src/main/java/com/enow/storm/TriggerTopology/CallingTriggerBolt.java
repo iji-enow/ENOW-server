@@ -38,19 +38,26 @@ public class CallingTriggerBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		Producer<String, String> producer = new KafkaProducer<String, String>(props);
-		String spoutSource;
 
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
 		_jsonArray = (ArrayList<JSONObject>) input.getValueByField("jsonArray");
 
-		if (_jsonArray == null) {
+		if(_jsonArray.size() == 0){
+			/*
 			ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
-					"error : _jsonArray == null");
+					"from order kafka but there is mapId for deviceId");
 			producer.send(data);
-
-			collector.emit(new Values("error"));
-		} else {
+			*/
+			return;
+		}else if (_jsonArray.get(0).containsKey("error")) {
+			/*
+			ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
+					_jsonArray.get(0).toJSONString());
+			producer.send(data);
+			*/
+			return;
+		}else{
 			for (JSONObject tmpJsonObject : _jsonArray) {
 
 				ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
@@ -58,8 +65,8 @@ public class CallingTriggerBolt extends BaseRichBolt {
 				producer.send(data);
 				collector.emit(new Values(tmpJsonObject.toJSONString()));
 			}
-
 		}
+
 		/*
 		 * if (spoutSource.equals("trigger")) { if (serverIdCheck &&
 		 * brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck && mapIdCheck)

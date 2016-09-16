@@ -25,13 +25,23 @@ public class TriggerTopology {
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
         String zkConnString = "localhost:2181";
-        String topic = "event";
         BrokerHosts brokerHosts = new ZkHosts(zkConnString);
 
-        SpoutConfig kafkaConfig = new SpoutConfig(brokerHosts, topic, "/" + topic, "storm");
+        SpoutConfig eventConfig = new SpoutConfig(brokerHosts, "event", "/event","storm");
 
-        kafkaConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
-        kafkaConfig.startOffsetTime = -1;
+        eventConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        eventConfig.startOffsetTime = -1;
+        
+        SpoutConfig proceedConfig = new SpoutConfig(brokerHosts, "proceed", "/proceed", "storm");
+
+        proceedConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        proceedConfig.startOffsetTime = -1;
+        
+        SpoutConfig orderConfig = new SpoutConfig(brokerHosts, "order", "/order", "storm");
+
+        orderConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
+        orderConfig.startOffsetTime = -1;
+        
         
         String url = "mongodb://127.0.0.1:27017/log";
 
@@ -46,8 +56,10 @@ public class TriggerTopology {
         InsertMongoBolt callingTriggerDBBolt = new InsertMongoBolt(url, "callingTriggerBolt", callingTriggerMapper);
 
         TopologyBuilder builder = new TopologyBuilder();
-        builder.setSpout("event-spout", new KafkaSpout(kafkaConfig));
-        builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout");
+        builder.setSpout("event-spout", new KafkaSpout(eventConfig));
+        builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));
+        builder.setSpout("order-spout", new KafkaSpout(orderConfig));
+        builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout").allGrouping("proceed-spout").allGrouping("order-spout");
         //builder.setBolt("indexing-db-bolt", indexingDBBolt).allGrouping("indexing-bolt");
         builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
         //builder.setBolt("staging-db-bolt", stagingDBBolt).allGrouping("staging-bolt");
