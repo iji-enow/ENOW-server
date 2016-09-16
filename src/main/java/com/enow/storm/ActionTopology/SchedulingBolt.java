@@ -62,7 +62,7 @@ public class SchedulingBolt extends BaseRichBolt {
         String order = (String) _jsonObject.get("order");
         String topic = (String) _jsonObject.get("topic");
 
-        if(order == "1" || order == "0") {
+        if(order == "2" || order == "0") {
             // Ready to get the status of device we need
             StatusDTO statusDTO = _statusDAO.getStatus(topic);
             String temp = statusDTO.getPayload();

@@ -19,8 +19,8 @@ import java.util.Properties;
 
 public class CallingFeedBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
-    protected static final String _KAFKA_1 = "feed";
-    protected static final String _KAFKA_2 = "proceed";
+    protected static final String _KAFKA_FEED = "feed";
+    protected static final String _KAFKA_PROCEED = "proceed";
     private OutputCollector _collector;
     private Producer<String, String> _producer;
     private Properties _props;
@@ -40,7 +40,9 @@ public class CallingFeedBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         JSONObject _jsonObject;
-
+        // if order = 0 then the node can be everywhere
+        // if order = 1 then the node in in middle of the sequence
+        // if order = 2 then the node only be at the last node
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
         String order = (String) _jsonObject.get("order");
@@ -60,22 +62,22 @@ public class CallingFeedBolt extends BaseRichBolt {
                 // 맵 아이디 변환작업
                 _jsonObject.put("mapId", outingPeer);
                 temp = _jsonObject.toJSONString();
-                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_1, temp);
+                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, temp);
+                _producer.send(nodeData);
+                nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
                 _producer.send(nodeData);
             }
         } else {
             // OutingNodes don't exist
             // Maybe This node is the last node of sequence or alone
-            if (lastNode) {
-                // To Do Somthing with lastNode
-            }
             temp = _jsonObject.toJSONString();
-            ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_1, temp);
+            ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, temp);
             _producer.send(nodeData);
-            if (order.equals("1") || order.equals("0")) {
-                nodeData = new ProducerRecord<>(_KAFKA_2, temp);
+            if (lastNode) {
+                nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
                 _producer.send(nodeData);
             }
+
         }
 
         _collector.emit(new Values(_jsonObject));
