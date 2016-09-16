@@ -6,7 +6,6 @@ import org.apache.storm.LocalCluster;
 import org.apache.storm.kafka.*;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
-import org.apache.storm.tuple.Fields;
 
 public class ActionTopology {
     public static void main(String[] args) throws Exception {
@@ -18,7 +17,6 @@ public class ActionTopology {
         // Trigger Kafka setting
         String topicTrigger = "trigger";
         SpoutConfig triggerConfig = new SpoutConfig(brokerHosts, topicTrigger, "/"+topicTrigger, "storm");
-
         triggerConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         triggerConfig.startOffsetTime = -1;
         // Status Kafka setting
@@ -34,9 +32,9 @@ public class ActionTopology {
                 .shuffleGrouping("trigger-spout");
         builder.setBolt("status-bolt", new StatusBolt())
                 .shuffleGrouping("status-spout");
-        builder.setBolt("executing-bolt", new ExecutingBolt()).fieldsGrouping("scheduling-bolt", new Fields("jsonObject"));
-        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).fieldsGrouping("executing-bolt", new Fields("jsonObject"));
-        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).fieldsGrouping("provisioning-bolt", new Fields("jsonObject"));
+        builder.setBolt("executing-bolt", new ExecutingBolt()).shuffleGrouping("scheduling-bolt");
+        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("executing-bolt");
+        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
         LocalCluster cluster = new LocalCluster();
 
         //BasicConfigurator.configure();

@@ -20,20 +20,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class CallingFeedBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
+    protected static final String _KAFKA_1 = "feed";
+    protected static final String _KAFKA_2 = "proceed";
     private OutputCollector _collector;
-    private Producer<String, String> producer;
-    private Properties props;
+    private Producer<String, String> _producer;
+    private Properties _props;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
-        props = new Properties();
-        props.put("producer.type", "sync");
-        props.put("batch.size", "1");
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        producer = new KafkaProducer<>(props);
+        _props = new Properties();
+        _props.put("producer.type", "sync");
+        _props.put("batch.size", "1");
+        _props.put("bootstrap.servers", "localhost:9092");
+        _props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        _props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        _producer = new KafkaProducer<>(_props);
     }
 
     @Override
@@ -42,6 +44,7 @@ public class CallingFeedBolt extends BaseRichBolt {
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
         Boolean proceed = (Boolean) _jsonObject.get("proceed");
+        Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
         Integer order = (Integer) _jsonObject.get("order");
         String temp;
 
@@ -58,18 +61,21 @@ public class CallingFeedBolt extends BaseRichBolt {
                     // 맵 아이디 변환작업
                     _jsonObject.put("mapId", outingPeer);
                     temp = _jsonObject.toJSONString();
-                    ProducerRecord<String, String> nodeData = new ProducerRecord<>("feed", temp);
-                    producer.send(nodeData);
+                    ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_1, temp);
+                    _producer.send(nodeData);
                 }
             } else {
                 // OutingNodes don't exist
                 // Maybe This node is the last node of sequence or alone
+                if(lastNode) {
+                    // To Do Somthing with lastNode
+                }
                 temp = _jsonObject.toJSONString();
-                ProducerRecord<String, String> nodeData = new ProducerRecord<>("feed", temp);
-                producer.send(nodeData);
-                if(order == 1 || order == 0){
-                    nodeData = new ProducerRecord<>("proceed", temp);
-                    producer.send(nodeData);
+                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_1, temp);
+                _producer.send(nodeData);
+                if(order.equals("1") || order.equals("0")){
+                    nodeData = new ProducerRecord<>(_KAFKA_2, temp);
+                    _producer.send(nodeData);
                 }
             }
         }

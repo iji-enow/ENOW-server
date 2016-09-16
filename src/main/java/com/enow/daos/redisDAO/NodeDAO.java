@@ -28,9 +28,9 @@ public class NodeDAO implements INodeDAO {
         String roadMapID = (String) jsonObject.get("roadMapId");
         String mapID = (String) jsonObject.get("mapId");
         String topic = (String) jsonObject.get("topic");
-        String payload = (String) jsonObject.get("payload");
+        JSONObject payload = (JSONObject) jsonObject.get("payload");
 
-        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload);
+        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString());
         return dto;
     }
 

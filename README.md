@@ -147,19 +147,19 @@ __JsonObject :__</br>
 {
     "topic":"enow/serverId1/brokerId1/deviceId1",
     "roadMapId":"1",
-    "mapId":1,
+    "mapId":"1",
     "procced":false,
     "incomingNode":["2", "4"],
     "outingNode":["11", "13"],
     "previousData":{"2" : "value1", "4" : "value2"},
     "payload": {},
     "lastNode":false,
-    "order":2,
-    "init":false
+    "order":"2",
 }
 ```
 order 0: 반복되는 시퀸스
-
+order 1: 트리거형 시퀸스의 중간 노드들
+order 2: 트리거형 시퀸스의 마지막 노드
 source, parameter 들은 따로 MongoDB를 통해 Console로부터 값을 받아온다.
 __Status :__ </br>
 ```JSON

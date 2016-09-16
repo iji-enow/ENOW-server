@@ -46,9 +46,9 @@ public class SchedulingBolt extends BaseRichBolt {
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
-
+        System.out.println(input.getValues().toString().substring(1, input.getValues().toString().length() - 1));
         // Parsing JSONString to JSONObject
-        String jsonString = input.getStringByField("jsonObject").toString().substring(1, input.getValues().toString().length() - 1);
+        String jsonString = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
         try {
             _jsonObject = (JSONObject) _parser.parse(jsonString);
             _LOG.debug("Succeed in inserting messages to _jsonObject : " + _jsonObject.toJSONString());
@@ -62,7 +62,7 @@ public class SchedulingBolt extends BaseRichBolt {
         String order = (String) _jsonObject.get("order");
         String topic = (String) _jsonObject.get("topic");
 
-        if(order == "1") {
+        if(order == "1" || order == "0") {
             // Ready to get the status of device we need
             StatusDTO statusDTO = _statusDAO.getStatus(topic);
             String temp = statusDTO.getPayload();
@@ -117,6 +117,6 @@ public class SchedulingBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("jsonObject", "status"));
+        declarer.declare(new Fields("jsonObject"));
     }
 }
