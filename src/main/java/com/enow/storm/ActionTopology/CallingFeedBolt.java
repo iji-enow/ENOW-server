@@ -45,8 +45,8 @@ public class CallingFeedBolt extends BaseRichBolt {
         // if order = 2 then the node only be at the last node
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
-        Boolean varified = (Boolean) _jsonObject.get("varified");
-        if(varified) {
+        Boolean verified = (Boolean) _jsonObject.get("verified");
+        if(verified) {
             Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
             String temp;
 

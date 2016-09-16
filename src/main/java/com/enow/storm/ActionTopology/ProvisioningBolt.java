@@ -32,8 +32,8 @@ public class ProvisioningBolt extends BaseRichBolt {
         JSONObject _jsonObject;
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        Boolean varified = (Boolean) _jsonObject.get("varified");
-        if (varified) {
+        Boolean verified = (Boolean) _jsonObject.get("verified");
+        if (verified) {
             _nodeDAO.updateNode(_nodeDAO.jsonObjectToNode(_jsonObject));
         }
         System.out.println(_jsonObject.toJSONString());

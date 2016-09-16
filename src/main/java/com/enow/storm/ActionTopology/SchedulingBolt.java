@@ -106,7 +106,7 @@ public class SchedulingBolt extends BaseRichBolt {
                         _nodeDAO.deleteNode(id);
                     }
                 } else {
-                    _jsonObject.put("varified", false);
+                    _jsonObject.put("verified", false);
                 }
 
                 _jsonObject.put("previousData", tempJSON);
