@@ -78,39 +78,41 @@ public class SchedulingBolt extends BaseRichBolt {
         }
 
         String roadMapId = (String) _jsonObject.get("roadMapId");
+        String mapId = (String) _jsonObject.get("mapId");
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
         String[] incomingNodes = null;
         if(incomingJSON != null){
-            incomingNodes = new String[incomingJSON.size()];
-            // If this node have incoming nodes...
-            for (int i = 0; i < incomingJSON.size(); i++)
-                incomingNodes[i] = (String) incomingJSON.get(i);
-            // Put the previous data incoming nodes have in _jsonObject
-            if(incomingNodes != null) {
-                JSONObject tempJSON = new JSONObject();
-                List<NodeDTO> checker = new ArrayList<>();
-                String id;
-                for(String nodeId : incomingNodes) {
-                    id = _nodeDAO.toID(roadMapId, nodeId);
-                    NodeDTO tempDTO = _nodeDAO.getNode(id);
-                    if(tempDTO != null) {
-                        checker.add(tempDTO);
-                    }
-                }
-
-                if(checker.size() == incomingJSON.size()) {
-                    for(String nodeId : incomingNodes) {
+            NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
+            if(redundancy == null) {
+                incomingNodes = new String[incomingJSON.size()];
+                // If this node have incoming nodes...
+                for (int i = 0; i < incomingJSON.size(); i++)
+                    incomingNodes[i] = (String) incomingJSON.get(i);
+                // Put the previous data incoming nodes have in _jsonObject
+                if (incomingNodes != null) {
+                    JSONObject tempJSON = new JSONObject();
+                    List<NodeDTO> checker = new ArrayList<>();
+                    String id;
+                    for (String nodeId : incomingNodes) {
                         id = _nodeDAO.toID(roadMapId, nodeId);
-                        NodeDTO nodeDTO = _nodeDAO.getNode(id);
-                        tempJSON.put(nodeId, nodeDTO.getPayload());
-                        _jsonObject.put("previousData", tempJSON);
-                        _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
+                        NodeDTO tempDTO = _nodeDAO.getNode(id);
+                        if (tempDTO != null) {
+                            checker.add(tempDTO);
+                        }
                     }
-                } else {
-                    _jsonObject.put("verified", false);
+
+                    if (checker.size() == incomingJSON.size()) {
+                        for (String nodeId : incomingNodes) {
+                            id = _nodeDAO.toID(roadMapId, nodeId);
+                            NodeDTO nodeDTO = _nodeDAO.getNode(id);
+                            tempJSON.put(nodeId, nodeDTO.getPayload());
+                            _jsonObject.put("previousData", tempJSON);
+                            _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
+                        }
+                    } else {
+                        _jsonObject.put("verified", false);
+                    }
                 }
-
-
             }
         }
         // Store this node for subsequent node
