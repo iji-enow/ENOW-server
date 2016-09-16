@@ -22,8 +22,6 @@ public class StatusDAO implements IStatusDAO {
     public StatusDTO jsonObjectToStatus(JSONObject jsonObject) {
         String topic = (String) jsonObject.get("topic");
         JSONObject payload = (JSONObject) jsonObject.get("payload");
-        System.out.println("topic : " + topic);
-        System.out.println("payload : " + payload.toJSONString());
         StatusDTO dto = new StatusDTO(topic, payload.toJSONString());
         return dto;
     }
@@ -41,7 +39,7 @@ public class StatusDAO implements IStatusDAO {
 
         while (iter.hasNext()) {
             String key = iter.next();
-            key = key.substring(5, key.length());
+            key = key.substring(7, key.length());
             ids.add(key);
             if (key.equals(id)) {
                 statusExists = true;
@@ -49,10 +47,11 @@ public class StatusDAO implements IStatusDAO {
         }
         if (!statusExists) {
             jedis.lpush("status-" + id, dto.getPayload());
-            return id + " overwrited";
-        } else {
-            jedis.lpush("status-" + id, dto.getPayload());
             return id;
+        } else {
+            jedis.del("status-" + id);
+            jedis.lpush("status-" + id, dto.getPayload());
+            return id + " overwrited";
         }
     }
 

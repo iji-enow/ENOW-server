@@ -44,40 +44,42 @@ public class CallingFeedBolt extends BaseRichBolt {
         // if order = 1 then the node in in middle of the sequence
         // if order = 2 then the node only be at the last node
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
-        // Boolean order = (Boolean) _jsonObject.get("order");
-        String temp;
 
+        Boolean varified = (Boolean) _jsonObject.get("varified");
+        if(varified) {
+            Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
+            String temp;
 
-        JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
-        String[] outingNodes = null;
-        if (outingJSON != null) {
-            outingNodes = new String[outingJSON.size()];
-            for (int i = 0; i < outingJSON.size(); i++)
-                outingNodes[i] = (String) outingJSON.get(i);
-        }
-        if (outingNodes != null) {
-            // OutingNodes exist
-            for (String outingNode : outingNodes) {
-                // 맵 아이디 변환작업
-                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
-                _jsonObject.put("mapId", outingNode);
+            JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
+            String[] outingNodes = null;
+            if (outingJSON != null) {
+                outingNodes = new String[outingJSON.size()];
+                for (int i = 0; i < outingJSON.size(); i++)
+                    outingNodes[i] = (String) outingJSON.get(i);
+            }
+            if (outingNodes != null) {
+                // OutingNodes exist
+                for (String outingNode : outingNodes) {
+                    // 맵 아이디 변환작업
+                    ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
+                    _jsonObject.put("mapId", outingNode);
+                    temp = _jsonObject.toJSONString();
+                    _producer.send(nodeData);
+                    if (!lastNode) {
+                        nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
+                        _producer.send(nodeData);
+                    }
+                }
+            } else {
+                // OutingNodes don't exist
+                // Maybe This node is the last node of sequence or alone
                 temp = _jsonObject.toJSONString();
+                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, temp);
                 _producer.send(nodeData);
                 if (!lastNode) {
                     nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
                     _producer.send(nodeData);
                 }
-            }
-        } else {
-            // OutingNodes don't exist
-            // Maybe This node is the last node of sequence or alone
-            temp = _jsonObject.toJSONString();
-            ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, temp);
-            _producer.send(nodeData);
-            if (!lastNode) {
-                nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
-                _producer.send(nodeData);
             }
         }
 

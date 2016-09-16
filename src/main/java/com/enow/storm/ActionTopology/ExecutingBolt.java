@@ -50,9 +50,11 @@ public class ExecutingBolt extends BaseRichBolt {
         JSONObject _jsonObject;
         JSONObject _payload = new JSONObject();
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
+        Boolean varified = (Boolean) _jsonObject.get("varified");
         _payload.put("succeed", "great!");
-        _jsonObject.put("payload",_payload);
-
+        if(varified) {
+            _jsonObject.put("payload", _payload);
+        }
 
         _collector.emit(new Values(_jsonObject));
 

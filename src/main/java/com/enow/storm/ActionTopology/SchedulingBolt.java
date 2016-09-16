@@ -76,7 +76,6 @@ public class SchedulingBolt extends BaseRichBolt {
         }
 
         String roadMapId = (String) _jsonObject.get("roadMapId");
-
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
         String[] incomingNodes = null;
         if(incomingJSON != null){
@@ -92,9 +91,10 @@ public class SchedulingBolt extends BaseRichBolt {
                     if(_nodeDAO.getNode(id) != null) {
                         NodeDTO nodeDTO = _nodeDAO.getNode(id);
                         tempJSON.put(nodeId, nodeDTO.getPayload());
+                        _jsonObject.put("previousData", tempJSON);
                         _nodeDAO.deleteNode(id);
                     } else {
-                        return;
+                        _jsonObject.put("varified", false);
                     }
                 }
                 _jsonObject.put("previousData", tempJSON);
@@ -106,6 +106,7 @@ public class SchedulingBolt extends BaseRichBolt {
         try {
             NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
             result = _nodeDAO.addNode(dto);
+            _nodeDAO.getNode(_nodeDAO.toID(dto.getRoadMapID(), dto.getMapID()));
         } catch(Exception e) {
             e.printStackTrace();
             _LOG.warn("Succeed in inserting current node to Redis : " + result);
