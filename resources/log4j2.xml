@@ -4,7 +4,7 @@
 		<Console name="STDOUT" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
 		</Console>
-		<File name="file" fileName="/Users/leegunjoon/Desktop/abc.log">
+		<File name="file" fileName="./logs/abc.log">
 			<PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
 		</File>
 	</Appenders>
