@@ -89,9 +89,13 @@ public class SchedulingBolt extends BaseRichBolt {
                 JSONObject tempJSON = new JSONObject();
                 for(String nodeId : incomingNodes) {
                     String id = _nodeDAO.toID(roadMapId, nodeId);
-                    NodeDTO nodeDTO = _nodeDAO.getNode(id);
-                    tempJSON.put(nodeId, nodeDTO.getPayload());
-                    _nodeDAO.deleteNode(id);
+                    if(_nodeDAO.getNode(id) != null) {
+                        NodeDTO nodeDTO = _nodeDAO.getNode(id);
+                        tempJSON.put(nodeId, nodeDTO.getPayload());
+                        _nodeDAO.deleteNode(id);
+                    } else {
+                        return;
+                    }
                 }
                 _jsonObject.put("previousData", tempJSON);
                 _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
