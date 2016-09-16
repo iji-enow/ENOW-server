@@ -113,6 +113,8 @@ public class SchedulingBolt extends BaseRichBolt {
                         _jsonObject.put("verified", false);
                     }
                 }
+            } else {
+                _jsonObject.put("verified", false);
             }
         }
         // Store this node for subsequent node
