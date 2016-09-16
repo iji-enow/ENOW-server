@@ -72,7 +72,6 @@ public class StatusDAO implements IStatusDAO {
         Jedis jedis = RedisDB.getConnection();
         List<StatusDTO> allStatus = new ArrayList<>();
         Set<String> keys = jedis.keys("status-*");
-
         for (String key : keys) {
             key = key.substring(5, key.length());
             allStatus.add(getStatus(key));

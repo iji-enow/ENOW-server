@@ -70,7 +70,6 @@ public class NodeDAO implements INodeDAO {
         String roadMapID = tokenizer.nextToken();
         String mapID = tokenizer.nextToken();
         String id = roadMapID + "-" + mapID;
-        System.out.println(id);
         List<String> result = jedis.lrange(NODE_PREFIX + id, 0, -1);
         if (result.size() > 1) {
             NodeDTO dto = new NodeDTO(roadMapID, mapID, result.get(0), result.get(1));
@@ -85,7 +84,6 @@ public class NodeDAO implements INodeDAO {
         Jedis jedis = RedisDB.getConnection();
         List<NodeDTO> nodes = new ArrayList<>();
         Set<String> keys = jedis.keys("node-*");
-
         for (String key : keys) {
             key = key.substring(5, key.length());
             nodes.add(getNode(key));
