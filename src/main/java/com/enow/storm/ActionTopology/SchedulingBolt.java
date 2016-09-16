@@ -79,8 +79,9 @@ public class SchedulingBolt extends BaseRichBolt {
         String roadMapId = (String) _jsonObject.get("roadMapId");
 
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
-        String[] incomingNodes = new String[incomingJSON.size()];
+        String[] incomingNodes = null;
         if(incomingJSON != null){
+            incomingNodes = new String[incomingJSON.size()];
             // If this node have incoming nodes...
             for (int i = 0; i < incomingJSON.size(); i++)
                 incomingNodes[i] = (String) incomingJSON.get(i);

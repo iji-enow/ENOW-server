@@ -84,6 +84,7 @@ public class CallingFeedBolt extends BaseRichBolt {
             _LOG.debug("input = [" + input + "]");
             _collector.ack(input);
         } catch (Exception e) {
+            _LOG.warn("input = [" + input + "]");
             _collector.fail(input);
         }
     }
