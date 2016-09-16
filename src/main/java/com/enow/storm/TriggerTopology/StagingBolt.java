@@ -69,7 +69,8 @@ public class StagingBolt extends BaseRichBolt {
 
 		if (_jsonObject.containsKey("error")) {
 			_jsonArray.add(_jsonObject);
-			//collector.emit(new Values(_jsonArray));
+			LOG.debug("error : stagingBolt/1");
+			// collector.emit(new Values(_jsonArray));
 			return;
 		}
 
@@ -78,7 +79,7 @@ public class StagingBolt extends BaseRichBolt {
 
 		iterable = roadMapCollection.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
 
-		if (_jsonObject.get("spoutName").equals("event")){
+		if (_jsonObject.get("spoutName").equals("event")) {
 			try {
 				roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 
@@ -100,15 +101,11 @@ public class StagingBolt extends BaseRichBolt {
 					tmpJsonObject = (JSONObject) parser.parse(jsonString);
 					tmpJsonObject.put("payload", null);
 					tmpJsonObject.put("previousData", null);
-					tmpJsonObject.put("order", "0");
+					tmpJsonObject.put("order", false);
 					tmpJsonObject.put("mapId", InitMapId);
-					tmpJsonObject.put("topic",
-							tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
-									+ tmpJsonObject.get("brokerId") + "/" + mapId.get("deviceId"));
+					tmpJsonObject.put("topic", "enow" + "/" + mapId.get("serverId") + "/"
+							+ mapId.get("brokerId") + "/" + mapId.get("deviceId"));
 
-					tmpJsonObject.remove("corporationName");
-					tmpJsonObject.remove("serverId");
-					tmpJsonObject.remove("brokerId");
 					tmpJsonObject.remove("spoutName");
 
 					if (outingNode.containsKey(InitMapId)) {
@@ -134,9 +131,10 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				error.put("error", "stagingBolt/1");
+				error.put("error", "stagingBolt/2");
+				LOG.debug("error : stagingBolt/2");
 				_jsonArray.add(error);
-				//collector.emit(new Values(_jsonArray));
+				// collector.emit(new Values(_jsonArray));
 				return;
 			}
 		} else if (_jsonObject.get("spoutName").equals("order")) {
@@ -156,11 +154,11 @@ public class StagingBolt extends BaseRichBolt {
 
 					mapId = (JSONObject) mapIds.get(InitMapId);
 					JSONObject tmpJsonObject = new JSONObject();
-					
-					if(_jsonObject.get("deviceId").equals(mapId.get("deviceId"))){
+
+					if (_jsonObject.get("deviceId").equals(mapId.get("deviceId"))) {
 						tmpJsonObject = (JSONObject) parser.parse(jsonString);
 						tmpJsonObject.put("previousData", null);
-						tmpJsonObject.put("order", "1");
+						tmpJsonObject.put("order", true);
 						tmpJsonObject.put("mapId", InitMapId);
 						tmpJsonObject.put("topic",
 								tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
@@ -170,7 +168,7 @@ public class StagingBolt extends BaseRichBolt {
 						tmpJsonObject.remove("serverId");
 						tmpJsonObject.remove("brokerId");
 						tmpJsonObject.remove("spoutName");
-						
+
 						if (outingNode.containsKey(InitMapId)) {
 							outingNodeArray = (JSONArray) outingNode.get(InitMapId);
 
@@ -189,17 +187,18 @@ public class StagingBolt extends BaseRichBolt {
 							tmpJsonObject.put("incomingNode", null);
 						}
 
-						_jsonArray.add(tmpJsonObject);						
-					}else{
-						
+						_jsonArray.add(tmpJsonObject);
+					} else {
+
 					}
 				}
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				error.put("error", "stagingBolt/2");
+				error.put("error", "stagingBolt/3");
+				LOG.debug("error : stagingBolt/3");
 				_jsonArray.add(error);
-				//collector.emit(new Values(_jsonArray));
+				// collector.emit(new Values(_jsonArray));
 				return;
 			}
 		} else if (_jsonObject.get("spoutName").equals("proceed")) {
@@ -213,18 +212,16 @@ public class StagingBolt extends BaseRichBolt {
 				lastNodeArray = (JSONArray) roadMapId.get("lastNode");
 
 				String currentMapId = (String) _jsonObject.get("mapId");
-				String[] topic = _jsonObject.get("topic").toString().split("\\/");
 
 				mapId = (JSONObject) mapIds.get(currentMapId);
 
-				_jsonObject.put("topic", topic[0] + "/" + topic[1] + "/" + topic[2] + "/" + mapId.get("deviceId"));
+				_jsonObject.put("topic", "enow" + "/" + mapId.get("serverId") + "/" + mapId.get("brokerId") + "/" + mapId.get("deviceId"));
 
 				_jsonObject.remove("spoutName");
 
-				
-				if(_jsonObject.get("order").equals("0")){	
-				}else{
-					_jsonObject.put("order", "2");
+				if ((boolean)_jsonObject.get("order")) {
+					_jsonObject.put("order",false);
+				} else {
 				}
 				if (outingNode.containsKey(currentMapId)) {
 					outingNodeArray = (JSONArray) outingNode.get(currentMapId);
@@ -248,135 +245,116 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				error.put("error", "stagingBolt/3");
+				error.put("error", "stagingBolt/4");
+				LOG.debug("error : stagingBolt/4");
 				_jsonArray.add(error);
-				//collector.emit(new Values(_jsonArray));
+				// collector.emit(new Values(_jsonArray));
 				return;
 
 			}
 		} else {
-			error.put("error", "stagingBolt/4");
+			error.put("error", "stagingBolt/5");
+			LOG.debug("error : stagingBolt/5");
 			_jsonArray.add(error);
-			//collector.emit(new Values(_jsonArray));
+			// collector.emit(new Values(_jsonArray));
 			return;
 		}
-		
-/*
-		if ((boolean) _jsonObject.get("init")) {
-			try {
-				roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 
-				mapIds = (JSONObject) roadMapId.get("mapIds");
-				initNodeArray = (JSONArray) roadMapId.get("initNode");
-				incomingNode = (JSONObject) roadMapId.get("incomingNode");
-				outingNode = (JSONObject) roadMapId.get("outingNode");
-				lastNodeArray = (JSONArray) roadMapId.get("lastNode");
-
-				String jsonString = _jsonObject.toJSONString();
-
-				for (int i = 0; i < initNodeArray.size(); i++) {
-					String InitMapId = (String) initNodeArray.get(i);
-
-					mapId = (JSONObject) mapIds.get(InitMapId);
-
-					JSONObject tmpJsonObject = new JSONObject();
-
-					tmpJsonObject = (JSONObject) parser.parse(jsonString);
-					tmpJsonObject.put("payload", null);
-					tmpJsonObject.put("previousData", null);
-					tmpJsonObject.put("proceed", false);
-					tmpJsonObject.put("mapId", InitMapId);
-					tmpJsonObject.put("deviceId", mapId.get("deviceId"));
-					tmpJsonObject.put("topic",
-							tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
-									+ tmpJsonObject.get("brokerId") + "/" + mapId.get("deviceId"));
-
-					tmpJsonObject.remove("corporationName");
-					tmpJsonObject.remove("serverId");
-					tmpJsonObject.remove("brokerId");
-
-					if (outingNode.containsKey(InitMapId)) {
-						outingNodeArray = (JSONArray) outingNode.get(InitMapId);
-
-						tmpJsonObject.put("outingNode", outingNodeArray);
-						tmpJsonObject.put("lastNode", false);
-					} else {
-						tmpJsonObject.put("outingNode", null);
-						tmpJsonObject.put("lastNode", true);
-					}
-
-					if (incomingNode.containsKey(InitMapId)) {
-						incomingNodeArray = (JSONArray) incomingNode.get(InitMapId);
-
-						tmpJsonObject.put("incomingNode", incomingNodeArray);
-					} else {
-						tmpJsonObject.put("incomingNode", null);
-					}
-
-					tmpJsonObject.put("init", false);
-					_jsonArray.add(tmpJsonObject);
-				}
-			} catch (ParseException e) {
-				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
-				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				e.printStackTrace();
-				error.put("error", "stagingBolt/1");
-				_jsonArray.add(error);
-				collector.emit(new Values(_jsonArray));
-			}
-		} else {
-			try {
-				roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
-
-				mapIds = (JSONObject) roadMapId.get("mapIds");
-				initNodeArray = (JSONArray) roadMapId.get("initNode");
-				incomingNode = (JSONObject) roadMapId.get("incomingNode");
-				outingNode = (JSONObject) roadMapId.get("outingNode");
-				lastNodeArray = (JSONArray) roadMapId.get("lastNode");
-
-				String currentMapId = (String) _jsonObject.get("mapId");
-				String[] topic = _jsonObject.get("topic").toString().split("\\/");
-
-				mapId = (JSONObject) mapIds.get(currentMapId);
-
-				_jsonObject.put("proceed", false);
-
-				_jsonObject.put("topic", topic[0] + "/" + topic[1] + "/" + topic[2] + "/" + mapId.get("deviceId"));
-
-				if (outingNode.containsKey(currentMapId)) {
-					outingNodeArray = (JSONArray) outingNode.get(currentMapId);
-
-					_jsonObject.put("outingNode", outingNodeArray);
-					_jsonObject.put("lastNode", false);
-				} else {
-					_jsonObject.put("outingNode", null);
-					_jsonObject.put("lastNode", true);
-				}
-
-				if (incomingNode.containsKey(currentMapId)) {
-					incomingNodeArray = (JSONArray) incomingNode.get(currentMapId);
-
-					_jsonObject.put("incomingNode", incomingNodeArray);
-				} else {
-					_jsonObject.put("incomingNode", null);
-				}
-
-				_jsonArray.add(_jsonObject);
-			} catch (ParseException e) {
-				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
-				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				e.printStackTrace();
-				error.put("error", "stagingBolt/2");
-				_jsonArray.add(error);
-				collector.emit(new Values(_jsonArray));
-
-			}
-		}
-*/
+		/*
+		 * if ((boolean) _jsonObject.get("init")) { try { roadMapId =
+		 * (JSONObject) jsonParser.parse(iterable.first().toJson());
+		 * 
+		 * mapIds = (JSONObject) roadMapId.get("mapIds"); initNodeArray =
+		 * (JSONArray) roadMapId.get("initNode"); incomingNode = (JSONObject)
+		 * roadMapId.get("incomingNode"); outingNode = (JSONObject)
+		 * roadMapId.get("outingNode"); lastNodeArray = (JSONArray)
+		 * roadMapId.get("lastNode");
+		 * 
+		 * String jsonString = _jsonObject.toJSONString();
+		 * 
+		 * for (int i = 0; i < initNodeArray.size(); i++) { String InitMapId =
+		 * (String) initNodeArray.get(i);
+		 * 
+		 * mapId = (JSONObject) mapIds.get(InitMapId);
+		 * 
+		 * JSONObject tmpJsonObject = new JSONObject();
+		 * 
+		 * tmpJsonObject = (JSONObject) parser.parse(jsonString);
+		 * tmpJsonObject.put("payload", null); tmpJsonObject.put("previousData",
+		 * null); tmpJsonObject.put("proceed", false);
+		 * tmpJsonObject.put("mapId", InitMapId); tmpJsonObject.put("deviceId",
+		 * mapId.get("deviceId")); tmpJsonObject.put("topic",
+		 * tmpJsonObject.get("corporationName") + "/" +
+		 * tmpJsonObject.get("serverId") + "/" + tmpJsonObject.get("brokerId") +
+		 * "/" + mapId.get("deviceId"));
+		 * 
+		 * tmpJsonObject.remove("corporationName");
+		 * tmpJsonObject.remove("serverId"); tmpJsonObject.remove("brokerId");
+		 * 
+		 * if (outingNode.containsKey(InitMapId)) { outingNodeArray =
+		 * (JSONArray) outingNode.get(InitMapId);
+		 * 
+		 * tmpJsonObject.put("outingNode", outingNodeArray);
+		 * tmpJsonObject.put("lastNode", false); } else {
+		 * tmpJsonObject.put("outingNode", null); tmpJsonObject.put("lastNode",
+		 * true); }
+		 * 
+		 * if (incomingNode.containsKey(InitMapId)) { incomingNodeArray =
+		 * (JSONArray) incomingNode.get(InitMapId);
+		 * 
+		 * tmpJsonObject.put("incomingNode", incomingNodeArray); } else {
+		 * tmpJsonObject.put("incomingNode", null); }
+		 * 
+		 * tmpJsonObject.put("init", false); _jsonArray.add(tmpJsonObject); } }
+		 * catch (ParseException e) { // iterable.first().toJson() 이 json형식의
+		 * string이 아닌 경우 // 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
+		 * e.printStackTrace(); error.put("error", "stagingBolt/1");
+		 * _jsonArray.add(error); collector.emit(new Values(_jsonArray)); } }
+		 * else { try { roadMapId = (JSONObject)
+		 * jsonParser.parse(iterable.first().toJson());
+		 * 
+		 * mapIds = (JSONObject) roadMapId.get("mapIds"); initNodeArray =
+		 * (JSONArray) roadMapId.get("initNode"); incomingNode = (JSONObject)
+		 * roadMapId.get("incomingNode"); outingNode = (JSONObject)
+		 * roadMapId.get("outingNode"); lastNodeArray = (JSONArray)
+		 * roadMapId.get("lastNode");
+		 * 
+		 * String currentMapId = (String) _jsonObject.get("mapId"); String[]
+		 * topic = _jsonObject.get("topic").toString().split("\\/");
+		 * 
+		 * mapId = (JSONObject) mapIds.get(currentMapId);
+		 * 
+		 * _jsonObject.put("proceed", false);
+		 * 
+		 * _jsonObject.put("topic", topic[0] + "/" + topic[1] + "/" + topic[2] +
+		 * "/" + mapId.get("deviceId"));
+		 * 
+		 * if (outingNode.containsKey(currentMapId)) { outingNodeArray =
+		 * (JSONArray) outingNode.get(currentMapId);
+		 * 
+		 * _jsonObject.put("outingNode", outingNodeArray);
+		 * _jsonObject.put("lastNode", false); } else {
+		 * _jsonObject.put("outingNode", null); _jsonObject.put("lastNode",
+		 * true); }
+		 * 
+		 * if (incomingNode.containsKey(currentMapId)) { incomingNodeArray =
+		 * (JSONArray) incomingNode.get(currentMapId);
+		 * 
+		 * _jsonObject.put("incomingNode", incomingNodeArray); } else {
+		 * _jsonObject.put("incomingNode", null); }
+		 * 
+		 * _jsonArray.add(_jsonObject); } catch (ParseException e) { //
+		 * iterable.first().toJson() 이 json형식의 string이 아닌 경우 // 발생 하지만 tojson이기에
+		 * 그럴 일이 발생하지 않을 것이라 가정 e.printStackTrace(); error.put("error",
+		 * "stagingBolt/2"); _jsonArray.add(error); collector.emit(new
+		 * Values(_jsonArray));
+		 * 
+		 * } }
+		 */
 		collector.emit(new Values(_jsonArray));
 
 		try {
-			LOG.debug("input = [" + input + "]");
+			LOG.debug("StagingBolt result = [" + _jsonArray.toString() + "]");
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);

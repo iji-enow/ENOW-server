@@ -49,6 +49,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 					"from order kafka but there is mapId for deviceId");
 			producer.send(data);
 			*/
+			LOG.debug("error : caliingTirggerBolt/1");
 			return;
 		}else if (_jsonArray.get(0).containsKey("error")) {
 			/*
@@ -56,6 +57,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 					_jsonArray.get(0).toJSONString());
 			producer.send(data);
 			*/
+			LOG.debug("error : caliingTirggerBolt/2");
 			return;
 		}else{
 			for (JSONObject tmpJsonObject : _jsonArray) {
@@ -110,7 +112,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		 * spoutSource가 Trigger나 proceed가 아닌 경 }
 		 */
 		try {
-			LOG.debug("input = [" + input + "]");
+			LOG.debug("callingTriggerBolt result = [" + _jsonArray.toString() + "]");
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);

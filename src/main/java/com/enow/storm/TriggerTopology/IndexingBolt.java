@@ -49,6 +49,7 @@ public class IndexingBolt extends BaseRichBolt {
 
 		if (input.toString().length() == 0) {
 			error.put("error", "indexingBolt/1");
+			LOG.debug("error : indexingBolt/1");
 			//collector.emit(new Values(error));
 			return;
 		}
@@ -59,16 +60,17 @@ public class IndexingBolt extends BaseRichBolt {
 			try {
 				_jsonObject = (JSONObject) parser.parse(msg);
 
-				if (_jsonObject.containsKey("corporationName") && _jsonObject.containsKey("serverId")
-						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("roadMapId")) {
+				if (_jsonObject.containsKey("roadMapId")) {
 					_jsonObject.put("spoutName", "event");
 				} else {
 					error.put("error", "indexingBolt/2");
+					LOG.debug("error : indexingBolt/2");
 					//collector.emit(new Values(error));
 					return;
 				}
 			} catch (ParseException e) {
-				error.put("error", "indexingBolt/6");
+				error.put("error", "indexingBolt/3");
+				LOG.debug("error : indexingBolt/3");
 				//collector.emit(new Values(error));
 				return;
 			}
@@ -80,7 +82,8 @@ public class IndexingBolt extends BaseRichBolt {
 						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("roadMapId")
 						&& _jsonObject.containsKey("deviceId") && _jsonObject.containsKey("payload")) {
 				} else {
-					error.put("error", "indexingBolt/3");
+					error.put("error", "indexingBolt/4");
+					LOG.debug("error : indexingBolt/4");
 					//collector.emit(new Values(error));
 					return;
 				}
@@ -144,12 +147,14 @@ public class IndexingBolt extends BaseRichBolt {
 				if (serverIdCheck && brokerIdCheck && deviceIdCheck && roadMapIdCheck) {
 					_jsonObject.put("spoutName", "order");
 				} else {
-					error.put("error", "indexingBolt/4");
+					error.put("error", "indexingBolt/5");
+					LOG.debug("error : indexingBolt/5");
 					//collector.emit(new Values(error));
 					return;
 				}
 			} catch (ParseException e) {
 				error.put("error", "indexingBolt/6");
+				LOG.debug("error : indexingBolt/6");
 				//collector.emit(new Values(error));
 				return;
 			}
@@ -167,17 +172,20 @@ public class IndexingBolt extends BaseRichBolt {
 					_jsonObject.put("spoutName", "proceed");
 				} else {
 					// init = false 일 경우 필요한 값이 다 안 들어 왔다.
-					error.put("error", "indexingBolt/5");
+					error.put("error", "indexingBolt/7");
+					LOG.debug("error : indexingBolt/7");
 					//collector.emit(new Values(error));
 					return;
 				}
 			} catch (ParseException e) {
-				error.put("error", "indexingBolt/6");
+				error.put("error", "indexingBolt/8");
+				LOG.debug("error : indexingBolt/8");
 				//collector.emit(new Values(error));
 				return;
 			}
 		} else {
-			error.put("error", "indexingBolt/7");
+			error.put("error", "indexingBolt/9");
+			LOG.debug("error : indexingBolt/9");
 			//collector.emit(new Values(error));
 			return;
 		}
@@ -279,7 +287,7 @@ public class IndexingBolt extends BaseRichBolt {
 		collector.emit(new Values(_jsonObject));
 
 		try {
-			LOG.debug("input = [" + input + "]");
+			LOG.debug("indexingBolt result = [" + _jsonObject.toJSONString() + "]");
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);
