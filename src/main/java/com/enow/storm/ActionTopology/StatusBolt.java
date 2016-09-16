@@ -1,6 +1,8 @@
 package com.enow.storm.ActionTopology;
 
 import com.enow.daos.redisDAO.IStatusDAO;
+import com.enow.facility.DAOFacility;
+import com.enow.persistence.dto.StatusDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -30,6 +32,7 @@ public class StatusBolt extends BaseRichBolt {
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
         _parser = new JSONParser();
+        _dao = DAOFacility.getInstance().createStatusDAO();
     }
 
     @Override
@@ -40,11 +43,13 @@ public class StatusBolt extends BaseRichBolt {
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
-        String jsonString = input.getStringByField("jsonObject").toString().substring(1, input.getValues().toString().length() - 1);
+
+        String jsonString = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
         try {
             _jsonObject = (JSONObject) _parser.parse(jsonString);
             _LOG.info("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
+            _dao.addStatus(_dao.jsonObjectToStatus(_jsonObject));
         } catch (ParseException e1) {
             e1.printStackTrace();
             _LOG.warn("Fail in inserting messages to _jsonObject");
@@ -52,7 +57,6 @@ public class StatusBolt extends BaseRichBolt {
             return;
         }
 
-        _dao.addStatus(_dao.jsonObjectToStatus(_jsonObject));
 
         _collector.emit(new Values(input));
         try {

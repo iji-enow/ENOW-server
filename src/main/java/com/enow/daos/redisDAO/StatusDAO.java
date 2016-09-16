@@ -2,30 +2,32 @@ package com.enow.daos.redisDAO;
 
 import com.enow.persistence.dto.StatusDTO;
 import com.enow.persistence.redis.RedisDB;
-import com.mongodb.util.JSON;
 import org.json.simple.JSONObject;
 import redis.clients.jedis.Jedis;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by writtic on 2016. 9. 13..
  */
-public class StatusDAO implements IStatusDAO{
+public class StatusDAO implements IStatusDAO {
 
     private static final String STATUS_PREFIX = "status-";
-    
-    @Override
-    public StatusDTO jsonObjectToStatus(JSONObject jsonObject){
-        String topic = (String) jsonObject.get("topic");
-        JSONObject temp = (JSONObject) jsonObject.get("payload");
-        String payload = temp.toJSONString();
 
-        StatusDTO dto = new StatusDTO(topic, payload);
+
+    @Override
+    public StatusDTO jsonObjectToStatus(JSONObject jsonObject) {
+        String topic = (String) jsonObject.get("topic");
+        JSONObject payload = (JSONObject) jsonObject.get("payload");
+        StatusDTO dto = new StatusDTO(topic, payload.toJSONString());
         return dto;
     }
+
     @Override
-    public String addStatus(StatusDTO dto){
+    public String addStatus(StatusDTO dto) {
         Jedis jedis = RedisDB.getConnection();
         String id = dto.getTopic();
 
@@ -35,15 +37,15 @@ public class StatusDAO implements IStatusDAO{
 
         boolean statusExists = false;
 
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             String key = iter.next();
             key = key.substring(5, key.length());
             ids.add(key);
-            if(key.equals(id)) {
+            if (key.equals(id)) {
                 statusExists = true;
             }
         }
-        if(!statusExists) {
+        if (!statusExists) {
             jedis.lpush("status-" + id, dto.getPayload());
             return id + " overwrited";
         } else {
@@ -51,8 +53,9 @@ public class StatusDAO implements IStatusDAO{
             return id;
         }
     }
+
     @Override
-    public StatusDTO getStatus(String topic){
+    public StatusDTO getStatus(String topic) {
         Jedis jedis = RedisDB.getConnection();
         List<String> result = jedis.lrange(STATUS_PREFIX + topic, 0, 0);
         if (result != null) {
@@ -62,8 +65,9 @@ public class StatusDAO implements IStatusDAO{
             return null;
         }
     }
+
     @Override
-    public List<StatusDTO> getAllStatus(){
+    public List<StatusDTO> getAllStatus() {
         Jedis jedis = RedisDB.getConnection();
         List<StatusDTO> allStatus = new ArrayList<>();
         Set<String> keys = jedis.keys("status-*");
@@ -74,14 +78,16 @@ public class StatusDAO implements IStatusDAO{
         }
         return allStatus;
     }
+
     @Override
-    public void updateStatus(StatusDTO dto){
+    public void updateStatus(StatusDTO dto) {
         Jedis jedis = RedisDB.getConnection();
         jedis.rpop(STATUS_PREFIX + dto.getTopic());
         jedis.rpush(STATUS_PREFIX + dto.getTopic(), dto.getPayload());
     }
+
     @Override
-    public void deleteAllStatus(){
+    public void deleteAllStatus() {
         Jedis jedis = RedisDB.getConnection();
         Set<String> keys = jedis.keys("status-*");
         Iterator<String> iter = keys.iterator();
@@ -89,8 +95,9 @@ public class StatusDAO implements IStatusDAO{
             jedis.del(iter.next());
         }
     }
+
     @Override
-    public void deleteStatus(String topic){
+    public void deleteStatus(String topic) {
         Jedis jedis = RedisDB.getConnection();
         jedis.del(STATUS_PREFIX + topic);
     }

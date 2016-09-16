@@ -148,7 +148,6 @@ __JsonObject :__</br>
     "topic":"enow/serverId1/brokerId1/deviceId1",
     "roadMapId":"1",
     "mapId":"1",
-    "procced":false,
     "incomingNode":["2", "4"],
     "outingNode":["11", "13"],
     "previousData":{"2" : "value1", "4" : "value2"},

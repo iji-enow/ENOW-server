@@ -16,7 +16,6 @@ import org.json.simple.JSONObject;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class CallingFeedBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
@@ -43,42 +42,42 @@ public class CallingFeedBolt extends BaseRichBolt {
         JSONObject _jsonObject;
 
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        Boolean proceed = (Boolean) _jsonObject.get("proceed");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
-        Integer order = (Integer) _jsonObject.get("order");
+        String order = (String) _jsonObject.get("order");
         String temp;
 
-        if (proceed) {
-            JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
-            String[] outingPeers = new String[outingJSON.size()];
-            if (outingJSON != null) {
-                for (int i = 0; i < outingJSON.size(); i++)
-                    outingPeers[i] = (String) outingJSON.get(i);
-            }
-            if (outingPeers != null) {
-                // OutingNodes exist
-                for (String outingPeer : outingPeers) {
-                    // 맵 아이디 변환작업
-                    _jsonObject.put("mapId", outingPeer);
-                    temp = _jsonObject.toJSONString();
-                    ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_1, temp);
-                    _producer.send(nodeData);
-                }
-            } else {
-                // OutingNodes don't exist
-                // Maybe This node is the last node of sequence or alone
-                if(lastNode) {
-                    // To Do Somthing with lastNode
-                }
+
+        JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
+        String[] outingPeers = null;
+        if (outingJSON != null) {
+            outingPeers = new String[outingJSON.size()];
+            for (int i = 0; i < outingJSON.size(); i++)
+                outingPeers[i] = (String) outingJSON.get(i);
+        }
+        if (outingPeers != null) {
+            // OutingNodes exist
+            for (String outingPeer : outingPeers) {
+                // 맵 아이디 변환작업
+                _jsonObject.put("mapId", outingPeer);
                 temp = _jsonObject.toJSONString();
                 ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_1, temp);
                 _producer.send(nodeData);
-                if(order.equals("1") || order.equals("0")){
-                    nodeData = new ProducerRecord<>(_KAFKA_2, temp);
-                    _producer.send(nodeData);
-                }
+            }
+        } else {
+            // OutingNodes don't exist
+            // Maybe This node is the last node of sequence or alone
+            if (lastNode) {
+                // To Do Somthing with lastNode
+            }
+            temp = _jsonObject.toJSONString();
+            ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_1, temp);
+            _producer.send(nodeData);
+            if (order.equals("1") || order.equals("0")) {
+                nodeData = new ProducerRecord<>(_KAFKA_2, temp);
+                _producer.send(nodeData);
             }
         }
+
         _collector.emit(new Values(_jsonObject));
         try {
             _LOG.debug("input = [" + input + "]");
