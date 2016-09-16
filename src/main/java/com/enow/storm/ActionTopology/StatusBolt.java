@@ -57,7 +57,6 @@ public class StatusBolt extends BaseRichBolt {
             return;
         }
 
-
         _collector.emit(new Values(input));
         try {
             _LOG.debug("input = [" + input + "]");

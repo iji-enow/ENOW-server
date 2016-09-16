@@ -29,7 +29,8 @@ public class NodeDAO implements INodeDAO {
         String mapID = (String) jsonObject.get("mapId");
         String topic = (String) jsonObject.get("topic");
         JSONObject payload = (JSONObject) jsonObject.get("payload");
-
+        System.out.println("topic : " + topic);
+        System.out.println("payload : " + payload.toJSONString());
         NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString());
         return dto;
     }
@@ -75,7 +76,7 @@ public class NodeDAO implements INodeDAO {
         List<String> result = jedis.lrange(NODE_PREFIX + id, 0, 1);
         if (result != null) {
             NodeDTO dto = new NodeDTO(roadMapID, mapID,
-                    result.get(1), result.get(2));
+                    result.get(0), result.get(1));
             return dto;
         } else {
             return null;

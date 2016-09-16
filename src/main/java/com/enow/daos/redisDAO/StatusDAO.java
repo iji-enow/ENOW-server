@@ -22,6 +22,8 @@ public class StatusDAO implements IStatusDAO {
     public StatusDTO jsonObjectToStatus(JSONObject jsonObject) {
         String topic = (String) jsonObject.get("topic");
         JSONObject payload = (JSONObject) jsonObject.get("payload");
+        System.out.println("topic : " + topic);
+        System.out.println("payload : " + payload.toJSONString());
         StatusDTO dto = new StatusDTO(topic, payload.toJSONString());
         return dto;
     }
@@ -59,7 +61,7 @@ public class StatusDAO implements IStatusDAO {
         Jedis jedis = RedisDB.getConnection();
         List<String> result = jedis.lrange(STATUS_PREFIX + topic, 0, 0);
         if (result != null) {
-            StatusDTO dto = new StatusDTO(topic, result.get(1));
+            StatusDTO dto = new StatusDTO(topic, result.get(0));
             return dto;
         } else {
             return null;
