@@ -49,23 +49,25 @@ public class CallingFeedBolt extends BaseRichBolt {
         String temp;
 
 
-        JSONArray outingJSON = (JSONArray) _jsonObject.get("outingPeer");
-        String[] outingPeers = null;
+        JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
+        String[] outingNodes = null;
         if (outingJSON != null) {
-            outingPeers = new String[outingJSON.size()];
+            outingNodes = new String[outingJSON.size()];
             for (int i = 0; i < outingJSON.size(); i++)
-                outingPeers[i] = (String) outingJSON.get(i);
+                outingNodes[i] = (String) outingJSON.get(i);
         }
-        if (outingPeers != null) {
+        if (outingNodes != null) {
             // OutingNodes exist
-            for (String outingPeer : outingPeers) {
+            for (String outingNode : outingNodes) {
                 // 맵 아이디 변환작업
-                _jsonObject.put("mapId", outingPeer);
+                _jsonObject.put("mapId", outingNode);
                 temp = _jsonObject.toJSONString();
                 ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, temp);
                 _producer.send(nodeData);
-                nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
-                _producer.send(nodeData);
+                if (!lastNode) {
+                    nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
+                    _producer.send(nodeData);
+                }
             }
         } else {
             // OutingNodes don't exist
