@@ -82,8 +82,8 @@ public class SchedulingBolt extends BaseRichBolt {
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
         String[] incomingNodes = null;
         if(incomingJSON != null){
-            NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
-            if(redundancy == null) {
+            // NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
+            // if(redundancy == null) {
                 incomingNodes = new String[incomingJSON.size()];
                 // If this node have incoming nodes...
                 for (int i = 0; i < incomingJSON.size(); i++)
@@ -113,9 +113,9 @@ public class SchedulingBolt extends BaseRichBolt {
                         _jsonObject.put("verified", false);
                     }
                 }
-            } else {
-                _jsonObject.put("verified", false);
-            }
+            //} else {
+            //    _jsonObject.put("verified", false);
+            //}
         }
         // Store this node for subsequent node
         Boolean verified = (Boolean) _jsonObject.get("verified");

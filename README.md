@@ -16,7 +16,7 @@ These are the new features you should expect in the coming months:
 - [x] ~~Not using LocalCluster, But using `StormSubmitter`~~
 - [ ] Make Event topology
 - [ ] Make Trigger & Status topology
-- [x] ~~Syncronizing data stream with `ConcurrentHashMap`~~
+- [x] ~~Connect Apache Storm to Redis~~
 - [x] ~~Create test Document on MongoDB~~
 - [x] ~~Connect Apache Storm to MongoDB~~
 - [x] ~~Connect Apache Storm to Redis for storing status of server~~
