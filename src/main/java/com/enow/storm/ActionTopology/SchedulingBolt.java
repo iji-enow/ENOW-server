@@ -63,7 +63,7 @@ public class SchedulingBolt extends BaseRichBolt {
         Boolean order = (Boolean) _jsonObject.get("order");
         String topic = (String) _jsonObject.get("topic");
         System.out.println("String topic = (String) _jsonObject.get(\"topic\") : " + topic);
-        if(!order) {
+        if (!order) {
             // Ready to get the status of device we need
             StatusDTO statusDTO = _statusDAO.getStatus(topic);
             String temp = statusDTO.getPayload();
@@ -81,27 +81,27 @@ public class SchedulingBolt extends BaseRichBolt {
         String mapId = (String) _jsonObject.get("mapId");
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
         String[] incomingNodes = null;
-        if(incomingJSON != null){
-            // NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
-            // if(redundancy == null) {
-                incomingNodes = new String[incomingJSON.size()];
-                // If this node have incoming nodes...
-                for (int i = 0; i < incomingJSON.size(); i++)
-                    incomingNodes[i] = (String) incomingJSON.get(i);
-                // Put the previous data incoming nodes have in _jsonObject
-                if (incomingNodes != null) {
-                    JSONObject tempJSON = new JSONObject();
-                    List<NodeDTO> checker = new ArrayList<>();
-                    String id;
-                    for (String nodeId : incomingNodes) {
-                        id = _nodeDAO.toID(roadMapId, nodeId);
-                        NodeDTO tempDTO = _nodeDAO.getNode(id);
-                        if (tempDTO != null) {
-                            checker.add(tempDTO);
-                        }
-                    }
+        if (incomingJSON != null) {
 
-                    if (checker.size() == incomingJSON.size()) {
+            incomingNodes = new String[incomingJSON.size()];
+            // If this node have incoming nodes...
+            for (int i = 0; i < incomingJSON.size(); i++)
+                incomingNodes[i] = (String) incomingJSON.get(i);
+            // Put the previous data incoming nodes have in _jsonObject
+            if (incomingNodes != null) {
+                JSONObject tempJSON = new JSONObject();
+                List<NodeDTO> checker = new ArrayList<>();
+                String id;
+                for (String nodeId : incomingNodes) {
+                    id = _nodeDAO.toID(roadMapId, nodeId);
+                    NodeDTO tempDTO = _nodeDAO.getNode(id);
+                    if (tempDTO != null) {
+                        checker.add(tempDTO);
+                    }
+                }
+                if (checker.size() == incomingJSON.size()) {
+                    NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
+                    if(redundancy == null) {
                         for (String nodeId : incomingNodes) {
                             id = _nodeDAO.toID(roadMapId, nodeId);
                             NodeDTO nodeDTO = _nodeDAO.getNode(id);
@@ -111,15 +111,20 @@ public class SchedulingBolt extends BaseRichBolt {
                         }
                     } else {
                         _jsonObject.put("verified", false);
+                        _LOG.warn("This _jsonObject isn't verified : " + tempJSON.toJSONString());
                     }
+                } else {
+                    _jsonObject.put("verified", false);
+                    _LOG.warn("This _jsonObject isn't verified : " + tempJSON.toJSONString());
                 }
+            }
             //} else {
             //    _jsonObject.put("verified", false);
             //}
         }
         // Store this node for subsequent node
         Boolean verified = (Boolean) _jsonObject.get("verified");
-        if(verified) {
+        if (verified) {
             String result = "nothing";
             try {
                 NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
