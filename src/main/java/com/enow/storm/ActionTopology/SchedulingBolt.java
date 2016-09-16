@@ -115,16 +115,18 @@ public class SchedulingBolt extends BaseRichBolt {
             }
         }
         // Store this node for subsequent node
-        String result = "nothing";
-        try {
-            NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
-            result = _nodeDAO.addNode(dto);
-            _LOG.warn("Succeed in inserting current node to Redis : " + result);
-        } catch(Exception e) {
-            e.printStackTrace();
-            _LOG.warn("Fail in inserting current node to Redis : " + result);
+        Boolean verified = (Boolean) _jsonObject.get("verified");
+        if(verified) {
+            String result = "nothing";
+            try {
+                NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
+                result = _nodeDAO.addNode(dto);
+                _LOG.warn("Succeed in inserting current node to Redis : " + result);
+            } catch (Exception e) {
+                e.printStackTrace();
+                _LOG.warn("Fail in inserting current node to Redis : " + result);
+            }
         }
-
         _collector.emit(new Values(_jsonObject));
         try {
             _LOG.debug("input = [" + input + "]");
