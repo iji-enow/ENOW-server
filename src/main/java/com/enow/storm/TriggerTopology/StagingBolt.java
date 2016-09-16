@@ -72,7 +72,7 @@ public class StagingBolt extends BaseRichBolt {
 			LOG.debug("error : stagingBolt/1");
 			// collector.emit(new Values(_jsonArray));
 			return;
-		}
+		} 
 
 		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
 		MongoCollection<Document> roadMapCollection = dbWrite.getCollection("roadMap");
