@@ -73,7 +73,7 @@ public class CallingFeedBolt extends BaseRichBolt {
             temp = _jsonObject.toJSONString();
             ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, temp);
             _producer.send(nodeData);
-            if (lastNode) {
+            if (!lastNode) {
                 nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
                 _producer.send(nodeData);
             }

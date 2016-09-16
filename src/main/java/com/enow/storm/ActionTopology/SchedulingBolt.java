@@ -46,7 +46,6 @@ public class SchedulingBolt extends BaseRichBolt {
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }
-        System.out.println(input.getValues().toString().substring(1, input.getValues().toString().length() - 1));
         // Parsing JSONString to JSONObject
         String jsonString = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
         try {

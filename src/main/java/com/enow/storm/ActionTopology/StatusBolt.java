@@ -48,7 +48,7 @@ public class StatusBolt extends BaseRichBolt {
 
         try {
             _jsonObject = (JSONObject) _parser.parse(jsonString);
-            _LOG.info("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
+            _LOG.debug("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
             _dao.addStatus(_dao.jsonObjectToStatus(_jsonObject));
         } catch (ParseException e1) {
             e1.printStackTrace();
