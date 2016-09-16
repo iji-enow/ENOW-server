@@ -59,10 +59,10 @@ public class SchedulingBolt extends BaseRichBolt {
             return;
         }
 
-        String order = (String) _jsonObject.get("order");
+        Boolean order = (Boolean) _jsonObject.get("order");
         String topic = (String) _jsonObject.get("topic");
 
-        if(order == "2" || order == "0") {
+        if(!order) {
             // Ready to get the status of device we need
             StatusDTO statusDTO = _statusDAO.getStatus(topic);
             String temp = statusDTO.getPayload();
@@ -91,6 +91,7 @@ public class SchedulingBolt extends BaseRichBolt {
                     String id = _nodeDAO.toID(roadMapId, nodeId);
                     NodeDTO nodeDTO = _nodeDAO.getNode(id);
                     tempJSON.put(nodeId, nodeDTO.getPayload());
+                    _nodeDAO.deleteNode(id);
                 }
                 _jsonObject.put("previousData", tempJSON);
                 _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());

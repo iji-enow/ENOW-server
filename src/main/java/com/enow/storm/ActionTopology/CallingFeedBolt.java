@@ -45,7 +45,7 @@ public class CallingFeedBolt extends BaseRichBolt {
         // if order = 2 then the node only be at the last node
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
-        String order = (String) _jsonObject.get("order");
+        // Boolean order = (Boolean) _jsonObject.get("order");
         String temp;
 
 
@@ -77,7 +77,6 @@ public class CallingFeedBolt extends BaseRichBolt {
                 nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
                 _producer.send(nodeData);
             }
-
         }
 
         _collector.emit(new Values(_jsonObject));
