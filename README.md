@@ -159,9 +159,8 @@ __JsonObject :__</br>
   }
 }
 ```
-order 0: 반복되는 시퀸스
-order 1: 트리거형 시퀸스의 중간 노드들
-order 2: 트리거형 시퀸스의 마지막 노드
+order is ture : 트리거형 시퀸스의 중간 노드들
+order is false : 반복되는 시퀸스
 source, parameter 들은 따로 MongoDB를 통해 Console로부터 값을 받아온다.
 __Status :__ </br>
 ```JSON

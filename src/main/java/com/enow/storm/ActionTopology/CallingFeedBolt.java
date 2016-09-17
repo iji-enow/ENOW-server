@@ -40,16 +40,12 @@ public class CallingFeedBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         JSONObject _jsonObject;
-        // if order = 0 then the node can be everywhere
-        // if order = 1 then the node in in middle of the sequence
-        // if order = 2 then the node only be at the last node
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
         Boolean verified = (Boolean) _jsonObject.get("verified");
         if(verified) {
             Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
             String temp;
-
             JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
             String[] outingNodes = null;
             if (outingJSON != null) {
@@ -60,12 +56,12 @@ public class CallingFeedBolt extends BaseRichBolt {
             if (outingNodes != null) {
                 // OutingNodes exist
                 ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
+                _producer.send(nodeData);
                 for (String outingNode : outingNodes) {
-                    // 맵 아이디 변환작업
+                    // change mapId to outingNode
                     JSONObject tempJSON = _jsonObject;
                     tempJSON.put("mapId", outingNode);
                     temp = tempJSON.toJSONString();
-                    _producer.send(nodeData);
                     if (!lastNode) {
                         nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
                         _producer.send(nodeData);
