@@ -102,19 +102,17 @@ public class SchedulingBolt extends BaseRichBolt {
                     NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
                     if(redundancy == null) {
                         JSONArray arr_temp = new JSONArray();
-                        for (String nodeId : incomingNodes) {
-                            id = _nodeDAO.toID(roadMapId, nodeId);
-                            NodeDTO nodeDTO = _nodeDAO.getNode(id);
-                            _nodeDAO.updateRefer(nodeDTO);
+                        for (NodeDTO node : checker) {
+                            _nodeDAO.updateRefer(node);
                             try {
-                                arr_temp.add(_parser.parse(nodeDTO.getPayload()));
+                                arr_temp.add(_parser.parse(node.getPayload()));
                             } catch (ParseException e1) {
                                 e1.printStackTrace();
                                 _LOG.warn("Fail in inserting status to _jsonObject");
                                 return;
                             }
                         }
-                        _jsonObject.put("previousData", tempJSON);
+                        _jsonObject.put("previousData", arr_temp);
                         _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
                     } else {
                         _jsonObject.put("verified", false);

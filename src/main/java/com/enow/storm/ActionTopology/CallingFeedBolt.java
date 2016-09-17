@@ -59,11 +59,12 @@ public class CallingFeedBolt extends BaseRichBolt {
             }
             if (outingNodes != null) {
                 // OutingNodes exist
+                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
                 for (String outingNode : outingNodes) {
                     // 맵 아이디 변환작업
-                    ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
-                    _jsonObject.put("mapId", outingNode);
-                    temp = _jsonObject.toJSONString();
+                    JSONObject tempJSON = _jsonObject;
+                    tempJSON.put("mapId", outingNode);
+                    temp = tempJSON.toJSONString();
                     _producer.send(nodeData);
                     if (!lastNode) {
                         nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
@@ -95,6 +96,5 @@ public class CallingFeedBolt extends BaseRichBolt {
     }
 
     @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-    }
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {}
 }
