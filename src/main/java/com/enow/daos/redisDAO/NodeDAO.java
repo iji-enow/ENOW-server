@@ -59,15 +59,15 @@ public class NodeDAO implements INodeDAO {
             }
         }
         if(!nodeExists) {
-            jedis.lpush(NODE_PREFIX + id, dto.getRefer());
-            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
             jedis.lpush(NODE_PREFIX + id, dto.getTopic());
+            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
+            jedis.lpush(NODE_PREFIX + id, dto.getRefer());
             return id;
         } else {
             jedis.del(NODE_PREFIX + id);
-            jedis.lpush(NODE_PREFIX + id, dto.getRefer());
-            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
             jedis.lpush(NODE_PREFIX + id, dto.getTopic());
+            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
+            jedis.lpush(NODE_PREFIX + id, dto.getRefer());
             return id + " overwritten";
         }
     }
