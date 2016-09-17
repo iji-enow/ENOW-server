@@ -107,21 +107,21 @@ public class NodeDAO implements INodeDAO {
     public void updateNode(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getMapID();
-        jedis.rpop(NODE_PREFIX + id);
-        jedis.rpush(NODE_PREFIX + id, dto.getPayload());
+        jedis.lpop(NODE_PREFIX + id);
+        jedis.lpop(NODE_PREFIX + id);
+        jedis.lpush(NODE_PREFIX + id, dto.getPayload());
+        jedis.lpush(NODE_PREFIX + id, dto.getRefer());
     }
 
     @Override
     public void updateRefer(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getMapID();
-        Integer temp = Integer.parseInt(dto.getRefer());
-        --temp;
-        if (temp > 0) {
-            jedis.rpop(NODE_PREFIX + id);
-            jedis.rpop(NODE_PREFIX + id);
-            jedis.rpush(NODE_PREFIX + id, dto.getPayload());
-            jedis.rpush(NODE_PREFIX + id, "" + temp);
+        Integer refer = Integer.parseInt(dto.getRefer());
+        --refer;
+        if (refer > 0) {
+            jedis.lpop(NODE_PREFIX + id);
+            jedis.lpush(NODE_PREFIX + id, "" + refer);
         } else {
             jedis.del(NODE_PREFIX + id);
         }
