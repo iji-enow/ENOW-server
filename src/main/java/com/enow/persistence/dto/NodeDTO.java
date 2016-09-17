@@ -8,12 +8,14 @@ public class NodeDTO {
     private String mapID;
     private String topic;
     private String payload;
+    private String refer;
 
-    public NodeDTO(String roadMapID, String mapID, String topic, String payload) {
+    public NodeDTO(String roadMapID, String mapID, String topic, String payload, String refer) {
         this.roadMapID = roadMapID;
         this.mapID = mapID;
         this.topic = topic;
         this.payload = payload;
+        this.refer = refer;
     }
 
     public String getRoadMapID() {
@@ -46,5 +48,13 @@ public class NodeDTO {
 
     public void setPayload(String payload) {
         this.payload = payload;
+    }
+
+    public String getRefer() {
+        return refer;
+    }
+
+    public void setRefer(String refer) {
+        this.refer = refer;
     }
 }

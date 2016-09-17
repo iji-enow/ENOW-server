@@ -51,7 +51,7 @@ public class StatusDAO implements IStatusDAO {
         } else {
             jedis.del("status-" + id);
             jedis.lpush("status-" + id, dto.getPayload());
-            return id + " overwrited";
+            return id + " overwritten";
         }
     }
 

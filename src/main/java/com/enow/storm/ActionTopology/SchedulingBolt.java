@@ -82,7 +82,6 @@ public class SchedulingBolt extends BaseRichBolt {
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
         String[] incomingNodes = null;
         if (incomingJSON != null) {
-
             incomingNodes = new String[incomingJSON.size()];
             // If this node have incoming nodes...
             for (int i = 0; i < incomingJSON.size(); i++)
@@ -102,25 +101,27 @@ public class SchedulingBolt extends BaseRichBolt {
                 if (checker.size() == incomingJSON.size()) {
                     NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
                     if(redundancy == null) {
+                        JSONArray arr_temp = new JSONArray();
                         for (String nodeId : incomingNodes) {
                             id = _nodeDAO.toID(roadMapId, nodeId);
                             NodeDTO nodeDTO = _nodeDAO.getNode(id);
-                            tempJSON.put(nodeId, nodeDTO.getPayload());
-                            _jsonObject.put("previousData", tempJSON);
-                            _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
+                            _nodeDAO.updateRefer(nodeDTO);
+                            try {
+                                arr_temp.add(_parser.parse(nodeDTO.getPayload()));
+                            } catch (ParseException e1) {
+                                e1.printStackTrace();
+                                _LOG.warn("Fail in inserting status to _jsonObject");
+                                return;
+                            }
                         }
-                    } else {
-                        _jsonObject.put("verified", false);
-                        _LOG.warn("This _jsonObject isn't verified : " + tempJSON.toJSONString());
+                        _jsonObject.put("previousData", tempJSON);
+                        _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
                     }
                 } else {
                     _jsonObject.put("verified", false);
                     _LOG.warn("This _jsonObject isn't verified : " + tempJSON.toJSONString());
                 }
             }
-            //} else {
-            //    _jsonObject.put("verified", false);
-            //}
         }
         // Store this node for subsequent node
         Boolean verified = (Boolean) _jsonObject.get("verified");
@@ -129,6 +130,7 @@ public class SchedulingBolt extends BaseRichBolt {
             try {
                 NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
                 result = _nodeDAO.addNode(dto);
+                System.out.println(_nodeDAO.getNode(_nodeDAO.toID(dto.getRoadMapID(), dto.getMapID())));
                 _LOG.warn("Succeed in inserting current node to Redis : " + result);
             } catch (Exception e) {
                 e.printStackTrace();

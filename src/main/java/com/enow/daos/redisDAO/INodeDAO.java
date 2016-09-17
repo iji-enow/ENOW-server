@@ -47,7 +47,12 @@ public interface INodeDAO {
      * @param dto
      */
     void updateNode(NodeDTO dto);
-
+    /**
+     * updating refer valuable
+     *
+     * @param dto
+     */
+    void updateRefer(NodeDTO dto);
     /**
      * Deletes all nodes
      */
