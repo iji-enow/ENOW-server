@@ -1,5 +1,6 @@
 package com.enow.storm.TriggerTopology;
 
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import org.apache.storm.task.OutputCollector;
@@ -16,6 +17,7 @@ import org.json.simple.parser.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.enow.daos.mongoDAO.MongoDAO;
 import com.enow.storm.Connect;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -41,20 +43,21 @@ public class IndexingBolt extends BaseRichBolt {
 		boolean mapIdCheck = false;
 		boolean brokerIdCheck = false;
 		boolean serverIdCheck = false;
-
-		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
-		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
-
-		JSONObject error = new JSONObject();
-
-		if (input.toString().length() == 0) {
-			error.put("error", "indexingBolt/1");
-			LOG.debug("error : indexingBolt/1");
-			//collector.emit(new Values(error));
-			return;
-		}
+		MongoDAO mongoDao;
 
 		String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
+
+		try {
+			mongoDao = new MongoDAO("127.0.0.1",27017);
+		} catch (UnknownHostException e1) {
+			LOG.debug("error : 1");
+			return;
+		}
+		
+		if (input.toString().length() == 0) {
+			LOG.debug("error : 2");
+			return;
+		}
 
 		if (input.getSourceComponent().equals("event-spout")) {
 			try {
@@ -63,15 +66,11 @@ public class IndexingBolt extends BaseRichBolt {
 				if (_jsonObject.containsKey("roadMapId")) {
 					_jsonObject.put("spoutName", "event");
 				} else {
-					error.put("error", "indexingBolt/2");
-					LOG.debug("error : indexingBolt/2");
-					//collector.emit(new Values(error));
+					LOG.debug("error : 3");
 					return;
 				}
 			} catch (ParseException e) {
-				error.put("error", "indexingBolt/3");
-				LOG.debug("error : indexingBolt/3");
-				//collector.emit(new Values(error));
+				LOG.debug("error : 4");
 				return;
 			}
 		} else if (input.getSourceComponent().equals("order-spout")) {
@@ -82,20 +81,15 @@ public class IndexingBolt extends BaseRichBolt {
 						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("roadMapId")
 						&& _jsonObject.containsKey("deviceId") && _jsonObject.containsKey("payload")) {
 				} else {
-					error.put("error", "indexingBolt/4");
-					LOG.debug("error : indexingBolt/4");
-					//collector.emit(new Values(error));
+					LOG.debug("error : 5");
 					return;
 				}
 
-				MongoDatabase dbWrite = mongoClient.getDatabase("lists");
-
-				MongoCollection<Document> serverListCollection = dbWrite.getCollection("server");
-
-				if (serverListCollection.count(new Document("serverId", (String) _jsonObject.get("serverId"))) == 0) {
+				mongoDao.setDBCollection("lists", "server");
+				
+				if (mongoDao.collectionCount(new Document("serverId", (String) _jsonObject.get("serverId"))) == 0) {
 					serverIdCheck = false;
-				} else if (serverListCollection
-						.count(new Document("serverId", (String) _jsonObject.get("serverId"))) == 1) {
+				} else if (mongoDao.collectionCount(new Document("serverId", (String) _jsonObject.get("serverId"))) == 1) {
 					serverIdCheck = true;
 				} else {
 					serverIdCheck = false;
@@ -103,12 +97,11 @@ public class IndexingBolt extends BaseRichBolt {
 				}
 
 				// Get device collection for matching input signal from device
-				MongoCollection<Document> brokerListCollection = dbWrite.getCollection("broker");
+				mongoDao.setCollection("broker");
 
-				if (brokerListCollection.count(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 0) {
+				if (mongoDao.collectionCount(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 0) {
 					brokerIdCheck = false;
-				} else if (brokerListCollection
-						.count(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 1) {
+				} else if (mongoDao.collectionCount(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 1) {
 					brokerIdCheck = true;
 
 				} else {
@@ -118,26 +111,23 @@ public class IndexingBolt extends BaseRichBolt {
 
 				// Get device collection for matching input signal from device
 
-				MongoCollection<Document> deviceListCollection = dbWrite.getCollection("device");
+				mongoDao.setCollection("device");
 
-				if (deviceListCollection.count(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 0) {
+				if (mongoDao.collectionCount(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 0) {
 					deviceIdCheck = false;
-				} else if (deviceListCollection
-						.count(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 1) {
+				} else if (mongoDao.collectionCount(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 1) {
 					deviceIdCheck = true;
 				} else {
 					deviceIdCheck = false;
 					LOG.debug("There are more than two machine ID on MongoDB");
 				}
 
-				dbWrite = mongoClient.getDatabase("enow");
+				mongoDao.setDBCollection("enow", "roadMap");
+				
 
-				MongoCollection<Document> roadMapCollection = dbWrite.getCollection("roadMap");
-
-				if (roadMapCollection.count(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 0) {
+				if (mongoDao.collectionCount(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 0) {
 					roadMapIdCheck = false;
-				} else if (roadMapCollection
-						.count(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 1) {
+				} else if (mongoDao.collectionCount(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 1) {
 					roadMapIdCheck = true;
 				} else {
 					roadMapIdCheck = false;
@@ -147,15 +137,11 @@ public class IndexingBolt extends BaseRichBolt {
 				if (serverIdCheck && brokerIdCheck && deviceIdCheck && roadMapIdCheck) {
 					_jsonObject.put("spoutName", "order");
 				} else {
-					error.put("error", "indexingBolt/5");
-					LOG.debug("error : indexingBolt/5");
-					//collector.emit(new Values(error));
+					LOG.debug("error : 6");
 					return;
 				}
 			} catch (ParseException e) {
-				error.put("error", "indexingBolt/6");
-				LOG.debug("error : indexingBolt/6");
-				//collector.emit(new Values(error));
+				LOG.debug("error : 7");
 				return;
 			}
 
@@ -167,127 +153,26 @@ public class IndexingBolt extends BaseRichBolt {
 						&& _jsonObject.containsKey("mapId") && _jsonObject.containsKey("payload")
 						&& _jsonObject.containsKey("incomingNode") && _jsonObject.containsKey("outingNode")
 						&& _jsonObject.containsKey("previousData") && _jsonObject.containsKey("topic")
-						&& _jsonObject.containsKey("lastNode")) {
+						&& _jsonObject.containsKey("lastNode")&& _jsonObject.containsKey("verified")) {
 
 					_jsonObject.put("spoutName", "proceed");
 				} else {
-					// init = false 일 경우 필요한 값이 다 안 들어 왔다.
-					error.put("error", "indexingBolt/7");
-					LOG.debug("error : indexingBolt/7");
-					//collector.emit(new Values(error));
+					LOG.debug("error : 8");
 					return;
 				}
 			} catch (ParseException e) {
-				error.put("error", "indexingBolt/8");
-				LOG.debug("error : indexingBolt/8");
-				//collector.emit(new Values(error));
+				LOG.debug("error : 9");
 				return;
 			}
 		} else {
-			error.put("error", "indexingBolt/9");
-			LOG.debug("error : indexingBolt/9");
-			//collector.emit(new Values(error));
+			LOG.debug("error : 10");
 			return;
 		}
 
-		/*
-		 * try { _jsonObject = (JSONObject) parser.parse(msg); if
-		 * (_jsonObject.containsKey("init")) { if ((boolean)
-		 * _jsonObject.get("init")) { if
-		 * (_jsonObject.containsKey("corporationName") &&
-		 * _jsonObject.containsKey("serverId") &&
-		 * _jsonObject.containsKey("brokerId") &&
-		 * _jsonObject.containsKey("roadMapId")) { collector.emit(new
-		 * Values(_jsonObject)); } else { // init = true 일 경우 필요한 값이 다 안 들어 왔다.
-		 * error.put("error", "indexingBolt/2"); collector.emit(new
-		 * Values(error)); } } else { if (_jsonObject.containsKey("proceed") &&
-		 * _jsonObject.containsKey("corporationName") &&
-		 * _jsonObject.containsKey("roadMapId") &&
-		 * _jsonObject.containsKey("mapId") &&
-		 * _jsonObject.containsKey("payload") &&
-		 * _jsonObject.containsKey("incomingNode") &&
-		 * _jsonObject.containsKey("outingNode") &&
-		 * _jsonObject.containsKey("previousData") &&
-		 * _jsonObject.containsKey("topic") &&
-		 * _jsonObject.containsKey("lastNode")) { collector.emit(new
-		 * Values(_jsonObject)); } else { // init = false 일 경우 필요한 값이 다 안 들어 왔다.
-		 * error.put("error", "indexingBolt/3"); collector.emit(new
-		 * Values(error)); return; } } } else { // init자체가 안들어왔다.
-		 * error.put("error", "indexingBolt/4"); collector.emit(new
-		 * Values(error)); } } catch (ParseException e) { // JSONParseException
-		 * 발 error.put("error", "indexingBolt/5"); collector.emit(new
-		 * Values(error)); }
-		 */
-		/*
-		 * MongoDatabase dbWrite = mongoClient.getDatabase("lists");
-		 * 
-		 * MongoCollection<Document> serverListCollection =
-		 * dbWrite.getCollection("server");
-		 * 
-		 * if (serverListCollection.count(new Document("serverId", (String)
-		 * _jsonObject.get("serverId"))) == 0) { // There isn't deviceId that
-		 * matches input signal from // device serverIdCheck = false; } else if
-		 * (serverListCollection.count(new Document("serverId", (String)
-		 * _jsonObject.get("serverId"))) == 1) { // There is deviceId that
-		 * matches input signal from device serverIdCheck = true; } else {
-		 * serverIdCheck = false;
-		 * LOG.debug("There are more than two server ID on MongoDB"); }
-		 * 
-		 * // Get device collection for matching input signal from device
-		 * MongoCollection<Document> brokerListCollection =
-		 * dbWrite.getCollection("broker");
-		 * 
-		 * if (brokerListCollection.count(new Document("brokerId", (String)
-		 * _jsonObject.get("brokerId"))) == 0) { // There isn't deviceId that
-		 * matches input signal from // device brokerIdCheck = false; } else if
-		 * (brokerListCollection.count(new Document("brokerId", (String)
-		 * _jsonObject.get("brokerId"))) == 1) { // There is deviceId that
-		 * matches input signal from device brokerIdCheck = true;
-		 * 
-		 * } else { brokerIdCheck = false;
-		 * LOG.debug("There are more than two broker ID on MongoDB"); }
-		 * 
-		 * // Get device collection for matching input signal from device
-		 * 
-		 * MongoCollection<Document> deviceListCollection =
-		 * dbWrite.getCollection("device");
-		 * 
-		 * if (deviceListCollection.count(new Document("deviceId", (String)
-		 * _jsonObject.get("deviceId"))) == 0) { // There isn't deviceId that
-		 * matches input signal from // device deviceIdCheck = false; } else if
-		 * (deviceListCollection.count(new Document("deviceId", (String)
-		 * _jsonObject.get("deviceId"))) == 1) { // There is deviceId that
-		 * matches input signal from device deviceIdCheck = true; } else {
-		 * deviceIdCheck = false;
-		 * LOG.debug("There are more than two machine ID on MongoDB"); } //
-		 * Check Phase Road-map ID
-		 * 
-		 * dbWrite = mongoClient.getDatabase("enow");
-		 * 
-		 * MongoCollection<Document> roadMapCollection =
-		 * dbWrite.getCollection("roadMap");
-		 * 
-		 * if (roadMapCollection.count(new Document("roadMapId", (String)
-		 * _jsonObject.get("roadMapId"))) == 0) { // There isn't phaseRoadMapId
-		 * that matches input signal from // device roadMapIdCheck = false; }
-		 * else if (roadMapCollection.count(new Document("roadMapId", (String)
-		 * _jsonObject.get("roadMapId"))) == 1) { // There is phaseRoadMapId
-		 * that matches input signal from // device roadMapIdCheck = true;
-		 * 
-		 * } else { roadMapIdCheck = false;
-		 * LOG.debug("There are more than two Phase Road-map Id on MongoDB"); }
-		 */
-
-		/*
-		 * if (serverIdCheck && brokerIdCheck && deviceIdCheck &&
-		 * roadMapIdCheck) { collector.emit(new Values(_jsonObject)); } else {
-		 * json = new JSONObject(); json.put("text", "6"); webhook =
-		 * con.post(con.getURL(), json); return; }
-		 */
 		collector.emit(new Values(_jsonObject));
 
 		try {
-			LOG.debug("indexingBolt result = [" + _jsonObject.toJSONString() + "]");
+			LOG.debug(_jsonObject.toJSONString());
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);

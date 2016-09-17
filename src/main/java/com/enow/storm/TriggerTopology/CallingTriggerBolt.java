@@ -44,20 +44,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		_jsonArray = (ArrayList<JSONObject>) input.getValueByField("jsonArray");
 
 		if(_jsonArray.size() == 0){
-			/*
-			ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
-					"from order kafka but there is mapId for deviceId");
-			producer.send(data);
-			*/
-			LOG.debug("error : caliingTirggerBolt/1");
-			return;
-		}else if (_jsonArray.get(0).containsKey("error")) {
-			/*
-			ProducerRecord<String, String> data = new ProducerRecord<String, String>("trigger",
-					_jsonArray.get(0).toJSONString());
-			producer.send(data);
-			*/
-			LOG.debug("error : caliingTirggerBolt/2");
+			LOG.debug("error : 1");
 			return;
 		}else{
 			for (JSONObject tmpJsonObject : _jsonArray) {
@@ -69,50 +56,8 @@ public class CallingTriggerBolt extends BaseRichBolt {
 			}
 		}
 
-		/*
-		 * if (spoutSource.equals("trigger")) { if (serverIdCheck &&
-		 * brokerIdCheck && deviceIdCheck && phaseRoadMapIdCheck && mapIdCheck)
-		 * { for (TopicStructure tmp : topicStructureArray) { if
-		 * (tmp.isLastMapId()) { String a = ""; for (int i = 0; i <
-		 * tmp.getWaitMapId().size(); i++) { a += tmp.getWaitMapId().get(i) +
-		 * " "; } ProducerRecord<String, String> data = new
-		 * ProducerRecord<String, String>("trigger", "trigger," + tmp.output() +
-		 * " " + a); producer.send(data); collector.emit(new
-		 * Values(tmp.output())); } else { ProducerRecord<String, String> data =
-		 * new ProducerRecord<String, String>("trigger", "trigger," +
-		 * tmp.output()); producer.send(data); collector.emit(new
-		 * Values(tmp.output())); } } } else { ProducerRecord<String, String>
-		 * data = new ProducerRecord<String, String>("trigger", "error : " +
-		 * "serverIdCheck = " + serverIdCheck + " brokerIdCheck = " +
-		 * brokerIdCheck + " machinIdCheck = " + deviceIdCheck +
-		 * " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck + " mapIdCheck = " +
-		 * mapIdCheck); producer.send(data); collector.emit(new
-		 * Values("error : " + "serverIdCheck = " + serverIdCheck +
-		 * " brokerIdCheck = " + brokerIdCheck + " machinIdCheck = " +
-		 * deviceIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck +
-		 * " mapIdCheck = " + mapIdCheck)); } } else if
-		 * (spoutSource.equals("proceed")) { if (serverIdCheck && brokerIdCheck
-		 * && deviceIdCheck && phaseRoadMapIdCheck && mapIdCheck) { for
-		 * (TopicStructure tmp : topicStructureArray) { ProducerRecord<String,
-		 * String> data = new ProducerRecord<String, String>("trigger",
-		 * "proceed," + tmp.output()); producer.send(data); collector.emit(new
-		 * Values(tmp.output())); } } else {
-		 * 
-		 * json = new JSONObject(); json.put("error","error");
-		 * 
-		 * ProducerRecord<String, String> data = new ProducerRecord<String,
-		 * String>("trigger", "error : " + "serverIdCheck = " + serverIdCheck +
-		 * " brokerIdCheck = " + brokerIdCheck + " machinIdCheck = " +
-		 * deviceIdCheck + " phaseRoadMapIdCheck = " + phaseRoadMapIdCheck +
-		 * " mapIdCheck = " + mapIdCheck); producer.send(data);
-		 * collector.emit(new Values("error : " + "serverIdCheck = " +
-		 * serverIdCheck + " brokerIdCheck = " + brokerIdCheck +
-		 * " machinIdCheck = " + deviceIdCheck + " phaseRoadMapIdCheck = " +
-		 * phaseRoadMapIdCheck + " mapIdCheck = " + mapIdCheck)); } } else { //
-		 * spoutSource가 Trigger나 proceed가 아닌 경 }
-		 */
 		try {
-			LOG.debug("callingTriggerBolt result = [" + _jsonArray.toString() + "]");
+			LOG.debug(_jsonArray.toString());
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);

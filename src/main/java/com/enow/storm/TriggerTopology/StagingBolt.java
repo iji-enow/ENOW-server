@@ -1,5 +1,6 @@
 package com.enow.storm.TriggerTopology;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +20,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.enow.daos.mongoDAO.MongoDAO;
 import com.enow.storm.Connect;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -27,7 +29,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 public class StagingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LogManager.getLogger(StagingBolt2.class);
+	protected static final Logger LOG = LogManager.getLogger(StagingBolt.class);
 	private OutputCollector collector;
 
 	@Override
@@ -39,45 +41,34 @@ public class StagingBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		JSONObject _jsonObject = null;
-		boolean mapIdCheck = false;
 		FindIterable<Document> iterable;
 		JSONParser jsonParser = new JSONParser();
 		JSONObject roadMapId;
 		JSONObject mapIds;
 		JSONObject mapId;
-		JSONObject phaseId;
-		JSONObject devices;
 		JSONObject outingNode;
 		JSONObject incomingNode;
-		JSONObject subsequentInitPeer;
-		JSONArray deviceId;
 		JSONArray incomingNodeArray;
-		JSONArray subsequentInitPeerPhase;
 		JSONArray outingNodeArray;
-		JSONArray incomingPeerArray;
 		JSONArray initNodeArray;
 		JSONArray lastNodeArray;
 		JSONParser parser = new JSONParser();
-		JSONObject error = new JSONObject();
-
+		MongoDAO mongoDao;
+		
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 		ConcurrentHashMap<String, JSONObject> ackSchdueling = new ConcurrentHashMap<>();
-		MongoClient mongoClient = new MongoClient("127.0.0.1", 27017);
-		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
+		try {
+			mongoDao = new MongoDAO("127.0.0.1",27017);
+		} catch (UnknownHostException e1) {
+			LOG.debug("error : 1");
+			return;
+		}
 
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
-		if (_jsonObject.containsKey("error")) {
-			_jsonArray.add(_jsonObject);
-			LOG.debug("error : stagingBolt/1");
-			// collector.emit(new Values(_jsonArray));
-			return;
-		} 
+		mongoDao.setDBCollection("enow", "roadMap");
 
-		MongoDatabase dbWrite = mongoClient.getDatabase("enow");
-		MongoCollection<Document> roadMapCollection = dbWrite.getCollection("roadMap");
-
-		iterable = roadMapCollection.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
+		iterable = mongoDao.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
 
 		if (_jsonObject.get("spoutName").equals("event")) {
 			try {
@@ -105,7 +96,8 @@ public class StagingBolt extends BaseRichBolt {
 					tmpJsonObject.put("mapId", InitMapId);
 					tmpJsonObject.put("topic", "enow" + "/" + mapId.get("serverId") + "/"
 							+ mapId.get("brokerId") + "/" + mapId.get("deviceId"));
-
+					tmpJsonObject.put("verified", true);
+					
 					tmpJsonObject.remove("spoutName");
 
 					if (outingNode.containsKey(InitMapId)) {
@@ -131,10 +123,7 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				error.put("error", "stagingBolt/2");
-				LOG.debug("error : stagingBolt/2");
-				_jsonArray.add(error);
-				// collector.emit(new Values(_jsonArray));
+				LOG.debug("error : 2");
 				return;
 			}
 		} else if (_jsonObject.get("spoutName").equals("order")) {
@@ -163,7 +152,7 @@ public class StagingBolt extends BaseRichBolt {
 						tmpJsonObject.put("topic",
 								tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
 										+ tmpJsonObject.get("brokerId") + "/" + mapId.get("deviceId"));
-
+						tmpJsonObject.put("verified", true);
 						tmpJsonObject.remove("corporationName");
 						tmpJsonObject.remove("serverId");
 						tmpJsonObject.remove("brokerId");
@@ -195,10 +184,7 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				error.put("error", "stagingBolt/3");
-				LOG.debug("error : stagingBolt/3");
-				_jsonArray.add(error);
-				// collector.emit(new Values(_jsonArray));
+				LOG.debug("error : 3");
 				return;
 			}
 		} else if (_jsonObject.get("spoutName").equals("proceed")) {
@@ -216,7 +202,7 @@ public class StagingBolt extends BaseRichBolt {
 				mapId = (JSONObject) mapIds.get(currentMapId);
 
 				_jsonObject.put("topic", "enow" + "/" + mapId.get("serverId") + "/" + mapId.get("brokerId") + "/" + mapId.get("deviceId"));
-
+				_jsonObject.put("verified", true);
 				_jsonObject.remove("spoutName");
 
 				if ((boolean)_jsonObject.get("order")) {
@@ -245,116 +231,19 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				error.put("error", "stagingBolt/4");
-				LOG.debug("error : stagingBolt/4");
-				_jsonArray.add(error);
-				// collector.emit(new Values(_jsonArray));
+				LOG.debug("error : 4");
 				return;
 
 			}
 		} else {
-			error.put("error", "stagingBolt/5");
-			LOG.debug("error : stagingBolt/5");
-			_jsonArray.add(error);
-			// collector.emit(new Values(_jsonArray));
+			LOG.debug("error : 5");
 			return;
 		}
 
-		/*
-		 * if ((boolean) _jsonObject.get("init")) { try { roadMapId =
-		 * (JSONObject) jsonParser.parse(iterable.first().toJson());
-		 * 
-		 * mapIds = (JSONObject) roadMapId.get("mapIds"); initNodeArray =
-		 * (JSONArray) roadMapId.get("initNode"); incomingNode = (JSONObject)
-		 * roadMapId.get("incomingNode"); outingNode = (JSONObject)
-		 * roadMapId.get("outingNode"); lastNodeArray = (JSONArray)
-		 * roadMapId.get("lastNode");
-		 * 
-		 * String jsonString = _jsonObject.toJSONString();
-		 * 
-		 * for (int i = 0; i < initNodeArray.size(); i++) { String InitMapId =
-		 * (String) initNodeArray.get(i);
-		 * 
-		 * mapId = (JSONObject) mapIds.get(InitMapId);
-		 * 
-		 * JSONObject tmpJsonObject = new JSONObject();
-		 * 
-		 * tmpJsonObject = (JSONObject) parser.parse(jsonString);
-		 * tmpJsonObject.put("payload", null); tmpJsonObject.put("previousData",
-		 * null); tmpJsonObject.put("proceed", false);
-		 * tmpJsonObject.put("mapId", InitMapId); tmpJsonObject.put("deviceId",
-		 * mapId.get("deviceId")); tmpJsonObject.put("topic",
-		 * tmpJsonObject.get("corporationName") + "/" +
-		 * tmpJsonObject.get("serverId") + "/" + tmpJsonObject.get("brokerId") +
-		 * "/" + mapId.get("deviceId"));
-		 * 
-		 * tmpJsonObject.remove("corporationName");
-		 * tmpJsonObject.remove("serverId"); tmpJsonObject.remove("brokerId");
-		 * 
-		 * if (outingNode.containsKey(InitMapId)) { outingNodeArray =
-		 * (JSONArray) outingNode.get(InitMapId);
-		 * 
-		 * tmpJsonObject.put("outingNode", outingNodeArray);
-		 * tmpJsonObject.put("lastNode", false); } else {
-		 * tmpJsonObject.put("outingNode", null); tmpJsonObject.put("lastNode",
-		 * true); }
-		 * 
-		 * if (incomingNode.containsKey(InitMapId)) { incomingNodeArray =
-		 * (JSONArray) incomingNode.get(InitMapId);
-		 * 
-		 * tmpJsonObject.put("incomingNode", incomingNodeArray); } else {
-		 * tmpJsonObject.put("incomingNode", null); }
-		 * 
-		 * tmpJsonObject.put("init", false); _jsonArray.add(tmpJsonObject); } }
-		 * catch (ParseException e) { // iterable.first().toJson() 이 json형식의
-		 * string이 아닌 경우 // 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-		 * e.printStackTrace(); error.put("error", "stagingBolt/1");
-		 * _jsonArray.add(error); collector.emit(new Values(_jsonArray)); } }
-		 * else { try { roadMapId = (JSONObject)
-		 * jsonParser.parse(iterable.first().toJson());
-		 * 
-		 * mapIds = (JSONObject) roadMapId.get("mapIds"); initNodeArray =
-		 * (JSONArray) roadMapId.get("initNode"); incomingNode = (JSONObject)
-		 * roadMapId.get("incomingNode"); outingNode = (JSONObject)
-		 * roadMapId.get("outingNode"); lastNodeArray = (JSONArray)
-		 * roadMapId.get("lastNode");
-		 * 
-		 * String currentMapId = (String) _jsonObject.get("mapId"); String[]
-		 * topic = _jsonObject.get("topic").toString().split("\\/");
-		 * 
-		 * mapId = (JSONObject) mapIds.get(currentMapId);
-		 * 
-		 * _jsonObject.put("proceed", false);
-		 * 
-		 * _jsonObject.put("topic", topic[0] + "/" + topic[1] + "/" + topic[2] +
-		 * "/" + mapId.get("deviceId"));
-		 * 
-		 * if (outingNode.containsKey(currentMapId)) { outingNodeArray =
-		 * (JSONArray) outingNode.get(currentMapId);
-		 * 
-		 * _jsonObject.put("outingNode", outingNodeArray);
-		 * _jsonObject.put("lastNode", false); } else {
-		 * _jsonObject.put("outingNode", null); _jsonObject.put("lastNode",
-		 * true); }
-		 * 
-		 * if (incomingNode.containsKey(currentMapId)) { incomingNodeArray =
-		 * (JSONArray) incomingNode.get(currentMapId);
-		 * 
-		 * _jsonObject.put("incomingNode", incomingNodeArray); } else {
-		 * _jsonObject.put("incomingNode", null); }
-		 * 
-		 * _jsonArray.add(_jsonObject); } catch (ParseException e) { //
-		 * iterable.first().toJson() 이 json형식의 string이 아닌 경우 // 발생 하지만 tojson이기에
-		 * 그럴 일이 발생하지 않을 것이라 가정 e.printStackTrace(); error.put("error",
-		 * "stagingBolt/2"); _jsonArray.add(error); collector.emit(new
-		 * Values(_jsonArray));
-		 * 
-		 * } }
-		 */
 		collector.emit(new Values(_jsonArray));
 
 		try {
-			LOG.debug("StagingBolt result = [" + _jsonArray.toString() + "]");
+			LOG.debug(_jsonArray.toString());
 			collector.ack(input);
 		} catch (Exception e) {
 			collector.fail(input);
