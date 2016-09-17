@@ -79,10 +79,11 @@ public class CallingFeedBolt extends BaseRichBolt {
                 if (!lastNode) {
                     nodeData = new ProducerRecord<>(_KAFKA_PROCEED, temp);
                     _producer.send(nodeData);
+                } else {
+
                 }
             }
         }
-
         _collector.emit(new Values(_jsonObject));
         try {
             _LOG.debug("input = [" + input + "]");

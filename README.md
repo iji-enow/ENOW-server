@@ -143,18 +143,20 @@ Payload
 
 __JsonObject :__</br>
 ```JSON
-
 {
-    "topic":"enow/serverId1/brokerId1/deviceId1",
-    "roadMapId":"1",
-    "mapId":"1",
-    "incomingNode":["2", "4"],
-    "outingNode":["11", "13"],
-    "previousData":{"2" : "value1", "4" : "value2"},
-    "payload": {},
-    "lastNode":false,
-    "order":false,
-    "verified":false
+  "topic": "SHA-256",
+  "payload": {
+      "topic":"enow/serverId1/brokerId1/deviceId1",
+      "roadMapId":"1",
+      "mapId":"1",
+      "incomingNode":["2", "4"],
+      "outingNode":["11", "13"],
+      "previousData":{"2" : "value1", "4" : "value2"},
+      "payload": {},
+      "lastNode":false,
+      "order":false,
+      "verified":false
+  }
 }
 ```
 order 0: 반복되는 시퀸스

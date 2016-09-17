@@ -116,10 +116,13 @@ public class SchedulingBolt extends BaseRichBolt {
                         }
                         _jsonObject.put("previousData", tempJSON);
                         _LOG.debug("Succeed in inserting previousData to _jsonObject : " + tempJSON.toJSONString());
+                    } else {
+                        _jsonObject.put("verified", false);
+                        _LOG.debug("This _jsonObject isn't verified : " + tempJSON.toJSONString());
                     }
                 } else {
                     _jsonObject.put("verified", false);
-                    _LOG.warn("This _jsonObject isn't verified : " + tempJSON.toJSONString());
+                    _LOG.debug("This _jsonObject isn't verified : " + tempJSON.toJSONString());
                 }
             }
         }

@@ -29,10 +29,13 @@ public class NodeDAO implements INodeDAO {
         String roadMapID = (String) jsonObject.get("roadMapId");
         String mapID = (String) jsonObject.get("mapId");
         String topic = (String) jsonObject.get("topic");
-        JSONArray incomingJSON = (JSONArray) jsonObject.get("outingNode");
-        Integer count = incomingJSON.size();
+        JSONArray outingJSON = (JSONArray) jsonObject.get("outingNode");
+        Integer refer = 0;
+        if(outingJSON != null){
+            refer = outingJSON.size();
+        }
         JSONObject payload = (JSONObject) jsonObject.get("payload");
-        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString(), "" + count);
+        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString(), "" + refer);
         return dto;
     }
 
