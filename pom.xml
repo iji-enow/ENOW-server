@@ -74,28 +74,31 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>connect-json</artifactId>
             <version>${kafka.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-core</artifactId>
             <version>${storm.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-kafka</artifactId>
             <version>${storm.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-mongodb</artifactId>
             <version>${storm.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -110,16 +113,19 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>2.6.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>2.6.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
             <version>2.6.2</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -143,21 +149,23 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.1</version>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
                 <executions>
                     <execution>
+                        <id>EnowTopologies</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.enow.storm.main.main</mainClass>
-                                </transformer>
-                            </transformers>
+                            <includes>
+                                <include>com/enow/storm/**/*.class</include>
+                                <include>com/enow/plugin/**/*.class</include>
+                                <include>com/enow/persistence/**/*.class</include>
+                                <include>com/enow/facility/**/*.class</include>
+                                <include>com/enow/daos/**/*.class</include>
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>
@@ -196,66 +204,7 @@
             <url>https://clojars.org/repo/</url>
         </repository>
     </repositories>
-
-
     <profiles>
-        <profile>
-            <id>local</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.storm</groupId>
-                    <artifactId>storm-core</artifactId>
-                    <version>${storm.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.storm</groupId>
-                    <artifactId>storm-kafka</artifactId>
-                    <version>${storm.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.storm</groupId>
-                    <artifactId>storm-mongodb</artifactId>
-                    <version>${storm.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.clojure</groupId>
-                    <artifactId>clojure</artifactId>
-                    <version>1.7.0</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>cluster</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.apache.storm</groupId>
-                    <artifactId>storm-core</artifactId>
-                    <version>${storm.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.storm</groupId>
-                    <artifactId>storm-kafka</artifactId>
-                    <version>${storm.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.storm</groupId>
-                    <artifactId>storm-mongodb</artifactId>
-                    <version>${storm.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.clojure</groupId>
-                    <artifactId>clojure</artifactId>
-                    <version>1.7.0</version>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
-        </profile>
         <profile>
             <id>all-tests</id>
             <properties>

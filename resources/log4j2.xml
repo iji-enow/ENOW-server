@@ -10,7 +10,7 @@
 		</Kafka>
 	</Appenders>
 	<Loggers>
-		<Logger name="com.enow.storm" level="trace" additivity="false">
+		<Logger name="com.enow.storm" level="info" additivity="false">
 			<AppenderRef ref="STDOUT" />
 			<AppenderRef ref="Kafka" />
 		</Logger>

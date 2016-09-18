@@ -1,21 +1,13 @@
 package com.enow.daos.mongoDAO;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 
 import java.net.UnknownHostException;
-import java.util.Set;
-
-import org.bson.Document;
 
 public class MongoDAO implements IMongoDAO{
 

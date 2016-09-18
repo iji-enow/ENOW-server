@@ -5,20 +5,32 @@ package com.enow.persistence.redis;
  */
 import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.dto.StatusDTO;
+import org.json.simple.JSONObject;
 
 import java.util.List;
 
 public interface IRedisDB {
 
     void clear();
-
     void shutdown();
 
+    String toID(String roadMapID, String mapID);
+    NodeDTO jsonObjectToNode(JSONObject jsonObject);
     String addNode(NodeDTO dto);
-
+    NodeDTO getNode(String ID);
     List<NodeDTO> getAllNodes();
+    void updateNode(NodeDTO dto);
+    void updateRefer(NodeDTO dto);
+    void deleteNode(String ID);
+    void deleteAllNodes();
 
+
+    StatusDTO jsonObjectToStatus(JSONObject jsonObject);
+    StatusDTO getStatus(String topic);
     String addStatus(StatusDTO dto);
-
     List<StatusDTO> getAllStatus();
+    void updateStatus(StatusDTO dto);
+    void deleteStatus(String topic);
+    void deleteAllStatus();
+
 }

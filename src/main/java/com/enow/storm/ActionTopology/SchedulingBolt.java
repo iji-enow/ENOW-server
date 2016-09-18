@@ -1,10 +1,9 @@
 package com.enow.storm.ActionTopology;
 
-import com.enow.daos.redisDAO.INodeDAO;
-import com.enow.daos.redisDAO.IStatusDAO;
-import com.enow.facility.DAOFacility;
 import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.dto.StatusDTO;
+import com.enow.persistence.redis.IRedisDB;
+import com.enow.persistence.redis.RedisDB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -25,15 +24,13 @@ import java.util.Map;
 
 public class SchedulingBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(SchedulingBolt.class);
-    private INodeDAO _nodeDAO;
-    private IStatusDAO _statusDAO;
+    private IRedisDB _redis;
     private OutputCollector _collector;
     private JSONParser _parser;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
-        _nodeDAO = DAOFacility.getInstance().createNodeDAO();
-        _statusDAO = DAOFacility.getInstance().createStatusDAO();
+        _redis = RedisDB.getInstance();
         _collector = collector;
         _parser = new JSONParser();
     }
@@ -62,10 +59,10 @@ public class SchedulingBolt extends BaseRichBolt {
 
         Boolean order = (Boolean) _jsonObject.get("order");
         String topic = (String) _jsonObject.get("topic");
-        System.out.println("String topic = (String) _jsonObject.get(\"topic\") : " + topic);
+
         if (!order) {
             // Ready to get the status of device we need
-            StatusDTO statusDTO = _statusDAO.getStatus(topic);
+            StatusDTO statusDTO = _redis.getStatus(topic);
             String temp = statusDTO.getPayload();
             try {
                 _jsonObject.put("payload", _parser.parse(temp));
@@ -92,18 +89,18 @@ public class SchedulingBolt extends BaseRichBolt {
                 List<NodeDTO> checker = new ArrayList<>();
                 String id;
                 for (String nodeId : incomingNodes) {
-                    id = _nodeDAO.toID(roadMapId, nodeId);
-                    NodeDTO tempDTO = _nodeDAO.getNode(id);
+                    id = _redis.toID(roadMapId, nodeId);
+                    NodeDTO tempDTO = _redis.getNode(id);
                     if (tempDTO != null) {
                         checker.add(tempDTO);
                     }
                 }
                 if (checker.size() == incomingJSON.size()) {
-                    NodeDTO redundancy = _nodeDAO.getNode(_nodeDAO.toID(roadMapId, mapId));
+                    NodeDTO redundancy = _redis.getNode(_redis.toID(roadMapId, mapId));
                     if(redundancy == null) {
                         JSONArray arr_temp = new JSONArray();
                         for (NodeDTO node : checker) {
-                            _nodeDAO.updateRefer(node);
+                            _redis.updateRefer(node);
                             try {
                                 arr_temp.add(_parser.parse(node.getPayload()));
                             } catch (ParseException e1) {
@@ -129,9 +126,8 @@ public class SchedulingBolt extends BaseRichBolt {
         if (verified) {
             String result = "nothing";
             try {
-                NodeDTO dto = _nodeDAO.jsonObjectToNode(_jsonObject);
-                result = _nodeDAO.addNode(dto);
-                System.out.println(_nodeDAO.getNode(_nodeDAO.toID(dto.getRoadMapID(), dto.getMapID())));
+                NodeDTO dto = _redis.jsonObjectToNode(_jsonObject);
+                result = _redis.addNode(dto);
                 _LOG.warn("Succeed in inserting current node to Redis : " + result);
             } catch (Exception e) {
                 e.printStackTrace();

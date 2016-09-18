@@ -26,7 +26,7 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
     // Declare that we emit a 'jsonObject'
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("jsonObject", "message"));
+        declarer.declare(new Fields("jsonObject"));
     }
 
     // Nothing to do for configuration
@@ -34,7 +34,8 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
     public Map<String, Object> getComponentConfiguration() {
         return null;
     }
-}*/
+}
+*/
 
 public class ExecutingBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
@@ -52,7 +53,7 @@ public class ExecutingBolt extends BaseRichBolt {
         Boolean verified = (Boolean) _jsonObject.get("verified");
         if(verified) {
             JSONObject _payload = new JSONObject();
-            _payload.put("succeed", "great!");
+            _payload.put(_jsonObject.get("mapId"), "great!");
             _jsonObject.put("payload", _payload);
         }
 
