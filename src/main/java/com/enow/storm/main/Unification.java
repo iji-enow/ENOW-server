@@ -71,24 +71,6 @@ public class Unification {
         builder.setBolt("executing-bolt", new ExecutingBolt()).shuffleGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("executing-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
-        
-        ///////
-        
-        // Status Kafka setting
-        // Build Topology
-        /*
-        config.setNumWorkers(2);
-        config.setMaxTaskParallelism(5);
-        config.put(Config.NIMBUS_THRIFT_PORT, 6627);
-        config.put(Config.STORM_ZOOKEEPER_PORT, 2181);
-        
-        System.setProperty("storm.jar", "/usr/local/Cellar/storm/1.0.1/libexec/extlib/enow-storm-1.0.jar");
-        
-        StormSubmitter submitter = new StormSubmitter();
-       
-        submitter.submitTopology("Trigger", config, builder.createTopology());
-        */
-
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("TriggerTopology", config, builder.createTopology());
 
