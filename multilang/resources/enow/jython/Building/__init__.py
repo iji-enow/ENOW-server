@@ -11,9 +11,9 @@ from enow.jython.runtimePackage.runtimeMain import runtimeMain
 class Building():
     main = None
     result = None
-    code = ""
-    parameter = ""
-    payload = ""
+    code = None
+    parameter = None
+    payload = None
     previousData = None
 
     def __init__(self):
@@ -37,7 +37,7 @@ class Building():
             return self.payload
         else:
             return ""
-        
+
     def getPreviousData(self):
         if self.previousData is not None:
             return self.previousData
@@ -52,7 +52,7 @@ class Building():
 
     def setPayload(self, _payload):
         self.payload = _payload
-        
+
     def setPreviousData(self, _previousData):
         self.previousData = _previousData
 

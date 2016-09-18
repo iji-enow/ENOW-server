@@ -1,6 +1,7 @@
 import sys
 import thread
 import json
+import codecs
 import logging
 import os
 
@@ -13,7 +14,7 @@ from postCode import postProcess
 from StreamToLogger import StreamToLogger
 '''
 List : Global Variables
-    Descriptions : 
+    Descriptions :
         threadExit : A variable for detecting whether a thread executing the body source has exited"
         loggerStdout : A variable logging the stream passed out on STDOUT
         loggerStderr : A variable logging the stream passed out on STDERR
@@ -30,73 +31,73 @@ def eventHandlerFacade(_event, _context, _callback):
     global lock
     old_stdout = sys.stdout
     old_stderr = sys.stderr
-    
+
     CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
     loggerStdoutFilePath = os.path.join(CURRENT_DIR, 'log', 'log.txt')
-    
+
     logging.basicConfig(
                        level=logging.DEBUG,
                        format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
                        filename=loggerStdoutFilePath,
                        filemode='a'
-                       )  
- 
+                       )
+
     stdout_logger = logging.getLogger('STDOUT')
     sl = StreamToLogger(stdout_logger, logging.INFO)
     sys.stdout = sl
- 
+
     stderr_logger = logging.getLogger('STDERR')
     sl = StreamToLogger(stderr_logger, logging.ERROR)
     sys.stderr = sl
-    
+
     eventHandler(_event, _context, _callback)
-    
+
     sys.stdout = old_stdout
     sys.stderr = old_stderr
-    
+
     lock.acquire()
     threadExit = True
     lock.release()
-    
-    
+
+
 def Main():
-    
+
     jsonDump = ""
     parameterDump = ""
     previousDataDump = ""
     while True:
-        string = sys.stdin.readline()
-        
-        if not string:
+        binaryString = sys.stdin.readline()
+
+        if not binaryString:
             break
-        
-        if string == "endl\n":
+
+        if binaryString == b"endl\n":
             break
-        
-        jsonDump += str(string)
-        
+
+        jsonDump += codecs.encode(binaryString, 'utf-8')
+
     while True:
-        string = sys.stdin.readline()
-        
-        if not string:
+        binaryString = sys.stdin.readline()
+
+        if not binaryString:
             break
-        
-        if string == "endl\n":
+
+        if binaryString == b"endl\n":
             break
-        
-        parameterDump += str(string)
-    
+
+        parameterDump += codecs.encode(binaryString, 'utf-8')
+
     while True:
-        string = sys.stdin.readline()
-        
-        if not string:
+        binaryString = sys.stdin.readline()
+
+        if not binaryString:
             break
-        
-        if string == "endl\n":
+
+        if binaryString == b"endl\n":
             break
-        
-        previousDataDump += str(string)
-    
+
+        previousDataDump += codecs.encode(binaryString, 'utf-8')
+
     _event = json.loads(jsonDump)
     _context = dict()
     _callback = dict()
@@ -117,18 +118,18 @@ def Main():
     _context["deviceID"] = ""
     _context["parameter"] = parameterDump
     _context["previousData"] = _previousData
-    
+
     """
     setting up a thread for executing a body code
     """
     global lock
     lock = thread.allocate_lock()
     global threadExit
-    
+
     stackSize = []
     stackSize.append(kilobytes(_context["memory_limit_in_mb"]))
     thread.stack_size(kilobytes(64))
-    
+
     """
     setting up a logger for debugging
     """
@@ -136,16 +137,16 @@ def Main():
         thread.start_new_thread(eventHandlerFacade, (_event, _context, _callback))
     except:
         print("Unable to start thread")
-    
+
     while True:
         lock.acquire()
         if threadExit == True:
             lock.release()
             break
         lock.release()
-    
+
     postProcess(_event, _context, _callback)
-    
+
 if __name__ == "__main__":
     '''
     sys.stderr.write("preCode.py : running")
