@@ -80,7 +80,7 @@ public class NodeDAO implements INodeDAO {
         String mapID = tokenizer.nextToken();
         String id = roadMapID + "-" + mapID;
         List<String> result = jedis.lrange(NODE_PREFIX + id, 0, -1);
-        if (result.size() > 1) {
+        if (result.size() > 2) {
             System.out.println("result.get(0) : " + result.get(0));
             System.out.println("result.get(1) : " + result.get(1));
             System.out.println("result.get(2) : " + result.get(2));
