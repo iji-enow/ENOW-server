@@ -87,6 +87,12 @@ public class StatusDAO implements IStatusDAO {
     }
 
     @Override
+    public void deleteStatus(String topic) {
+        Jedis jedis = RedisDB.getConnection();
+        jedis.del(STATUS_PREFIX + topic);
+    }
+
+    @Override
     public void deleteAllStatus() {
         Jedis jedis = RedisDB.getConnection();
         Set<String> keys = jedis.keys("status-*");
@@ -94,11 +100,5 @@ public class StatusDAO implements IStatusDAO {
         while (iter.hasNext()) {
             jedis.del(iter.next());
         }
-    }
-
-    @Override
-    public void deleteStatus(String topic) {
-        Jedis jedis = RedisDB.getConnection();
-        jedis.del(STATUS_PREFIX + topic);
     }
 }
