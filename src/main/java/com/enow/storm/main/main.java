@@ -30,13 +30,13 @@ public class main {
     protected void runMain(String[] args) throws Exception {
 
 
-//        if (args.length == 0) {
-//            submitTopologyLocalCluster("action", getActionTopology(), getConfig());
-//            submitTopologyLocalCluster("trigger", getTriggerTopology(), getConfig());
-//        } else {
-            submitTopologyRemoteCluster("trigger", getTriggerTopology(), getConfig());
-            submitTopologyRemoteCluster("action", getActionTopology(), getConfig());
-//        }
+        if (args.length == 0) {
+            submitTopologyLocalCluster("action", getActionTopology(), getConfig());
+            submitTopologyLocalCluster("trigger", getTriggerTopology(), getConfig());
+        } else {
+            submitTopologyRemoteCluster(args[0], getTriggerTopology(), getConfig());
+            submitTopologyRemoteCluster(args[1], getActionTopology(), getConfig());
+        }
 
     }
 
