@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class main {
     private static final String[] TOPICS = new String[]{"event", "proceed", "order", "trigger", "status"};
-    private static final String zkhost = "localhost:2181";
+    private static final String zkhost = "192.168.99.100:2181";
     private LocalCluster cluster = new LocalCluster();
     public static void main(String[] args) throws Exception {
         new main().runMain(args);
