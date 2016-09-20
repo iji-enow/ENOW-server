@@ -58,7 +58,7 @@ public class StagingBolt extends BaseRichBolt {
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 		ConcurrentHashMap<String, JSONObject> ackSchdueling = new ConcurrentHashMap<>();
 		try {
-			mongoDao = new MongoDAO("127.0.0.1",27017);
+			mongoDao = new MongoDAO("192.168.99.100",27017);
 		} catch (UnknownHostException e1) {
 			LOG.debug("error : 1");
 			return;

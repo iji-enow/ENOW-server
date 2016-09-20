@@ -31,7 +31,7 @@ public class CallingFeedBolt extends BaseRichBolt {
         _props = new Properties();
         _props.put("producer.type", "sync");
         _props.put("batch.size", "1");
-        _props.put("bootstrap.servers", "localhost:9092");
+        _props.put("bootstrap.servers", "192.168.99.100:9092");
         _props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         _props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         _producer = new KafkaProducer<>(_props);

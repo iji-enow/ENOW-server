@@ -32,7 +32,7 @@ public class RedisDB implements IRedisDB {
     }
 
     public RedisDB() {
-        connection = new Jedis("127.0.0.1", 6379);
+        connection = new Jedis("192.168.0.151", 6379);
     }
 
     // public void setTestDb() {connection.select(10);}

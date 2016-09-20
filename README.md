@@ -32,38 +32,79 @@ TriggerTopology
 TriggerTopology literally can activate the component of Road-Map so that IoT devices are connected each other. before ordering devices, TriggerTopology refine the information of event and link refined one to database for using.
 
 ### IndexingBolt :
+
 __INPUT:__
 - `eventKafka` ⇨ `jsonObject(Event)`
+- `orderKafka` ⇨ `jsonObject(Order)`
 - `proceedKafka` ⇨ `jsonObject(Proceed)`
 
+
+__`jsonObject(Event)` :__</br>
+```JSON
+{
+    "roadMapId":"1",
+}
+```
+
+__`jsonObject(orderKafka)` :__</br>
+```JSON
+{
+    "corporationName":enow,
+    "serverId":serverId1,
+    "brokerId":brokerId1,
+    "deviceId":deviceId1,
+    "roadMapId":"1",
+    "payload": {"humidity": "60", "brightness": "231"},
+}
+```
+
+__`jsonObject(Proceed)` :__</br>
+```JSON
+{
+    "topic":"enow/serverId1/brokerId1/deviceId1",
+    "roadMapId":"1",
+    "mapId":"1",
+    "incomingNode":["2", "4"],
+    "outingNode":["11", "13"],
+    "previousData":{"2" : "value1", "4" : "value2"},
+    "payload": {"humidity": "60", "brightness": "231"},
+    "lastNode":false,
+    "order":false,
+    "verified":false,
+    "lambda":false
+}
+```
+
 __PROCESSING:__
-- `eventKafka`에서 `Console`에서 `Init node`의 정보를 받아온다.
-- `proceedKafka`에서는 `ActionTopology`에서 `running node`의 정보를 받아온다.
-- `eventKafka`와 `proceedKafka`에서 받아온 `jsonObject`가 필요한 모든 `key, value`를 갖고 있는지 확인한다.
-- `eventKafka`와 `proceedKafka`에서 받아온 `jsonObject`의 `serverId`,`brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
+- `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
+- `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`의 정보를 받아온다.
+- `proceedKafka`에서 `ActionTopology`로부터 받은 `jsonObject(Proceed)`를 받아온다.
+- `eventKafka`, `proceedKafka`와 `orderKafka`에서 받아온 `jsonObject`가 필요한 모든 `key`값을 갖고 있는지 확인한다.
+- `orderKafka`에서 받아온 `jsonObject`는 사용자가 직접 보내준 값이므로 `serverId`,`brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
 
 __OUTPUT:__
 
 - `jsonObject` ⇨ `StagingBolt`
-
-
 ### StagingBolt :
 __INPUT:__
 - `IndexingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `"init" = true`라면 받은 `jsonObject` 그대로 `CallingTriggerBolt`로 넘겨준다.
-- `"init" = flase`라면 받은 `jsonObject`의 `MapID`값에 해당하는 `deviceId`, `waitingNode`, `outingNode`의 값을 `MongoDB`에서 받아와 갱신시켜준다.
+- `eventKafka`에서 `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode`들을 실행한다.
+
+- `orderKafka`에서 `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode` 중 `jsonObject(Order)`의 `deviceId`와 일치하는 `deviceId`를 실행한다.
+
+- `proceedKafka`에서 `jsonObject(Proceed)`를 받은 경우 `MongoDB`에서 `jsonObject(proceed)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후  `jsonObject(proceed)`의 `mapId`와 일치하는 `mapId`의 `incomingNode`와 `outingNode`를 `jsonObject(Proceed)`에 할당해준다.
 
 __OUTPUT:__
-- `jsonObject` ⇨ `CallingTriggerBolt`
+- `jsonArray` ⇨ `CallingTriggerBolt`
 
 ### CallingTriggerBolt :
 __INPUT:__
-- `StagingBolt` ⇨ `jsonObject`
+- `StagingBolt` ⇨ `jsonArray`
 
 __PROCESSING:__
-- `StagingBolt`에서 받은 `jsonObject`를 `Trigger topic`으로 보내준다.
+- `StagingBolt`에서 받은 `jsonArray`를 `jsonObject`로 바꿔 `Trigger topic`으로 보내준다.
 
 __OUTPUT:__
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Trigger`
