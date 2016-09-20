@@ -4,6 +4,8 @@ package com.enow.storm.main;
  * Created by writtic on 2016. 8. 30..
  */
 
+import com.enow.persistence.redis.IRedisDB;
+import com.enow.persistence.redis.RedisDB;
 import com.enow.storm.ActionTopology.*;
 import com.enow.storm.TriggerTopology.*;
 import org.apache.storm.Config;
@@ -24,6 +26,8 @@ public class main {
     private static final String zkhost = "192.168.99.100:2181";
     private LocalCluster cluster = new LocalCluster();
     public static void main(String[] args) throws Exception {
+        RedisDB.getInstance().deleteAllNodes();
+        // RedisDB.getInstance().deleteAllStatus();
         new main().runMain(args);
     }
 
