@@ -30,7 +30,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 public class StagingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LogManager.getLogger(StagingBolt.class);
+	protected static final Logger _LOG = LogManager.getLogger(StagingBolt.class);
 	private OutputCollector collector;
 
 	@Override
@@ -62,7 +62,7 @@ public class StagingBolt extends BaseRichBolt {
 			//mongoDao = new MongoDAO("192.168.99.100",27017);
 			mongoDao = new MongoDAO("127.0.0.1",27017);
 		} catch (UnknownHostException e1) {
-			LOG.debug("error : 1");
+			_LOG.debug("error : 1");
 			return;
 		}
 
@@ -126,7 +126,7 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				LOG.debug("error : 2");
+				_LOG.debug("error : 2");
 				return;
 			}
 		} else if (_jsonObject.get("spoutName").equals("order")) {
@@ -190,7 +190,7 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				LOG.debug("error : 3");
+				_LOG.debug("error : 3");
 				return;
 			}
 		} else if (_jsonObject.get("spoutName").equals("proceed")) {
@@ -239,22 +239,21 @@ public class StagingBolt extends BaseRichBolt {
 			} catch (ParseException e) {
 				// iterable.first().toJson() 이 json형식의 string이 아닌 경우
 				// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
-				LOG.debug("error : 4");
+				_LOG.debug("error : 4");
 				return;
 
 			}
 		} else {
-			LOG.debug("error : 5");
+			_LOG.debug("error : 5");
 			return;
 		}
 
 		collector.emit(new Values(_jsonArray));
 
 		try {
-			LOG.info(_jsonArray);
 			collector.ack(input);
 		} catch (Exception e) {
-			Log.error("ack failed");
+			Log.warn("ack failed");
 			collector.fail(input);
 		}
 	}

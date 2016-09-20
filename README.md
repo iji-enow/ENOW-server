@@ -87,12 +87,14 @@ __OUTPUT:__
 - `jsonObject` ⇨ `StagingBolt`
 ### StagingBolt :
 __INPUT:__
-- `IndexingBolt` ⇨ `jsonObject`
+- `IndexingBolt` ⇨  `jsonObject(Event)`
+`jsonObject(Order)`
+`jsonObject(Proceed)`
 
 __PROCESSING:__
-- `eventKafka`에서 `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode`들을 실행한다.
+- `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode`들을 실행한다.
 
-- `orderKafka`에서 `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode` 중 `jsonObject(Order)`의 `deviceId`와 일치하는 `deviceId`를 실행한다.
+- `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode` 중 `jsonObject(Order)`의 `deviceId`와 일치하는 `deviceId`를 실행한다.
 
 - `proceedKafka`에서 `jsonObject(Proceed)`를 받은 경우 `MongoDB`에서 `jsonObject(proceed)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후  `jsonObject(proceed)`의 `mapId`와 일치하는 `mapId`의 `incomingNode`와 `outingNode`를 `jsonObject(Proceed)`에 할당해준다.
 

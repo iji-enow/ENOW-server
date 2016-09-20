@@ -40,7 +40,7 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
 */
 
 public class ExecutingBolt extends BaseRichBolt {
-    protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
+    protected static final Logger _LOG = LogManager.getLogger(ExecutingBolt.class);
     private OutputCollector _collector;
 
     @Override
@@ -62,10 +62,9 @@ public class ExecutingBolt extends BaseRichBolt {
         _collector.emit(new Values(_jsonObject));
 
         try {
-            _LOG.info(_jsonObject);
             _collector.ack(input);
         } catch (Exception e) {
-        	Log.error("ack failed");
+        	Log.warn("ack failed");
             _collector.fail(input);
         }
     }

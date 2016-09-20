@@ -11,6 +11,7 @@ import org.apache.storm.kafka.ZkHosts;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
+import com.enow.persistence.redis.RedisDB;
 import com.enow.storm.ActionTopology.CallingFeedBolt;
 import com.enow.storm.ActionTopology.ExecutingBolt;
 import com.enow.storm.ActionTopology.ProvisioningBolt;
@@ -25,6 +26,7 @@ import com.enow.storm.TriggerTopology.StagingBolt;
 public class Unification {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
+        RedisDB.getInstance().deleteAllNodes();
         Config config = new Config();
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);

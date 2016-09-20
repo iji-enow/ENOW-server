@@ -48,10 +48,9 @@ public class ProvisioningBolt extends BaseRichBolt {
 
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.info(_jsonObject);
             _collector.ack(input);
         } catch (Exception e) {
-        	Log.error("ack failed");
+        	_LOG.warn("ack failed");
             _collector.fail(input);
         }
     }

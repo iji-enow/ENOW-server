@@ -26,7 +26,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 public class IndexingBolt extends BaseRichBolt {
-	protected static final Logger LOG = LogManager.getLogger(IndexingBolt.class);
+	protected static final Logger _LOG = LogManager.getLogger(IndexingBolt.class);
 	private OutputCollector collector;
 
 	@Override
@@ -52,12 +52,12 @@ public class IndexingBolt extends BaseRichBolt {
 			//mongoDao = new MongoDAO("192.168.99.100",27017);
 			mongoDao = new MongoDAO("127.0.0.1", 27017);
 		} catch (UnknownHostException e1) {
-			LOG.debug("error : 1");
+			_LOG.debug("error : 1");
 			return;
 		}
 
 		if (input.toString().length() == 0) {
-			LOG.debug("error : 2");
+			_LOG.debug("error : 2");
 			return;
 		}
 
@@ -68,11 +68,11 @@ public class IndexingBolt extends BaseRichBolt {
 				if (_jsonObject.containsKey("roadMapId")) {
 					_jsonObject.put("spoutName", "event");
 				} else {
-					LOG.debug("error : 3");
+					_LOG.debug("error : 3");
 					return;
 				}
 			} catch (ParseException e) {
-				LOG.debug("error : 4");
+				_LOG.debug("error : 4");
 				return;
 			}
 		} else if (input.getSourceComponent().equals("order-spout")) {
@@ -83,7 +83,7 @@ public class IndexingBolt extends BaseRichBolt {
 						&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("roadMapId")
 						&& _jsonObject.containsKey("deviceId") && _jsonObject.containsKey("payload")) {
 				} else {
-					LOG.debug("error : 5");
+					_LOG.debug("error : 5");
 					return;
 				}
 
@@ -96,7 +96,7 @@ public class IndexingBolt extends BaseRichBolt {
 					serverIdCheck = true;
 				} else {
 					serverIdCheck = false;
-					LOG.debug("There are more than two server ID on MongoDB");
+					_LOG.debug("There are more than two server ID on MongoDB");
 				}
 
 				// Get device collection for matching input signal from device
@@ -110,7 +110,7 @@ public class IndexingBolt extends BaseRichBolt {
 
 				} else {
 					brokerIdCheck = false;
-					LOG.debug("There are more than two broker ID on MongoDB");
+					_LOG.debug("There are more than two broker ID on MongoDB");
 				}
 
 				// Get device collection for matching input signal from device
@@ -124,7 +124,7 @@ public class IndexingBolt extends BaseRichBolt {
 					deviceIdCheck = true;
 				} else {
 					deviceIdCheck = false;
-					LOG.debug("There are more than two machine ID on MongoDB");
+					_LOG.debug("There are more than two machine ID on MongoDB");
 				}
 
 				mongoDao.setDBCollection("enow", "roadMap");
@@ -136,17 +136,17 @@ public class IndexingBolt extends BaseRichBolt {
 					roadMapIdCheck = true;
 				} else {
 					roadMapIdCheck = false;
-					LOG.debug("There are more than two Phase Road-map Id on MongoDB");
+					_LOG.debug("There are more than two Phase Road-map Id on MongoDB");
 				}
 
 				if (serverIdCheck && brokerIdCheck && deviceIdCheck && roadMapIdCheck) {
 					_jsonObject.put("spoutName", "order");
 				} else {
-					LOG.debug("error : 6");
+					_LOG.debug("error : 6");
 					return;
 				}
 			} catch (ParseException e) {
-				LOG.debug("error : 7");
+				_LOG.debug("error : 7");
 				return;
 			}
 
@@ -163,25 +163,25 @@ public class IndexingBolt extends BaseRichBolt {
 
 					_jsonObject.put("spoutName", "proceed");
 				} else {
-					LOG.debug("error : 8");
+					_LOG.debug("error : 8");
 					return;
 				}
 			} catch (ParseException e) {
-				LOG.debug("error : 9");
+				_LOG.debug("error : 9");
 				return;
 			}
 		} else {
-			LOG.debug("error : 10");
+			_LOG.debug("error : 10");
 			return;
 		}
 
 		collector.emit(new Values(_jsonObject));
 
 		try {
-			LOG.info(_jsonObject);
+			_LOG.info("entered Trigger topology");
 			collector.ack(input);
 		} catch (Exception e) {
-			Log.error("ack failed");
+			Log.warn("ack failed");
 			collector.fail(input);
 		}
 	}

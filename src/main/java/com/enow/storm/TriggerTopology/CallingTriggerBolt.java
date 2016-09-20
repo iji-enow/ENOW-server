@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 
 public class CallingTriggerBolt extends BaseRichBolt {
-	protected static final Logger LOG = LogManager.getLogger(CallingTriggerBolt.class);
+	protected static final Logger _LOG = LogManager.getLogger(CallingTriggerBolt.class);
 	private OutputCollector collector;
 	private Properties props;
 
@@ -46,7 +46,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		_jsonArray = (ArrayList<JSONObject>) input.getValueByField("jsonArray");
 
 		if(_jsonArray.size() == 0){
-			LOG.debug("error : 1");
+			_LOG.debug("error : 1");
 			return;
 		}else{
 			for (JSONObject tmpJsonObject : _jsonArray) {
@@ -60,10 +60,10 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		
 		
 		try {
-			LOG.info(_jsonArray);
+			_LOG.info("exited Trigger topology");
 			collector.ack(input);
 		} catch (Exception e) {
-			Log.error("ack failed");
+			Log.warn("ack failed");
 			collector.fail(input);
 		}
 	}

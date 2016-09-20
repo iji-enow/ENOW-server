@@ -45,6 +45,7 @@ public class SchedulingBolt extends BaseRichBolt {
         JSONObject _jsonObject;
 
         if ((null == input.toString()) || (input.toString().length() == 0)) {
+        	_LOG.error("error : 1");
             return;
         }
         // Parsing JSONString to JSONObject
@@ -55,7 +56,7 @@ public class SchedulingBolt extends BaseRichBolt {
         } catch (ParseException e1) {
             e1.printStackTrace();
             _LOG.warn("Fail in inserting messages to _jsonObject");
-            _collector.fail(input);
+            _LOG.error("error : 2");
             return;
         }
 
@@ -72,6 +73,7 @@ public class SchedulingBolt extends BaseRichBolt {
             } catch (ParseException e1) {
                 e1.printStackTrace();
                 _LOG.warn("Fail in inserting status to _jsonObject");
+                _LOG.error("error : 3");
                 return;
             }
         }
@@ -108,6 +110,7 @@ public class SchedulingBolt extends BaseRichBolt {
                             } catch (ParseException e1) {
                                 e1.printStackTrace();
                                 _LOG.warn("Fail in inserting status to _jsonObject");
+                                _LOG.error("error : 4");
                                 return;
                             }
                         }
@@ -138,10 +141,10 @@ public class SchedulingBolt extends BaseRichBolt {
         }
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.info(_jsonObject);
+            _LOG.info("entered Action topology");
             _collector.ack(input);
         } catch (Exception e) {
-        	Log.error("ack failed");
+        	_LOG.warn("ack failed");
             _collector.fail(input);
         }
     }

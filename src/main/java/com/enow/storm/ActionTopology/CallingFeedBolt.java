@@ -91,10 +91,10 @@ public class CallingFeedBolt extends BaseRichBolt {
         }
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.debug(_jsonObject);
+            _LOG.info("exited Action topology");
             _collector.ack(input);
         } catch (Exception e) {
-        	Log.error("ack failed");
+        	_LOG.warn("ack failed");
             _collector.fail(input);
         }
     }

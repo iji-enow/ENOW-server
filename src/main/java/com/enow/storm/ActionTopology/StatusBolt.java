@@ -25,7 +25,7 @@ import java.util.Map;
  * Created by writtic on 2016. 9. 13..
  */
 public class StatusBolt extends BaseRichBolt {
-    protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
+    protected static final Logger _LOG = LogManager.getLogger(StatusBolt.class);
     private OutputCollector _collector;
     private JSONParser _parser;
     private IStatusDAO _dao;
@@ -43,6 +43,7 @@ public class StatusBolt extends BaseRichBolt {
         JSONObject _jsonObject;
 
         if ((null == input.toString()) || (input.toString().length() == 0)) {
+        	_LOG.error("error : 1");
             return;
         }
 
@@ -54,17 +55,16 @@ public class StatusBolt extends BaseRichBolt {
             _dao.addStatus(_dao.jsonObjectToStatus(_jsonObject));
         } catch (ParseException e1) {
             e1.printStackTrace();
-            _LOG.warn("Fail in inserting messages to _jsonObject");
-            _collector.fail(input);
+            _LOG.error("error : 2");
             return;
         }
 
         _collector.emit(new Values(input));
         try {
-            _LOG.info(_jsonObject);
+            _LOG.info("entered Status Topology");
             _collector.ack(input);
         } catch (Exception e) {
-        	Log.error("ack failed");
+        	_LOG.warn("ack failed");
             _collector.fail(input);
         }
     }
