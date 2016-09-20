@@ -48,6 +48,7 @@ public class CallingFeedBolt extends BaseRichBolt {
         Boolean verified = (Boolean) _jsonObject.get("verified");
         if(verified) {
             Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
+            Boolean lambda = (Boolean) _jsonObject.get("lambda");
             String tempString;
             JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
             String[] outingNodes = null;
@@ -59,7 +60,9 @@ public class CallingFeedBolt extends BaseRichBolt {
             if (outingNodes != null) {
                 // OutingNodes exist
                 ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
-                _producer.send(nodeData);
+                if(!lambda) {
+                    _producer.send(nodeData);
+                }
                 for (String outingNode : outingNodes) {
                     // change mapId to outingNode
                     JSONObject tempJSON = _jsonObject;
@@ -75,7 +78,9 @@ public class CallingFeedBolt extends BaseRichBolt {
                 // Maybe This node is the last node of sequence or alone
                 tempString = _jsonObject.toJSONString();
                 ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, tempString);
-                _producer.send(nodeData);
+                if(!lambda) {
+                    _producer.send(nodeData);
+                }
                 if (!lastNode) {
                     nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
                     _producer.send(nodeData);
