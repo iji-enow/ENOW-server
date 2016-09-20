@@ -48,12 +48,12 @@ public class IndexingBolt extends BaseRichBolt {
 		String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
 		try {
-			mongoDao = new MongoDAO("127.0.0.1",27017);
+			mongoDao = new MongoDAO("127.0.0.1", 27017);
 		} catch (UnknownHostException e1) {
 			LOG.debug("error : 1");
 			return;
 		}
-		
+
 		if (input.toString().length() == 0) {
 			LOG.debug("error : 2");
 			return;
@@ -86,10 +86,11 @@ public class IndexingBolt extends BaseRichBolt {
 				}
 
 				mongoDao.setDBCollection("lists", "server");
-				
+
 				if (mongoDao.collectionCount(new Document("serverId", (String) _jsonObject.get("serverId"))) == 0) {
 					serverIdCheck = false;
-				} else if (mongoDao.collectionCount(new Document("serverId", (String) _jsonObject.get("serverId"))) == 1) {
+				} else if (mongoDao
+						.collectionCount(new Document("serverId", (String) _jsonObject.get("serverId"))) == 1) {
 					serverIdCheck = true;
 				} else {
 					serverIdCheck = false;
@@ -101,7 +102,8 @@ public class IndexingBolt extends BaseRichBolt {
 
 				if (mongoDao.collectionCount(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 0) {
 					brokerIdCheck = false;
-				} else if (mongoDao.collectionCount(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 1) {
+				} else if (mongoDao
+						.collectionCount(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 1) {
 					brokerIdCheck = true;
 
 				} else {
@@ -115,7 +117,8 @@ public class IndexingBolt extends BaseRichBolt {
 
 				if (mongoDao.collectionCount(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 0) {
 					deviceIdCheck = false;
-				} else if (mongoDao.collectionCount(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 1) {
+				} else if (mongoDao
+						.collectionCount(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 1) {
 					deviceIdCheck = true;
 				} else {
 					deviceIdCheck = false;
@@ -123,11 +126,11 @@ public class IndexingBolt extends BaseRichBolt {
 				}
 
 				mongoDao.setDBCollection("enow", "roadMap");
-				
 
 				if (mongoDao.collectionCount(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 0) {
 					roadMapIdCheck = false;
-				} else if (mongoDao.collectionCount(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 1) {
+				} else if (mongoDao
+						.collectionCount(new Document("roadMapId", (String) _jsonObject.get("roadMapId"))) == 1) {
 					roadMapIdCheck = true;
 				} else {
 					roadMapIdCheck = false;
@@ -153,7 +156,8 @@ public class IndexingBolt extends BaseRichBolt {
 						&& _jsonObject.containsKey("mapId") && _jsonObject.containsKey("payload")
 						&& _jsonObject.containsKey("incomingNode") && _jsonObject.containsKey("outingNode")
 						&& _jsonObject.containsKey("previousData") && _jsonObject.containsKey("topic")
-						&& _jsonObject.containsKey("lastNode")&& _jsonObject.containsKey("verified")) {
+						&& _jsonObject.containsKey("lastNode") && _jsonObject.containsKey("verified")
+						&& _jsonObject.containsKey("lambda")) {
 
 					_jsonObject.put("spoutName", "proceed");
 				} else {

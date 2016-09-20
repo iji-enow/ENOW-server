@@ -97,6 +97,7 @@ public class StagingBolt extends BaseRichBolt {
 					tmpJsonObject.put("topic", "enow" + "/" + mapId.get("serverId") + "/"
 							+ mapId.get("brokerId") + "/" + mapId.get("deviceId"));
 					tmpJsonObject.put("verified", true);
+					tmpJsonObject.put("lambda", mapId.get("lambda"));
 					
 					tmpJsonObject.remove("spoutName");
 
@@ -153,6 +154,9 @@ public class StagingBolt extends BaseRichBolt {
 								tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
 										+ tmpJsonObject.get("brokerId") + "/" + mapId.get("deviceId"));
 						tmpJsonObject.put("verified", true);
+						tmpJsonObject.put("lambda", mapId.get("lambda"));
+						
+						
 						tmpJsonObject.remove("corporationName");
 						tmpJsonObject.remove("serverId");
 						tmpJsonObject.remove("brokerId");
@@ -203,6 +207,8 @@ public class StagingBolt extends BaseRichBolt {
 
 				_jsonObject.put("topic", "enow" + "/" + mapId.get("serverId") + "/" + mapId.get("brokerId") + "/" + mapId.get("deviceId"));
 				_jsonObject.put("verified", true);
+				_jsonObject.put("lambda", mapId.get("lambda"));
+				
 				_jsonObject.remove("spoutName");
 
 				if ((boolean)_jsonObject.get("order")) {
