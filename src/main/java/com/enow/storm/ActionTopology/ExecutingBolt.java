@@ -14,6 +14,8 @@ import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.esotericsoftware.minlog.Log;
+
 import java.util.Map;
 
 /*
@@ -60,9 +62,10 @@ public class ExecutingBolt extends BaseRichBolt {
         _collector.emit(new Values(_jsonObject));
 
         try {
-            _LOG.debug("input = [" + input + "]");
+            _LOG.info(_jsonObject);
             _collector.ack(input);
         } catch (Exception e) {
+        	Log.error("ack failed");
             _collector.fail(input);
         }
     }

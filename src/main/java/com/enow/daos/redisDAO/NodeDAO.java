@@ -59,7 +59,6 @@ public class NodeDAO implements INodeDAO {
             }
         }
         if(!nodeExists) {
-            System.out.println("refer: " + dto.getRefer());
             jedis.lpush(NODE_PREFIX + id, dto.getTopic());
             jedis.lpush(NODE_PREFIX + id, dto.getPayload());
             jedis.lpush(NODE_PREFIX + id, dto.getRefer());

@@ -16,7 +16,6 @@
 		</Logger>
 		<Root level="error">
 			<Appender-Ref ref="STDOUT" />
-			<AppenderRef ref="Kafka" />
 		</Root>
 	</Loggers>
 </Configuration>

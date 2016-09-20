@@ -13,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.enow.storm.Connect;
+import com.esotericsoftware.minlog.Log;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -30,7 +31,8 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		props = new Properties();
 		props.put("producer.type", "sync");
 		props.put("batch.size", "1");
-		props.put("bootstrap.servers", "192.168.99.100:9092");
+		//props.put("bootstrap.servers", "192.168.99.100:9092");
+		props.put("bootstrap.servers", "127.0.0.1:9092");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 	}
@@ -55,11 +57,13 @@ public class CallingTriggerBolt extends BaseRichBolt {
 				collector.emit(new Values(tmpJsonObject.toJSONString()));
 			}
 		}
-
+		
+		
 		try {
-			LOG.debug(_jsonArray.toString());
+			LOG.info(_jsonArray);
 			collector.ack(input);
 		} catch (Exception e) {
+			Log.error("ack failed");
 			collector.fail(input);
 		}
 	}

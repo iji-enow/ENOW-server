@@ -14,6 +14,8 @@ import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import com.esotericsoftware.minlog.Log;
+
 import java.util.Map;
 import java.util.Properties;
 
@@ -31,7 +33,8 @@ public class CallingFeedBolt extends BaseRichBolt {
         _props = new Properties();
         _props.put("producer.type", "sync");
         _props.put("batch.size", "1");
-        _props.put("bootstrap.servers", "192.168.99.100:9092");
+        //_props.put("bootstrap.servers", "192.168.99.100:9092");
+        _props.put("bootstrap.servers", "127.0.0.1:9092");
         _props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         _props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         _producer = new KafkaProducer<>(_props);
@@ -83,10 +86,10 @@ public class CallingFeedBolt extends BaseRichBolt {
         }
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.debug("input = [" + input + "]");
+            _LOG.debug(_jsonObject);
             _collector.ack(input);
         } catch (Exception e) {
-            _LOG.warn("input = [" + input + "]");
+        	Log.error("ack failed");
             _collector.fail(input);
         }
     }

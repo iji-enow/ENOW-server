@@ -22,6 +22,7 @@ import org.json.simple.parser.ParseException;
 
 import com.enow.daos.mongoDAO.MongoDAO;
 import com.enow.storm.Connect;
+import com.esotericsoftware.minlog.Log;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
@@ -58,7 +59,8 @@ public class StagingBolt extends BaseRichBolt {
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 		ConcurrentHashMap<String, JSONObject> ackSchdueling = new ConcurrentHashMap<>();
 		try {
-			mongoDao = new MongoDAO("192.168.99.100",27017);
+			//mongoDao = new MongoDAO("192.168.99.100",27017);
+			mongoDao = new MongoDAO("127.0.0.1",27017);
 		} catch (UnknownHostException e1) {
 			LOG.debug("error : 1");
 			return;
@@ -249,9 +251,10 @@ public class StagingBolt extends BaseRichBolt {
 		collector.emit(new Values(_jsonArray));
 
 		try {
-			LOG.debug(_jsonArray.toString());
+			LOG.info(_jsonArray);
 			collector.ack(input);
 		} catch (Exception e) {
+			Log.error("ack failed");
 			collector.fail(input);
 		}
 	}

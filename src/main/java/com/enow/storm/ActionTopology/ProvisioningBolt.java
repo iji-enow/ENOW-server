@@ -4,6 +4,8 @@ import com.enow.daos.redisDAO.INodeDAO;
 import com.enow.facility.DAOFacility;
 import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
+import com.esotericsoftware.minlog.Log;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -46,9 +48,10 @@ public class ProvisioningBolt extends BaseRichBolt {
 
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.debug("input = [" + input + "]");
+            _LOG.info(_jsonObject);
             _collector.ack(input);
         } catch (Exception e) {
+        	Log.error("ack failed");
             _collector.fail(input);
         }
     }

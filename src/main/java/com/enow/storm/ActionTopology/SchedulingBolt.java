@@ -4,6 +4,8 @@ import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.dto.StatusDTO;
 import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
+import com.esotericsoftware.minlog.Log;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
@@ -66,7 +68,7 @@ public class SchedulingBolt extends BaseRichBolt {
             String temp = statusDTO.getPayload();
             try {
                 _jsonObject.put("payload", _parser.parse(temp));
-                _LOG.debug("Succeed in inserting status to _jsonObject : " + _jsonObject.toJSONString());
+                _LOG.info("Succeed in inserting status to _jsonObject : " + _jsonObject.toJSONString());
             } catch (ParseException e1) {
                 e1.printStackTrace();
                 _LOG.warn("Fail in inserting status to _jsonObject");
@@ -128,7 +130,7 @@ public class SchedulingBolt extends BaseRichBolt {
             try {
                 NodeDTO dto = _redis.jsonObjectToNode(_jsonObject);
                 result = _redis.addNode(dto);
-                _LOG.warn("Succeed in inserting current node to Redis : " + result);
+                _LOG.debug("Succeed in inserting current node to Redis : " + result);
             } catch (Exception e) {
                 e.printStackTrace();
                 _LOG.warn("Fail in inserting current node to Redis : " + result);
@@ -136,9 +138,10 @@ public class SchedulingBolt extends BaseRichBolt {
         }
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.debug("input = [" + input + "]");
+            _LOG.info(_jsonObject);
             _collector.ack(input);
         } catch (Exception e) {
+        	Log.error("ack failed");
             _collector.fail(input);
         }
     }
