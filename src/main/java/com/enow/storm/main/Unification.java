@@ -24,7 +24,6 @@ import com.enow.storm.TriggerTopology.StagingBolt;
 
 public class Unification {
     public static void main(String[] args) throws Exception {
-        BasicConfigurator.configure();
         Config config = new Config();
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
