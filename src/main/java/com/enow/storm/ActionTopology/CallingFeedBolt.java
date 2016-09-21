@@ -13,92 +13,108 @@ import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.esotericsoftware.minlog.Log;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
 public class CallingFeedBolt extends BaseRichBolt {
-    protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
-    protected static final String _KAFKA_FEED = "feed";
-    protected static final String _KAFKA_PROCEED = "proceed";
-    private OutputCollector _collector;
-    private Producer<String, String> _producer;
-    private Properties _props;
+	protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
+	protected static final String _KAFKA_FEED = "feed";
+	protected static final String _KAFKA_PROCEED = "proceed";
+	private OutputCollector _collector;
+	private Producer<String, String> _producer;
+	private Properties _props;
 
-    @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
-        _collector = collector;
-        _props = new Properties();
-        _props.put("producer.type", "sync");
-        _props.put("batch.size", "1");
-        //_props.put("bootstrap.servers", "192.168.99.100:9092");
-        _props.put("bootstrap.servers", "127.0.0.1:9092");
-        _props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        _props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        _producer = new KafkaProducer<>(_props);
-    }
+	@Override
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		_collector = collector;
+		_props = new Properties();
+		_props.put("producer.type", "sync");
+		_props.put("batch.size", "1");
+		// _props.put("bootstrap.servers", "192.168.99.100:9092");
+		_props.put("bootstrap.servers", "127.0.0.1:9092");
+		_props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		_props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		_producer = new KafkaProducer<>(_props);
+	}
 
-    @Override
-    public void execute(Tuple input) {
-        JSONObject _jsonObject;
-        _jsonObject = (JSONObject) input.getValueByField("jsonObject");
+	@Override
+	public void execute(Tuple input) {
+		JSONObject _jsonObject;
+		JSONParser parser = new JSONParser();
+		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
+		String _jsonString = _jsonObject.toJSONString();
+		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
-        Boolean verified = (Boolean) _jsonObject.get("verified");
-        if(verified) {
-            Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
-            Boolean lambda = (Boolean) _jsonObject.get("lambda");
-            String tempString;
-            JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
-            String[] outingNodes = null;
-            if (outingJSON != null) {
-                outingNodes = new String[outingJSON.size()];
-                for (int i = 0; i < outingJSON.size(); i++)
-                    outingNodes[i] = (String) outingJSON.get(i);
-            }
-            if (outingNodes != null) {
-                // OutingNodes exist
-                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
-                if(!lambda) {
-                    _producer.send(nodeData);
-                }
-                for (String outingNode : outingNodes) {
-                    // change mapId to outingNode
-                    JSONObject tempJSON = _jsonObject;
-                    tempJSON.put("mapId", outingNode);
-                    tempString = tempJSON.toJSONString();
-                    if (!lastNode) {
-                        nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
-                        _producer.send(nodeData);
-                    }
-                }
-            } else {
-                // OutingNodes don't exist
-                // Maybe This node is the last node of sequence or alone
-                tempString = _jsonObject.toJSONString();
-                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, tempString);
-                if(!lambda) {
-                    _producer.send(nodeData);
-                }
-                if (!lastNode) {
-                    nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
-                    _producer.send(nodeData);
-                } else {
+		Boolean verified = (Boolean) _jsonObject.get("verified");
+		if (verified) {
+			Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
+			Boolean lambda = (Boolean) _jsonObject.get("lambda");
+			String tempString;
+			JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
+			String[] outingNodes = null;
+			if (outingJSON != null) {
+				outingNodes = new String[outingJSON.size()];
+				for (int i = 0; i < outingJSON.size(); i++)
+					outingNodes[i] = (String) outingJSON.get(i);
+			}
+			if (outingNodes != null) {
+				// OutingNodes exist
+				ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
+				if (!lambda) {
+					_producer.send(nodeData);
+				}
+				for (String outingNode : outingNodes) {
+					// change mapId to outingNode
+					JSONObject tempJSON;
+					try {
+						tempJSON = (JSONObject) parser.parse(_jsonString);
+						tempJSON.put("mapId", outingNode);
+						_jsonArray.add(tempJSON);
+						tempString = tempJSON.toJSONString();
+						if (!lastNode) {
+							nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
+							_producer.send(nodeData);
+						}
+					} catch (ParseException e) {
+						_LOG.debug("error : 1");
+						return;
+					}
+				}
+			} else {
+				// OutingNodes don't exist
+				// Maybe This node is the last node of sequence or alone
+				tempString = _jsonObject.toJSONString();
+				ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, tempString);
+				if (!lambda) {
+					_producer.send(nodeData);
+				}
+				if (!lastNode) {
+					nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
+					_producer.send(nodeData);
+				} else {
 
-                }
-            }
-        }
-        _collector.emit(new Values(_jsonObject));
-        try {
-            _LOG.info("exited Action topology");
-            _collector.ack(input);
-        } catch (Exception e) {
-        	_LOG.warn("ack failed");
-            _collector.fail(input);
-        }
-    }
+				}
+			}
+		}
+		_collector.emit(new Values(_jsonObject));
+		try {
+			for (JSONObject tmp : _jsonArray) {
+				_LOG.info("exited Action topology roadMapId : " + tmp.get("roadMapId") + " mapId : " + tmp.get("mapId"));
+			}
+			_collector.ack(input);
+		} catch (Exception e) {
+			_LOG.warn("ack failed");
+			_collector.fail(input);
+		}
+	}
 
-    @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {}
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+	}
 }

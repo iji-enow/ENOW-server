@@ -34,9 +34,9 @@ TriggerTopology literally can activate the component of Road-Map so that IoT dev
 ### IndexingBolt :
 
 __INPUT:__
-- `eventKafka` ⇨ `jsonObject(Event)`
-- `orderKafka` ⇨ `jsonObject(Order)`
-- `proceedKafka` ⇨ `jsonObject(Proceed)`
+- `eventKafka` ⇨ `jsonObject(Event)` from `Console`
+- `orderKafka` ⇨ `jsonObject(Order)` from `user device`
+- `proceedKafka` ⇨ `jsonObject(Proceed)`from `ActionTopology`
 
 
 __`jsonObject(Event)` :__</br>
@@ -49,10 +49,10 @@ __`jsonObject(Event)` :__</br>
 __`jsonObject(orderKafka)` :__</br>
 ```JSON
 {
-    "corporationName":enow,
-    "serverId":serverId1,
-    "brokerId":brokerId1,
-    "deviceId":deviceId1,
+    "corporationName":"enow",
+    "serverId":"serverId1",
+    "brokerId":"brokerId1",
+    "deviceId":"deviceId1",
     "roadMapId":"1",
     "payload": {"humidity": "60", "brightness": "231"},
 }
@@ -76,6 +76,11 @@ __`jsonObject(Proceed)` :__</br>
 ```
 
 __PROCESSING:__
+- From `eventKafka` get `jsonObject(Event)`
+- From `orderKafka` get `jsonObject(Order)`
+- From `proceedKafka` get `jsonObject(Proceed)`
+- Check whether `jsonObject` has all necessary `key` values
+- Since `jsonObject(Order)` is from `user device` directly confirm whether `serverId`,`brokerId`and `deviceId` values are registered in `MongoDB`
 - `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
 - `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`의 정보를 받아온다.
 - `proceedKafka`에서 `ActionTopology`로부터 받은 `jsonObject(Proceed)`를 받아온다.
@@ -88,8 +93,8 @@ __OUTPUT:__
 ### StagingBolt :
 __INPUT:__
 - `IndexingBolt` ⇨  `jsonObject(Event)`
-`jsonObject(Order)`
-`jsonObject(Proceed)`
+- `IndexingBolt` ⇨  `jsonObject(Order)`
+- `IndexingBolt` ⇨  `jsonObject(Proceed)`
 
 __PROCESSING:__
 - `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode`들을 실행한다.

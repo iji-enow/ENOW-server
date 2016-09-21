@@ -61,7 +61,7 @@ public class StatusBolt extends BaseRichBolt {
 
         _collector.emit(new Values(input));
         try {
-            _LOG.info("entered Status Topology");
+            _LOG.info("entered Status Topology topic : " + _jsonObject.get("topic"));
             _collector.ack(input);
         } catch (Exception e) {
         	_LOG.warn("ack failed");

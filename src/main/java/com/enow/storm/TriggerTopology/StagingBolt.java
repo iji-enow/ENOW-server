@@ -68,7 +68,7 @@ public class StagingBolt extends BaseRichBolt {
 
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
-		mongoDao.setDBCollection("enow", "roadMap");
+		mongoDao.setDBCollection("source", "recipes");
 
 		iterable = mongoDao.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
 
@@ -247,10 +247,14 @@ public class StagingBolt extends BaseRichBolt {
 			_LOG.debug("error : 5");
 			return;
 		}
+		
 
 		collector.emit(new Values(_jsonArray));
 
 		try {
+			for(JSONObject tmp : _jsonArray){
+				_LOG.info("entered Trigger topology roadMapId : " + tmp.get("roadMapId") + " mapId : " + tmp.get("mapId"));
+			}
 			collector.ack(input);
 		} catch (Exception e) {
 			Log.warn("ack failed");

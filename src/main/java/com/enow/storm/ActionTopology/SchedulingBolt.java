@@ -69,7 +69,7 @@ public class SchedulingBolt extends BaseRichBolt {
             String temp = statusDTO.getPayload();
             try {
                 _jsonObject.put("payload", _parser.parse(temp));
-                _LOG.info("Succeed in inserting status to _jsonObject : " + _jsonObject.toJSONString());
+                _LOG.debug("Succeed in inserting status to _jsonObject : " + _jsonObject.toJSONString());
             } catch (ParseException e1) {
                 e1.printStackTrace();
                 _LOG.warn("Fail in inserting status to _jsonObject");
@@ -141,7 +141,7 @@ public class SchedulingBolt extends BaseRichBolt {
         }
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.info("entered Action topology");
+            _LOG.info("entered Action topology roadMapId : " + _jsonObject.get("roadMapId") + " mapId : " + _jsonObject.get("mapId"));
             _collector.ack(input);
         } catch (Exception e) {
         	_LOG.warn("ack failed");

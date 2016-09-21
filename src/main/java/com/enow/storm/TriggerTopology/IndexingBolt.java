@@ -178,7 +178,6 @@ public class IndexingBolt extends BaseRichBolt {
 		collector.emit(new Values(_jsonObject));
 
 		try {
-			_LOG.info("entered Trigger topology");
 			collector.ack(input);
 		} catch (Exception e) {
 			Log.warn("ack failed");
