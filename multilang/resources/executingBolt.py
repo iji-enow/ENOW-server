@@ -1,4 +1,4 @@
-# import storm
+import storm
 import sys
 import _thread
 import json
@@ -26,17 +26,15 @@ from enow.jython.Building import Building
 # but it is a Python 2.7 thing
 
 
-# class ExecutingBolt(storm.BasicBolt):
-class ExecutingBolt:
+class ExecutingBolt(storm.BasicBolt):
     # Initialize this instance
 
     def __init__(self):
         self.initialize()
 
-    # def initialize(self, conf, context):
-    def initialize(self):
-        # self._conf = conf
-        # self._context = context
+    def initialize(self, conf, context):
+        self._conf = conf
+        self._context = context
         self.Building = Building()
         try:
             self.client = MongoClient('localhost', 27017)
@@ -107,13 +105,12 @@ class ExecutingBolt:
             tmp = self.Building.run()
             # Handle the result and convert it to JSON object
             jsonResult = json.loads(tmp, strict=False)
+            jsonObject["payload"] = jsonResult
 
-            # storm.emit([jsonResult])
-            return jsonResult
+            storm.emit(jsonObject)
         else:
             tmp = ""
-            # storm.emit([tup, tmp])
-            return None
+            storm.emit([tup, tmp])
 
 # Start the bolt when it's invoked
-# ExecutingBolt().run()
+ExecutingBolt().run()
