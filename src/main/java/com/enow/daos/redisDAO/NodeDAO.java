@@ -35,7 +35,12 @@ public class NodeDAO implements INodeDAO {
             refer = outingJSON.size();
         }
         JSONObject payload = (JSONObject) jsonObject.get("payload");
-        NodeDTO dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString(), "" + refer);
+        NodeDTO dto;
+        if(payload != null){
+            dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString(), "" + refer);
+        }else {
+            dto = new NodeDTO(roadMapID, mapID, topic, "null", "" + refer);
+        }
         return dto;
     }
 

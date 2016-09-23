@@ -43,7 +43,7 @@ public class SchedulingBolt extends BaseRichBolt {
         _LOG.debug("Entering SchedulingBolt");
 
         JSONObject _jsonObject;
-
+        System.out.println(input);
         if ((null == input.toString()) || (input.toString().length() == 0)) {
         	_LOG.error("error : 1");
             return;
@@ -61,9 +61,10 @@ public class SchedulingBolt extends BaseRichBolt {
         }
 
         Boolean order = (Boolean) _jsonObject.get("order");
+        Boolean lambda = (Boolean) _jsonObject.get("lambda");
         String topic = (String) _jsonObject.get("topic");
 
-        if (!order) {
+        if (!(order || lambda)) {
             // Ready to get the status of device we need
             StatusDTO statusDTO = _redis.getStatus(topic);
             String temp = statusDTO.getPayload();

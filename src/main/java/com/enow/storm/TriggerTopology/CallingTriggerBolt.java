@@ -39,15 +39,18 @@ public class CallingTriggerBolt extends BaseRichBolt {
 
 	@Override
 	public void execute(Tuple input) {
+		JSONObject _jsonError = new JSONObject();
+		
 		Producer<String, String> producer = new KafkaProducer<String, String>(props);
 
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
 		_jsonArray = (ArrayList<JSONObject>) input.getValueByField("jsonArray");
-
-		if(_jsonArray.size() == 0){
-			_LOG.debug("error : 1");
-			return;
+		
+		if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("error")){
+			_LOG.error("error : 1");
+		}else if(_jsonArray.size() == 0){
+			_LOG.error("error : 2");
 		}else{
 			for (JSONObject tmpJsonObject : _jsonArray) {
 
@@ -60,8 +63,12 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		
 		
 		try {
-			for(JSONObject tmp : _jsonArray){
-				_LOG.info("exited Trigger topology roadMapId : " + tmp.get("roadMapId") + " mapId : " + tmp.get("mapId"));
+			if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("error")){
+				
+			}else{
+				for(JSONObject tmp : _jsonArray){
+					_LOG.info("exited Trigger topology roadMapId : " + tmp.get("roadMapId") + " mapId : " + tmp.get("mapId"));
+				}
 			}
 			collector.ack(input);
 		} catch (Exception e) {
