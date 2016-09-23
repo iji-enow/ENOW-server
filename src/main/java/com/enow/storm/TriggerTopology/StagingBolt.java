@@ -60,7 +60,6 @@ public class StagingBolt extends BaseRichBolt {
 
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
-<<<<<<< HEAD
 		if (_jsonObject.containsKey("error")) {
 			_LOG.error("error : 1");
 			_jsonError.put("error", "error");
@@ -69,11 +68,8 @@ public class StagingBolt extends BaseRichBolt {
 			try {
 				// mongoDao = new MongoDAO("192.168.99.100",27017);
 				mongoDao = new MongoDAO("127.0.0.1", 27017);
-=======
-		mongoDao.setDBCollection("source", "execute");
->>>>>>> 2e6e2b424f19276aaf0a40fd3f3160a9d4897a28
 
-				mongoDao.setDBCollection("enow", "recipes");
+				mongoDao.setDBCollection("enow", "roadMap");
 
 				iterable = mongoDao.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
 

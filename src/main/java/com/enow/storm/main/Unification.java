@@ -25,11 +25,9 @@ import com.enow.storm.TriggerTopology.StagingBolt;
 
 public class Unification {
     public static void main(String[] args) throws Exception {
-<<<<<<< HEAD
         BasicConfigurator.configure();
         RedisDB.getInstance().deleteAllNodes();
-=======
->>>>>>> 2e6e2b424f19276aaf0a40fd3f3160a9d4897a28
+
         Config config = new Config();
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
