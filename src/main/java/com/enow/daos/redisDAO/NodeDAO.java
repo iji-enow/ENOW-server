@@ -39,7 +39,7 @@ public class NodeDAO implements INodeDAO {
         if(payload != null){
             dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString(), "" + refer);
         }else {
-            dto = new NodeDTO(roadMapID, mapID, topic, "", "" + refer);
+            dto = new NodeDTO(roadMapID, mapID, topic, "null", "" + refer);
         }
         return dto;
     }
