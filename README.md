@@ -49,10 +49,10 @@ __`jsonObject(Event)` :__</br>
 __`jsonObject(orderKafka)` :__</br>
 ```JSON
 {
-    "corporationName":enow,
-    "serverId":serverId1,
-    "brokerId":brokerId1,
-    "deviceId":deviceId1,
+    "corporationName":"enow",
+    "serverId":"serverId1",
+    "brokerId":"brokerId1",
+    "deviceId":"deviceId1",
     "roadMapId":"1",
     "payload": {"humidity": "60", "brightness": "231"},
 }
