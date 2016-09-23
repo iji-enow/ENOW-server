@@ -16,7 +16,6 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <json.version>20160810</json.version>
@@ -30,7 +29,6 @@
         <log4j-over-slf4j.version>1.6.6</log4j-over-slf4j.version>
         <clojure.version>1.7.0</clojure.version>
     </properties>
-
     <developers>
         <developer>
             <id>writtic</id>
@@ -133,7 +131,7 @@
         <resources>
             <resource>
                 <!-- Where the Python bits are kept -->
-                <directory>${basedir}/multilang</directory>
+                <directory>./multilang/resources</directory>
             </resource>
             <resource>
                 <directory>./src/main/resources</directory>

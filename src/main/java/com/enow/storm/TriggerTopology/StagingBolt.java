@@ -68,7 +68,7 @@ public class StagingBolt extends BaseRichBolt {
 
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
-		mongoDao.setDBCollection("enow", "roadMap");
+		mongoDao.setDBCollection("source", "execute");
 
 		iterable = mongoDao.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
 

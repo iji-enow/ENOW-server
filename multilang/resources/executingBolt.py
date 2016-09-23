@@ -20,6 +20,9 @@ sys.path.append(enow_Path)
 sys.path.append(enow_jython_Path)
 sys.path.append(enow_jython_Building_Path)
 sys.path.append(enow_jython_runtimePackage_Path)
+sys.path.append("/Applications/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.2.0.201608171824/pysrc/")
+
+import pydevd
 from enow.jython.Building import Building
 # from jython.Building import Building
 # Counter is a nice way to count things,
@@ -32,10 +35,9 @@ class ExecutingBolt(storm.BasicBolt):
     def __init__(self):
         self.initialize()
 
-    def initialize(self, conf, context):
-        self._conf = conf
-        self._context = context
+    def initialize(self):
         self.Building = Building()
+        pydevd.settrace()
         try:
             self.client = MongoClient('localhost', 27017)
             print("A client has created")

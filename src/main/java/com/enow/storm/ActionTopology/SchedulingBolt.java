@@ -43,7 +43,7 @@ public class SchedulingBolt extends BaseRichBolt {
         _LOG.debug("Entering SchedulingBolt");
 
         JSONObject _jsonObject;
-
+        System.out.println(input);
         if ((null == input.toString()) || (input.toString().length() == 0)) {
             return;
         }

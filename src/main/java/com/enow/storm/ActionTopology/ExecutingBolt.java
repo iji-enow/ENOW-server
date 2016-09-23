@@ -22,7 +22,7 @@ import java.util.Map;
 public class ExecutingBolt extends ShellBolt implements IRichBolt {
     // Call the countbolt.py using Python
     public ExecutingBolt() {
-        super("python", "executingBolt.py");
+        super("python", "/Users/writtic/Documents/repository/storm/multilang/resources/executingBolt.py");
     }
 
     // Declare that we emit a 'jsonObject'
