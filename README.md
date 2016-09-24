@@ -95,16 +95,24 @@ __PROCESSING:__
  Since `jsonObject(Order)` is from `user device` directly confirm whether `serverId`,`brokerId`and `deviceId` values are all registered in `MongoDB`
  -->
 - `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
+
 - `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`의 정보를 받아온다.
+
 - `proceedKafka`에서 `ActionTopology`로부터 받은 `jsonObject(Proceed)`를 받아온다.
+
 - `eventKafka`, `proceedKafka`와 `orderKafka`에서 받아온 `jsonObject`가 필요한 모든 `key`값을 갖고 있는지 확인한다.
+
 - `orderKafka`에서 받아온 `jsonObject`는 사용자가 직접 보내준 값이므로 `corporationName`,`serverId`,`brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
 
 
 __OUTPUT:__
 
 - `jsonObject` ⇨ `StagingBolt`
+
+<br>
+
 ### StagingBolt :
+
 __INPUT:__
 - `IndexingBolt` ⇨  `jsonObject(Event)`
 - `IndexingBolt` ⇨  `jsonObject(Order)`
@@ -124,7 +132,10 @@ If `jsonObject(Event)` is received, find `roadMapId` which is same as `roadMapId
 __OUTPUT:__
 - `jsonArray` ⇨ `CallingTriggerBolt`
 
+<br>
+
 ### CallingTriggerBolt :
+
 __INPUT:__
 - `StagingBolt` ⇨ `jsonArray`
 
@@ -134,6 +145,25 @@ __PROCESSING:__
 __OUTPUT:__
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Trigger`
 
+__`jsonObject.toJSONString` :__</br>
+```JSON
+{
+    "topic":"enow\/serverId1\/brokerId1\/deviceId1",
+    "roadMapId":"1",
+    "mapId":"1",
+    "incomingNode":null,
+    "outingNode":["2"],
+    "previousData":null,
+    "payload":null,
+    "lastNode":false,
+    "order":false,
+    "verified":true,
+    "lambda":false,
+}
+```
+
+<br><br>
+
 ActionTopology
 --------------
 ActionTopology schedules the enow server to run a Road-Map scheme and handles the executable source code from console pairing the result to devices and event came from TriggerTopology.
@@ -141,6 +171,14 @@ ActionTopology schedules the enow server to run a Road-Map scheme and handles th
 ### StatusBolt :
 __INPUT:__
 - `statusKafka` ⇨ `jsonObject(Status)`
+
+__`jsonObject(Status)` :__</br>
+```JSON
+{
+    "topic":"enow\/serverId1\/brokerId1\/deviceId13",
+    "payload": {"humidity": "60", "brightness": "231"}
+}
+```
 
 __PROCESSING:__
 - 각각의 StatusKafka에서 들어오는 JsonObject들을 Topic별로 Redis에 저장한다.
