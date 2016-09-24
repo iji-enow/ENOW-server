@@ -76,16 +76,19 @@ __`jsonObject(Proceed)` :__</br>
 ```
 
 __PROCESSING:__
-- From `eventKafka` get `jsonObject(Event)`
-- From `orderKafka` get `jsonObject(Order)`
-- From `proceedKafka` get `jsonObject(Proceed)`
-- Check whether `jsonObject` has all necessary `key` values
-- Since `jsonObject(Order)` is from `user device` directly confirm whether `serverId`,`brokerId`and `deviceId` values are registered in `MongoDB`
+ <!--
+ From `eventKafka` get `jsonObject(Event)`
+ From `orderKafka` get `jsonObject(Order)`
+ From `proceedKafka` get `jsonObject(Proceed)`
+ Check whether `jsonObject` has all necessary `key` values
+ Since `jsonObject(Order)` is from `user device` directly confirm whether `serverId`,`brokerId`and `deviceId` values are all registered in `MongoDB`
+ -->
 - `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
 - `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`의 정보를 받아온다.
 - `proceedKafka`에서 `ActionTopology`로부터 받은 `jsonObject(Proceed)`를 받아온다.
 - `eventKafka`, `proceedKafka`와 `orderKafka`에서 받아온 `jsonObject`가 필요한 모든 `key`값을 갖고 있는지 확인한다.
-- `orderKafka`에서 받아온 `jsonObject`는 사용자가 직접 보내준 값이므로 `serverId`,`brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
+- `orderKafka`에서 받아온 `jsonObject`는 사용자가 직접 보내준 값이므로 `corporationName`,`serverId`,`brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
+
 
 __OUTPUT:__
 
@@ -97,9 +100,13 @@ __INPUT:__
 - `IndexingBolt` ⇨  `jsonObject(Proceed)`
 
 __PROCESSING:__
-- `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode`들을 실행한다.
+<!--
+If `jsonObject(Event)` is received, find `roadMapId` which is same as `roadMapId` in `jsonObject(Event)` then start `initNodes`
+-->
 
-- `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode` 중 `jsonObject(Order)`의 `deviceId`와 일치하는 `deviceId`를 실행한다.
+- `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNodes`들을 실행한다.
+
+- `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `orderNode` 중 `jsonObject(Order)`의 `corporationName`,`serverId`,`brokerId`,`deviceId`와 일치하는 `mapId`를 실행한다.
 
 - `proceedKafka`에서 `jsonObject(Proceed)`를 받은 경우 `MongoDB`에서 `jsonObject(proceed)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후  `jsonObject(proceed)`의 `mapId`와 일치하는 `mapId`의 `incomingNode`와 `outingNode`를 `jsonObject(Proceed)`에 할당해준다.
 

@@ -52,6 +52,7 @@ public class StagingBolt extends BaseRichBolt {
 		JSONArray incomingNodeArray;
 		JSONArray outingNodeArray;
 		JSONArray initNodeArray;
+		JSONArray orderNodeArray;
 		JSONArray lastNodeArray;
 		JSONParser parser = new JSONParser();
 		MongoDAO mongoDao;
@@ -86,9 +87,9 @@ public class StagingBolt extends BaseRichBolt {
 						String jsonString = _jsonObject.toJSONString();
 
 						for (int i = 0; i < initNodeArray.size(); i++) {
-							String InitMapId = (String) initNodeArray.get(i);
+							String initMapId = (String) initNodeArray.get(i);
 
-							mapId = (JSONObject) mapIds.get(InitMapId);
+							mapId = (JSONObject) mapIds.get(initMapId);
 
 							JSONObject tmpJsonObject = new JSONObject();
 
@@ -96,7 +97,7 @@ public class StagingBolt extends BaseRichBolt {
 							tmpJsonObject.put("payload", null);
 							tmpJsonObject.put("previousData", null);
 							tmpJsonObject.put("order", false);
-							tmpJsonObject.put("mapId", InitMapId);
+							tmpJsonObject.put("mapId", initMapId);
 							tmpJsonObject.put("topic", "enow" + "/" + mapId.get("serverId") + "/"
 									+ mapId.get("brokerId") + "/" + mapId.get("deviceId"));
 							tmpJsonObject.put("verified", true);
@@ -104,8 +105,8 @@ public class StagingBolt extends BaseRichBolt {
 
 							tmpJsonObject.remove("spoutName");
 
-							if (outingNode.containsKey(InitMapId)) {
-								outingNodeArray = (JSONArray) outingNode.get(InitMapId);
+							if (outingNode.containsKey(initMapId)) {
+								outingNodeArray = (JSONArray) outingNode.get(initMapId);
 
 								tmpJsonObject.put("outingNode", outingNodeArray);
 								tmpJsonObject.put("lastNode", false);
@@ -114,8 +115,8 @@ public class StagingBolt extends BaseRichBolt {
 								tmpJsonObject.put("lastNode", true);
 							}
 
-							if (incomingNode.containsKey(InitMapId)) {
-								incomingNodeArray = (JSONArray) incomingNode.get(InitMapId);
+							if (incomingNode.containsKey(initMapId)) {
+								incomingNodeArray = (JSONArray) incomingNode.get(initMapId);
 
 								tmpJsonObject.put("incomingNode", incomingNodeArray);
 							} else {
@@ -136,24 +137,24 @@ public class StagingBolt extends BaseRichBolt {
 						roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 
 						mapIds = (JSONObject) roadMapId.get("mapIds");
-						initNodeArray = (JSONArray) roadMapId.get("initNode");
+						orderNodeArray = (JSONArray) roadMapId.get("orderNode");
 						incomingNode = (JSONObject) roadMapId.get("incomingNode");
 						outingNode = (JSONObject) roadMapId.get("outingNode");
 						lastNodeArray = (JSONArray) roadMapId.get("lastNode");
 
 						String jsonString = _jsonObject.toJSONString();
 
-						for (int i = 0; i < initNodeArray.size(); i++) {
-							String InitMapId = (String) initNodeArray.get(i);
+						for (int i = 0; i < orderNodeArray.size(); i++) {
+							String orderMapId = (String) orderNodeArray.get(i);
 
-							mapId = (JSONObject) mapIds.get(InitMapId);
+							mapId = (JSONObject) mapIds.get(orderMapId);
 							JSONObject tmpJsonObject = new JSONObject();
-
-							if (_jsonObject.get("deviceId").equals(mapId.get("deviceId"))) {
+						
+							if (_jsonObject.get("corporationName").equals("enow") && _jsonObject.get("serverId").equals(mapId.get("serverId")) && _jsonObject.get("brokerId").equals(mapId.get("brokerId")) && _jsonObject.get("deviceId").equals(mapId.get("deviceId"))) {
 								tmpJsonObject = (JSONObject) parser.parse(jsonString);
 								tmpJsonObject.put("previousData", null);
 								tmpJsonObject.put("order", true);
-								tmpJsonObject.put("mapId", InitMapId);
+								tmpJsonObject.put("mapId", orderMapId);
 								tmpJsonObject.put("topic",
 										tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
 												+ tmpJsonObject.get("brokerId") + "/" + mapId.get("deviceId"));
@@ -165,8 +166,8 @@ public class StagingBolt extends BaseRichBolt {
 								tmpJsonObject.remove("brokerId");
 								tmpJsonObject.remove("spoutName");
 
-								if (outingNode.containsKey(InitMapId)) {
-									outingNodeArray = (JSONArray) outingNode.get(InitMapId);
+								if (outingNode.containsKey(orderMapId)) {
+									outingNodeArray = (JSONArray) outingNode.get(orderMapId);
 
 									tmpJsonObject.put("outingNode", outingNodeArray);
 									tmpJsonObject.put("lastNode", false);
@@ -175,8 +176,8 @@ public class StagingBolt extends BaseRichBolt {
 									tmpJsonObject.put("lastNode", true);
 								}
 
-								if (incomingNode.containsKey(InitMapId)) {
-									incomingNodeArray = (JSONArray) incomingNode.get(InitMapId);
+								if (incomingNode.containsKey(orderMapId)) {
+									incomingNodeArray = (JSONArray) incomingNode.get(orderMapId);
 
 									tmpJsonObject.put("incomingNode", incomingNodeArray);
 								} else {

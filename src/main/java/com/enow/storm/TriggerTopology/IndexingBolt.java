@@ -40,6 +40,7 @@ public class IndexingBolt extends BaseRichBolt {
 		JSONParser parser = new JSONParser();
 		JSONObject _jsonObject;
 		JSONObject _jsonError = new JSONObject();
+		boolean corporationNameCheck = false;
 		boolean deviceIdCheck = false;
 		boolean roadMapIdCheck = false;
 		boolean mapIdCheck = false;
@@ -81,6 +82,12 @@ public class IndexingBolt extends BaseRichBolt {
 								&& _jsonObject.containsKey("deviceId") && _jsonObject.containsKey("payload")) {
 							mongoDao.setDBCollection("lists", "server");
 
+							if(("corporationName").equals("enow")){
+								corporationNameCheck = true;
+							}else{
+								corporationNameCheck = false;
+							}
+							
 							if (mongoDao
 									.collectionCount(new Document("serverId", (String) _jsonObject.get("serverId"))) == 0) {
 								serverIdCheck = false;
@@ -137,7 +144,7 @@ public class IndexingBolt extends BaseRichBolt {
 								_LOG.debug("There are more than two Phase Road-map Id on MongoDB");
 							}
 
-							if (serverIdCheck && brokerIdCheck && deviceIdCheck && roadMapIdCheck) {
+							if (corporationNameCheck && serverIdCheck && brokerIdCheck && deviceIdCheck && roadMapIdCheck) {
 								_jsonObject.put("spoutName", "order");
 							} else {
 								_LOG.error("error : 4");
