@@ -1,7 +1,5 @@
-TEST-storm ![travis](https://travis-ci.org/ENOW-IJI/storm.svg?branch=master) [![Maven Version](https://maven-badges.herokuapp.com/maven-central/org.apache.storm/storm-core/badge.svg)](http://search.maven.org/#search|gav|1|g:"org.apache.storm"%20AND%20a:"storm-core")
+ENOW-Server ![travis](https://travis-ci.org/ENOW-IJI/storm.svg?branch=master) [![Maven Version](https://maven-badges.herokuapp.com/maven-central/org.apache.storm/storm-core/badge.svg)](http://search.maven.org/#search|gav|1|g:"org.apache.storm"%20AND%20a:"storm-core")
 =========================
-
-
 
 Todo List
 ---------
@@ -23,8 +21,12 @@ These are the new features you should expect in the coming months:
 - [ ] Connect Apache Storm to Devices
 - [ ] Build on `StormSubmitter`
 
+Apache Storm
+------------
+We use a free and open source distributed realtime computation system, Apache Storm. It's easy to reliably process unbounded streams of data, doing for realtime processing what Hadoop did for batch processing and simple, can be used with any programming language.
+
 Topologies
-==========
+----------
 To do realtime computation on Apache Storm for ENOW, we create what are called "topologies". A topology is a graph of computation. Each node in a topology contains processing logic, and links between nodes indicate how data should be passed around between nodes.
 
 TriggerTopology
