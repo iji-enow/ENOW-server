@@ -38,14 +38,18 @@ public class ProvisioningBolt extends BaseRichBolt {
         _jsonObject = (JSONObject) input.getValueByField("jsonObject");
         Boolean verified = (Boolean) _jsonObject.get("verified");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
+        // Confirm verification
         if (verified) {
+            // Check this node is the last node
             if(!lastNode) {
+                // When this node is the last node, delete the node that will not be used
                 _redis.updateNode(_redis.jsonObjectToNode(_jsonObject));
             } else {
+                // When this node isn't the last node, the reference value is decreased
                 _redis.updateRefer(_redis.jsonObjectToNode(_jsonObject));
             }
         }
-
+        // Go to next bolt
         _collector.emit(new Values(_jsonObject));
         try {
             _collector.ack(input);

@@ -21,8 +21,8 @@ public interface INodeDAO {
      * Handles adding a node,
      * adding a roadMapID
      * adding a mapID
-     * adding a topic
-     * adding data
+     * adding payload
+     * adding reference value by outingNodes
      *
      * @param dto
      */
@@ -32,13 +32,15 @@ public interface INodeDAO {
      * Handles verifying node which returns nodeID
      * Getting the current roadMapID
      * Getting the current mapID
-     * Getting a list of topic
      * Getting a list of data
+     * Create the reference value for checking incomming nodes
      *
-     * @return
+     * @return dto
      */
     NodeDTO getNode(String ID);
-
+    /*
+     * Getting all nodes in redis
+     */
     List<NodeDTO> getAllNodes();
 
     /**

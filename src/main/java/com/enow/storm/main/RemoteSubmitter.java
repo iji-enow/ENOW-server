@@ -4,7 +4,6 @@ package com.enow.storm.main;
  * Created by writtic on 2016. 8. 30..
  */
 
-import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
 import com.enow.storm.ActionTopology.*;
 import com.enow.storm.TriggerTopology.*;
@@ -21,7 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.UUID;
 
-public class main {
+public class RemoteSubmitter {
     private static final String[] TOPICS = new String[]{"event", "proceed", "order", "trigger", "status"};
     //private static final String zkhost = "192.168.99.100:2181";
     private static final String zkhost = "127.0.0.1:2181";
@@ -29,25 +28,12 @@ public class main {
     public static void main(String[] args) throws Exception {
         RedisDB.getInstance().deleteAllNodes();
         // RedisDB.getInstance().deleteAllStatus();
-        new main().runMain(args);
+        new RemoteSubmitter().runMain(args);
     }
 
     protected void runMain(String[] args) throws Exception {
-
-
-        if (args.length == 0) {
-            submitTopologyLocalCluster("action", getActionTopology(), getConfig());
-            submitTopologyLocalCluster("trigger", getTriggerTopology(), getConfig());
-        } else {
             submitTopologyRemoteCluster(args[0], getTriggerTopology(), getConfig());
             submitTopologyRemoteCluster(args[1], getActionTopology(), getConfig());
-        }
-
-    }
-
-    protected void submitTopologyLocalCluster(String name, StormTopology topology, Config config) throws InterruptedException {
-        cluster.submitTopology(name, config, topology);
-        stopWaitingForInput();
     }
 
     protected void submitTopologyRemoteCluster(String arg, StormTopology topology, Config config) throws Exception {
@@ -89,7 +75,7 @@ public class main {
         orderConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         orderConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
         orderConfig.ignoreZkOffsets = true;
-//         kafka.api.OffsetRequest.LatestTime()
+        //  kafka.api.OffsetRequest.LatestTime()
         // Set spouts
         builder.setSpout("event-spout", new KafkaSpout(eventConfig));
         builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));

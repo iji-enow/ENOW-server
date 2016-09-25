@@ -10,7 +10,7 @@ import enow.jython.interfaces.JythonObjectFactory;
 
 /*
  * Class : entry
- * 	class where the main function is located.
+ * 	class where the RemoteSubmitter function is located.
  * 	implemented to show an example about how to use the whole api
  */
 

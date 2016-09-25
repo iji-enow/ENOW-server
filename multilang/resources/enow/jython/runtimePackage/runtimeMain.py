@@ -7,7 +7,7 @@ from .sourceControl import sourceControl
 from .runtime import runtime
 
 '''
-Class : main
+Class : RemoteSubmitter
     Description : 
     Actual class controlling a pipeline for the whole program.
 '''

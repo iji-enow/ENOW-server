@@ -48,17 +48,17 @@ public class StatusBolt extends BaseRichBolt {
         }
 
         String jsonString = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-
         try {
             _jsonObject = (JSONObject) _parser.parse(jsonString);
             _LOG.debug("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
+            // Save the payload came from connected devices.
             _dao.addStatus(_dao.jsonObjectToStatus(_jsonObject));
         } catch (ParseException e1) {
             e1.printStackTrace();
             _LOG.error("error : 2");
             return;
         }
-
+        // Go to next bolt
         _collector.emit(new Values(input));
         try {
             _LOG.info("entered Status Topology topic : " + _jsonObject.get("topic"));

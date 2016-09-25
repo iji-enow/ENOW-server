@@ -1,5 +1,6 @@
 package com.enow.storm.main;
 
+import com.enow.persistence.redis.RedisDB;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
@@ -23,11 +24,8 @@ import com.enow.storm.TriggerTopology.IndexingBolt;
 
 import com.enow.storm.TriggerTopology.StagingBolt;
 
-public class Unification {
-    public static void main(String[] args) throws Exception {
-        BasicConfigurator.configure();
-        RedisDB.getInstance().deleteAllNodes();
-
+public class LocalSubmitter {
+    public static void main(String[] args) throws Exception{
         Config config = new Config();
         config.setDebug(true);
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
@@ -74,6 +72,10 @@ public class Unification {
         builder.setBolt("executing-bolt", new ExecutingBolt()).shuffleGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("executing-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
+
+        RedisDB.getInstance().deleteAllNodes();
+        // RedisDB.getInstance().deleteAllStatus();
+
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("TriggerTopology", config, builder.createTopology());
 

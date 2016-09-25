@@ -63,7 +63,8 @@ public class SchedulingBolt extends BaseRichBolt {
         Boolean order = (Boolean) _jsonObject.get("order");
         Boolean lambda = (Boolean) _jsonObject.get("lambda");
         String topic = (String) _jsonObject.get("topic");
-
+        // order and lambda nodes aren't related to devices
+        // So skip this part
         if (!(order || lambda)) {
             // Ready to get the status of device we need
             StatusDTO statusDTO = _redis.getStatus(topic);
@@ -100,8 +101,10 @@ public class SchedulingBolt extends BaseRichBolt {
                         checker.add(tempDTO);
                     }
                 }
+                // If incomingJSON is empty, the verified value is going to be false
                 if (checker.size() == incomingJSON.size()) {
                     NodeDTO redundancy = _redis.getNode(_redis.toID(roadMapId, mapId));
+                    // If Current MapId has been saved on Redis
                     if(redundancy == null) {
                         JSONArray arr_temp = new JSONArray();
                         for (NodeDTO node : checker) {
@@ -140,6 +143,7 @@ public class SchedulingBolt extends BaseRichBolt {
                 _LOG.warn("Fail in inserting current node to Redis : " + result);
             }
         }
+        // Go to next bolt
         _collector.emit(new Values(_jsonObject));
         try {
             _LOG.info("entered Action topology roadMapId : " + _jsonObject.get("roadMapId") + " mapId : " + _jsonObject.get("mapId"));

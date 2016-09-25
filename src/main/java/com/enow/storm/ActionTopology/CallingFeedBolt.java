@@ -51,68 +51,69 @@ public class CallingFeedBolt extends BaseRichBolt {
 		String _jsonString = _jsonObject.toJSONString();
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
-		Boolean verified = (Boolean) _jsonObject.get("verified");
-		if (verified) {
-			Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
-			Boolean lambda = (Boolean) _jsonObject.get("lambda");
-			String tempString;
-			JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
-			String[] outingNodes = null;
-			if (outingJSON != null) {
-				outingNodes = new String[outingJSON.size()];
-				for (int i = 0; i < outingJSON.size(); i++)
-					outingNodes[i] = (String) outingJSON.get(i);
-			}
-			if (outingNodes != null) {
-				// OutingNodes exist
-				ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
-				if (!lambda) {
-					_producer.send(nodeData);
-				}
-				for (String outingNode : outingNodes) {
-					// change mapId to outingNode
-					JSONObject tempJSON;
-					try {
-						tempJSON = (JSONObject) parser.parse(_jsonString);
-						tempJSON.put("mapId", outingNode);
-						_jsonArray.add(tempJSON);
-						tempString = tempJSON.toJSONString();
-						if (!lastNode) {
-							nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
-							_producer.send(nodeData);
-						}
-					} catch (ParseException e) {
-						_LOG.debug("error : 1");
-						return;
-					}
-				}
-			} else {
-				// OutingNodes don't exist
-				// Maybe This node is the last node of sequence or alone
-				tempString = _jsonObject.toJSONString();
-				ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, tempString);
-				if (!lambda) {
-					_producer.send(nodeData);
-				}
-				if (!lastNode) {
-					nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
-					_producer.send(nodeData);
-				} else {
+        Boolean verified = (Boolean) _jsonObject.get("verified");
+        // Confirm verification
+        if(verified) {
+            Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
+            Boolean lambda = (Boolean) _jsonObject.get("lambda");
+            String tempString;
+            JSONArray outingJSON = (JSONArray) _jsonObject.get("outingNode");
+            String[] outingNodes = null;
+            if (outingJSON != null) {
+                outingNodes = new String[outingJSON.size()];
+                for (int i = 0; i < outingJSON.size(); i++)
+                    outingNodes[i] = (String) outingJSON.get(i);
+            }
+            // If the node has no outingNodes
+            if (outingNodes != null) {
+                // OutingNodes exist
+                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, _jsonObject.toJSONString());
+                // If this code is for lambda
+                // Won't send the data to feed topic
+                if(!lambda) {
+                    _producer.send(nodeData);
+                }
+                for (String outingNode : outingNodes) {
+                    // change mapId to outingNode
+                    JSONObject tempJSON = _jsonObject;
+                    tempJSON.put("mapId", outingNode);
+                    tempString = tempJSON.toJSONString();
+                    // If this node isn't the last node, send the data to proceed topic
+                    if (!lastNode) {
+                        nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
+                        _producer.send(nodeData);
+                    }
+                }
+            } else {
+                // OutingNodes don't exist
+                // Maybe This node is the last node of sequence or alone
+                tempString = _jsonObject.toJSONString();
+                ProducerRecord<String, String> nodeData = new ProducerRecord<>(_KAFKA_FEED, tempString);
+                // If this code is for lambda
+                // Won't send the data to feed topic
+                if(!lambda) {
+                    _producer.send(nodeData);
+                }
+                // If this node isn't the last node, send the data to proceed topic
+                if (!lastNode) {
+                    nodeData = new ProducerRecord<>(_KAFKA_PROCEED, tempString);
+                    _producer.send(nodeData);
+                } else {
 
-				}
-			}
-		}
-		_collector.emit(new Values(_jsonObject));
-		try {
-			for (JSONObject tmp : _jsonArray) {
-				_LOG.info("exited Action topology roadMapId : " + tmp.get("roadMapId") + " mapId : " + tmp.get("mapId"));
-			}
-			_collector.ack(input);
-		} catch (Exception e) {
-			_LOG.warn("ack failed");
-			_collector.fail(input);
-		}
-	}
+                }
+            }
+        }
+        // Go to next bolt
+        _collector.emit(new Values(_jsonObject));
+        // Check ack
+        try {
+            _LOG.debug(_jsonObject);
+            _collector.ack(input);
+        } catch (Exception e) {
+        	Log.error("ack failed");
+            _collector.fail(input);
+        }
+    }
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
