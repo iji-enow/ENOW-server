@@ -1,6 +1,15 @@
 ENOW-Server ![travis](https://travis-ci.org/ENOW-IJI/storm.svg?branch=master) [![Maven Version](https://maven-badges.herokuapp.com/maven-central/org.apache.storm/storm-core/badge.svg)](http://search.maven.org/#search|gav|1|g:"org.apache.storm"%20AND%20a:"storm-core")
 =========================
-
+```
+███████╗███╗   ██╗ ██████╗ ██╗    ██╗  
+██╔════╝████╗  ██║██╔═══██╗██║    ██║  
+█████╗  ██╔██╗ ██║██║   ██║██║ █╗ ██║  
+██╔══╝  ██║╚██╗██║██║   ██║██║███╗██║  
+███████╗██║ ╚████║╚██████╔╝╚███╔███╔╝  
+╚══════╝╚═╝  ╚═══╝ ╚═════╝  ╚══╝╚══╝   
+ENOW-Server Version 0.0.1
+Copyright © 2016 ENOW. All rights reserved.
+```
 Todo List
 ---------
 These are the new features you should expect in the coming months:
