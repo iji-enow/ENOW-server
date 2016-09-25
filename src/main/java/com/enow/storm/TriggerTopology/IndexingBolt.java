@@ -43,7 +43,6 @@ public class IndexingBolt extends BaseRichBolt {
 		boolean corporationNameCheck = false;
 		boolean deviceIdCheck = false;
 		boolean roadMapIdCheck = false;
-		boolean mapIdCheck = false;
 		boolean brokerIdCheck = false;
 		boolean serverIdCheck = false;
 		MongoDAO mongoDao;
@@ -166,7 +165,7 @@ public class IndexingBolt extends BaseRichBolt {
 						_jsonObject = (JSONObject) parser.parse(msg);
 
 						if (_jsonObject.containsKey("order") && _jsonObject.containsKey("roadMapId")
-								&& _jsonObject.containsKey("mapId") && _jsonObject.containsKey("payload")
+								&& _jsonObject.containsKey("nodeId") && _jsonObject.containsKey("payload")
 								&& _jsonObject.containsKey("incomingNode") && _jsonObject.containsKey("outingNode")
 								&& _jsonObject.containsKey("previousData") && _jsonObject.containsKey("topic")
 								&& _jsonObject.containsKey("lastNode") && _jsonObject.containsKey("verified")

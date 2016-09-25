@@ -79,7 +79,7 @@ __`jsonObject(Proceed)` :__</br>
     "outingNode":["11", "13"],
     "previousData":{"2" : "value1", "4" : "value2"},
     "payload": {"humidity": "60", "brightness": "231"},
-    "lastNode":false,
+    "lastNode":true,
     "order":false,
     "verified":false,
     "lambda":false
@@ -106,7 +106,6 @@ __PROCESSING:__
 
 
 __OUTPUT:__
-
 - `jsonObject` ⇨ `StagingBolt`
 
 <br>
@@ -122,8 +121,7 @@ __PROCESSING:__
 <!--
 If `jsonObject(Event)` is received, find `roadMapId` which is same as `roadMapId` in `jsonObject(Event)` then start `initNodes`
 -->
-
-- `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNodes`들을 실행한다.
+- `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode`들을 실행한다.
 
 - `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `orderNode` 중 `jsonObject(Order)`의 `corporationName`,`serverId`,`brokerId`,`deviceId`와 일치하는 `mapId`를 실행한다.
 
@@ -143,7 +141,7 @@ __PROCESSING:__
 - `StagingBolt`에서 받은 `jsonArray`를 `jsonObject`로 바꿔 `Trigger topic`으로 보내준다.
 
 __OUTPUT:__
-- `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Trigger`
+- `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Trigger`
 
 __`jsonObject.toJSONString` :__</br>
 ```JSON
@@ -169,82 +167,96 @@ ActionTopology
 ActionTopology schedules the enow server to run a Road-Map scheme and handles the executable source code from console pairing the result to devices and event came from TriggerTopology.
 
 ### StatusBolt :
+
 __INPUT:__
 - `statusKafka` ⇨ `jsonObject(Status)`
 
 __`jsonObject(Status)` :__</br>
 ```JSON
 {
-    "topic":"enow\/serverId1\/brokerId1\/deviceId13",
+    "topic":"enow\/serverId1\/brokerId1\/deviceId1",
     "payload": {"humidity": "60", "brightness": "231"}
 }
 ```
 
 __PROCESSING:__
-- 각각의 StatusKafka에서 들어오는 JsonObject들을 Topic별로 Redis에 저장한다.
-- Save Each `JsonObjects` came from `StatusKafka` to `Redis`.
+- `JsonObject(Status)`들을 `topic`별로 `Redis`에 저장한다.
+<!--
+Save Each `JsonObjects` came from `StatusKafka` to `Redis`.
+-->
 
 __OUTPUT:__
-- `jsonObject` ⇨ `ExecutingBolt`
+- 없다.
+
+<br>
 
 ### SchedulingBolt :
+
 __INPUT:__
 - `triggerKafka` ⇨ `jsonObject(Trigger)`
 
 __PROCESSING:__
-- `order`값이 `False`일 때, 현재 노드가 다수의 `incomingNode`들을 가지면, 각각 노드들의 `payload` 정보를 현재 `jsonObject`가 지닌 `Topic`에 근거하여 `Redis`에서 읽어들여 `jsonObject`에 저장한다.
+- `order`값이 `false` 또는 `rambda`값이 `false`일 때, 현재 노드가 다수의 `incomingNode`들을 가지면, 각각 노드들의 `payload` 정보를 현재 `jsonObject`가 지닌 `topic`에 근거하여 `Redis`에서 읽어들여 `jsonObject`에 저장한다.
+
 - `incomingNodes`가 `null`이 아니고, 처음 방문한 `mapId`라면 `Redis`에서 각각 `incomingNodes`에 저장된 값들을 꺼내 `jsonObject`안의 `previousData`에 저장한다.
+
 - 만약 이미 방문한적이 있는 `mapId`라면 `verified`값을 `false`로 전환한다.
+
 - `verified`값이 `true`면 각각의 `Trigger` 토픽에서 쏟아져나오는 `jsonObject`값들을 `Redis`에 저장한다.
-- 변경된 `jsonObject`를 `ExecutingBolt`로 `emit` 한다.
-- When node needs multiple `previousData`, wait for all of `incomingNodes`
+
+<!-- When node needs multiple `previousData`, wait for all of `incomingNodes`
+-->
 
 __OUTPUT:__
 - `jsonObject` ⇨ `ExecutingBolt`
 
+<br>
+
 ### ExecutingBolt :
+
 __INPUT:__
 - `SchedulingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `MongoDB`에서 Source Code 와 Parameter를 받아온다.
+- `MongoDB`에서 source code 와 parameter를 받아온다.
+
+- `jsonObject`에서 `payload`를 받아온다.
+
+- `source code`에 `parameter`와 `payload`값을 넣어 실행한다. 단, `lambda`가 `true`일 경우에는 `payload` 값은 `""`이다.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `ProvisioningBolt`
 
+<br>
+
 ### ProvisioningBolt :
+
 __INPUT:__
 - `ExecutingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- 갱신된 `result`를 해당 노드에 매칭된 `Redis`에 갱신한다.
+- `ExecutingBolt`에서 실행한 `jsonObject`의 `topic`과 일치하는 `topic`을 `Redis`에서 찾아 갱신하여준다.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `CallingFeedBolt`
 
+<br>
+
 ### CallingFeedBolt :
+
 __INPUT:__
 - `ProvisioningBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `ProvisioningBolt`를 참고하여 `KafkaProducer`를 호출한다.
-- `outingNode`의 `MapID`별로 `jsonObject`를 갱신시킨 후 `KafkaProducer`를 호출한다.
+- `ProvisioningBolt`에서 받은 `jsonObject`의 `mapId`를 `jsonObject`의 `outingNode`들의 `mapId` 별로 바꿔 `Feed topic`,`Proceed topic`으로 보내준다.
+
+- `rambda`값이 `true`일 경우에는 `Feed topic`로 보내지 않는다.
 
 __OUTPUT:__
-- `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `Topic : Feed`
+- `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Feed`
+- `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Proceed`
 
-StatusTopology
---------------
-
-### StatusBolt :
-__INPUT:__
-- `statusKafka` ⇨ `jsonObject(Status)`
-
-__PROCESSING:__
-- `Topic`별로 디바이스 정보를 `Redis`에 저장한다.
-
-__OUTPUT:__
-- `jsonObject` ⇨ `ExecutingBolt`
+<br><br>
 
 Payload
 =======
@@ -265,9 +277,18 @@ __JsonObject :__</br>
 }
 
 ```
-order is ture : 트리거형 시퀸스의 중간 노드들
-order is false : 반복되는 시퀸스
-source, parameter 들은 따로 MongoDB를 통해 Console로부터 값을 받아온다.
+
+topic : 회사명/서버명/브로커명(사용자의 mqtt의 ip)/디바이스명 으로 구성.
+roadMapId : 로드맵 아이디
+mapId : roadMapId안에 존재하는 노드들의 아이디
+incomingNode : 현재 mapId로 들어오는 node들
+outingNode : 현재 mapId에서 나가는 node들
+previousData : 이전 node들의 실행 결과
+payload : 현제 node의 센서값 혹은 사용자로부터 들어온 값
+lastNode : 마지막 노드라면 true,아니라면 false
+order : 사용자가 직접 입력하는 형태라면 true, 아니라면 false
+verified : incomingNode들이 모두
+
 __Status :__ </br>
 ```JSON
 {
@@ -275,6 +296,7 @@ __Status :__ </br>
   "payload": {"humidity": "60", "brightness": "231"}
 }
 ```
+
 __ExecutingBolt :__ </br>
 result: <br>
 ```JSON
