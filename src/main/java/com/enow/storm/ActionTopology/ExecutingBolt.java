@@ -20,14 +20,15 @@ import java.util.Map;
 
 public class ExecutingBolt extends ShellBolt implements IRichBolt {
     // Call the countbolt.py using Python
+	protected static final Logger _LOG = LogManager.getLogger(ExecutingBolt.class);
     public ExecutingBolt() {
-        super("python", "/Users/writtic/Documents/repository/storm/multilang/resources/executingBolt.py");
+        super("python", "executingBolt.py");
     }
-
-    // Declare that we emit a 'jsonObject'
+    
     @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("jsonObject"));
+    public void execute(Tuple input){
+    	_LOG.fatal(input);
+    	super.execute(input);
     }
 
     // Nothing to do for configuration
@@ -35,6 +36,13 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
     public Map<String, Object> getComponentConfiguration() {
         return null;
     }
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		// TODO Auto-generated method stub
+		declarer.declare(new Fields("jsonObject"));
+		
+	}
 }
 
 /*

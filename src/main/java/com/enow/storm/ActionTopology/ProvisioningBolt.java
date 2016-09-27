@@ -16,6 +16,8 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.util.Map;
 
@@ -33,9 +35,20 @@ public class ProvisioningBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
 
-        JSONObject _jsonObject;
+    	org.apache.storm.shade.org.json.simple.JSONObject _jsonObject_conversion;
+    	JSONObject _jsonObject = new JSONObject();
+    	JSONParser _parser = new JSONParser();
+        String _jsonString;
 
-        _jsonObject = (JSONObject) input.getValueByField("jsonObject");
+        _jsonObject_conversion = (org.apache.storm.shade.org.json.simple.JSONObject) input.getValue(0);
+        _jsonString = _jsonObject_conversion.toJSONString();
+        try {
+			_jsonObject = (JSONObject) _parser.parse(_jsonString);
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    
         Boolean verified = (Boolean) _jsonObject.get("verified");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
         // Confirm verification

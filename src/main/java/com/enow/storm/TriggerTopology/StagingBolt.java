@@ -78,7 +78,7 @@ public class StagingBolt extends BaseRichBolt {
 					try {
 						roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 
-						nodeIds = (JSONObject) roadMapId.get("NodeIds");
+						nodeIds = (JSONObject) roadMapId.get("nodeIds");
 						initNodeArray = (JSONArray) roadMapId.get("initNode");
 						incomingNode = (JSONObject) roadMapId.get("incomingNode");
 						outingNode = (JSONObject) roadMapId.get("outingNode");

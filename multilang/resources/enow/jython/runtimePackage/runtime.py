@@ -23,7 +23,7 @@ class runtime:
         fileDir = os.path.dirname(os.path.realpath('__file__'))
         sourceDir = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
 
-        jythonPath = "/usr/local/bin/python"
+        jythonPath = "/usr/bin/python"
         command = []
         command.append(jythonPath)
         command.append("-u")

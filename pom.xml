@@ -131,7 +131,7 @@
         <resources>
             <resource>
                 <!-- Where the Python bits are kept -->
-                <directory>./multilang/resources</directory>
+                <directory>./multilang</directory>
             </resource>
             <resource>
                 <directory>./src/main/resources</directory>

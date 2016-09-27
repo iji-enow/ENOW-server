@@ -1,6 +1,6 @@
 import storm
 import sys
-import _thread
+import thread
 import json
 import logging
 import os
@@ -20,7 +20,9 @@ sys.path.append(enow_Path)
 sys.path.append(enow_jython_Path)
 sys.path.append(enow_jython_Building_Path)
 sys.path.append(enow_jython_runtimePackage_Path)
+sys.path.append("/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc")
 from enow.jython.Building import Building
+import pydevd
 # from jython.Building import Building
 # Counter is a nice way to count things,
 # but it is a Python 2.7 thing
@@ -30,7 +32,7 @@ class ExecutingBolt(storm.BasicBolt):
     # Initialize this instance
 
     def __init__(self):
-        self.initialize()
+        pass
 
     def initialize(self, conf, context):
         self._conf = conf
@@ -38,15 +40,20 @@ class ExecutingBolt(storm.BasicBolt):
         self.Building = Building()
         try:
             self.client = MongoClient('localhost', 27017)
-            print("A client has created")
         except pymongo.errors.ConnectionFailure as e:
-            print("Creating a MongoClient has failed")
+            sys.exit(1)
 
-        self.source_db = self.client['source']
-        self.execute_collection = self.source_db['execute']
+        self.source_db = self.client['enow']
+        self.execute_collection = self.source_db['recipes']
         # Create a new counter for this instance
         # storm.logInfo("Counter bolt instance starting...")
 
+    def tupleToJson(self, tuple):
+        dictObject = tuple.values[0]
+        jsonObject_str = json.dumps(dictObject)
+        jsonObject = json.loads(jsonObject_str)
+        return jsonObject
+    
     def process(self, tup):
         # Get the word from the inbound tuple
         # word = tup.values[0]
@@ -56,15 +63,17 @@ class ExecutingBolt(storm.BasicBolt):
         #jsonObject = json.loads(word, strict=False)
         # Executtion Cycle
 
-        jsonObject = tup
+        jsonObject = self.tupleToJson(tup)
+        
         if jsonObject["verified"] == True:
             # Get the document of which type is json
             # The document indicates that
             # the 'SOURCE' and 'PARAMETER' is the one currently executing
 
             # Getting the whole payload object from the tuple
+            # pydevd.settrace()
             l_payload_json = jsonObject["payload"]
-            l_mapId_string = jsonObject["mapId"]
+            l_mapId_string = jsonObject["nodeId"]
             l_roadMapId_string = jsonObject["roadMapId"]
 
             # Getting previous execution informations
@@ -76,8 +85,7 @@ class ExecutingBolt(storm.BasicBolt):
             t_item_bson_string = dumps(t_execute_cursor)
             t_item_json = json.loads(t_item_bson_string)
             # Getting a list of mapIds
-            t_mapId_json = t_item_json["mapIds"]
-            print("Finding \"{0}\" among mapIds".format(l_mapId_string))
+            t_mapId_json = t_item_json["nodeIds"]
             # Search if the current mapId exists
             if l_mapId_string not in t_mapId_json:
                 raise ValueError("No mapId in the given list of mapIds")
@@ -108,9 +116,9 @@ class ExecutingBolt(storm.BasicBolt):
             jsonObject["payload"] = jsonResult
             
 
-            storm.emit(jsonObject)
+            storm.emit([jsonObject])
         else:
-            storm.emit(jsonObject)
+            storm.emit([jsonObject], "")
 
 # Start the bolt when it's invoked
 ExecutingBolt().run()
