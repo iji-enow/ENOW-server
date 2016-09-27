@@ -18,8 +18,8 @@ public class NodeDAO implements INodeDAO {
     private static final String NODE_PREFIX = "node-";
 
     @Override
-    public String toID(String roadMapID, String mapID) {
-        String id = roadMapID + "-" + mapID;
+    public String toID(String roadMapID, String nodeID) {
+        String id = roadMapID + "-" + nodeID;
         return id;
     }
 
@@ -27,7 +27,7 @@ public class NodeDAO implements INodeDAO {
     public NodeDTO jsonObjectToNode(JSONObject jsonObject){
 
         String roadMapID = (String) jsonObject.get("roadMapId");
-        String mapID = (String) jsonObject.get("mapId");
+        String nodeID = (String) jsonObject.get("nodeId");
         String topic = (String) jsonObject.get("topic");
         JSONArray outingJSON = (JSONArray) jsonObject.get("outingNode");
         Integer refer = 0;
@@ -37,9 +37,9 @@ public class NodeDAO implements INodeDAO {
         JSONObject payload = (JSONObject) jsonObject.get("payload");
         NodeDTO dto;
         if(payload != null){
-            dto = new NodeDTO(roadMapID, mapID, topic, payload.toJSONString(), "" + refer);
+            dto = new NodeDTO(roadMapID, nodeID, topic, payload.toJSONString(), "" + refer);
         }else {
-            dto = new NodeDTO(roadMapID, mapID, topic, "null", "" + refer);
+            dto = new NodeDTO(roadMapID, nodeID, topic, "null", "" + refer);
         }
         return dto;
     }
@@ -47,7 +47,7 @@ public class NodeDAO implements INodeDAO {
     @Override
     public String addNode(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
-        String id = dto.getRoadMapID() + "-" + dto.getMapID();
+        String id = dto.getRoadMapID() + "-" + dto.getNodeID();
 
         Set<String> keys = jedis.keys("node-*");
         Iterator<String> iter = keys.iterator();
@@ -81,14 +81,14 @@ public class NodeDAO implements INodeDAO {
         Jedis jedis = RedisDB.getConnection();
         StringTokenizer tokenizer = new StringTokenizer(ID, "-");
         String roadMapID = tokenizer.nextToken();
-        String mapID = tokenizer.nextToken();
-        String id = roadMapID + "-" + mapID;
+        String nodeID = tokenizer.nextToken();
+        String id = roadMapID + "-" + nodeID;
         List<String> result = jedis.lrange(NODE_PREFIX + id, 0, -1);
         if (result.size() > 2) {
             System.out.println("result.get(0) : " + result.get(0));
             System.out.println("result.get(1) : " + result.get(1));
             System.out.println("result.get(2) : " + result.get(2));
-            NodeDTO dto = new NodeDTO(roadMapID, mapID, result.get(2), result.get(1), result.get(0));
+            NodeDTO dto = new NodeDTO(roadMapID, nodeID, result.get(2), result.get(1), result.get(0));
             return dto;
         } else {
             return null;
@@ -110,7 +110,7 @@ public class NodeDAO implements INodeDAO {
     @Override
     public void updateNode(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
-        String id = dto.getRoadMapID() + "-" + dto.getMapID();
+        String id = dto.getRoadMapID() + "-" + dto.getNodeID();
         jedis.lpop(NODE_PREFIX + id);
         jedis.lpop(NODE_PREFIX + id);
         jedis.lpush(NODE_PREFIX + id, dto.getPayload());
@@ -120,7 +120,7 @@ public class NodeDAO implements INodeDAO {
     @Override
     public void updateRefer(NodeDTO dto) {
         Jedis jedis = RedisDB.getConnection();
-        String id = dto.getRoadMapID() + "-" + dto.getMapID();
+        String id = dto.getRoadMapID() + "-" + dto.getNodeID();
         Integer refer = Integer.parseInt(dto.getRefer());
         --refer;
         if (refer > 0) {

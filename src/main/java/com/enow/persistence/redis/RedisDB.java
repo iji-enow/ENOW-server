@@ -53,9 +53,9 @@ public class RedisDB implements IRedisDB {
     }
 
     @Override
-    public String toID(String roadMapID, String mapID) {
+    public String toID(String roadMapID, String nodeID) {
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
-        return dao.toID(roadMapID, mapID);
+        return dao.toID(roadMapID, nodeID);
     }
 
     @Override

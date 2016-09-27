@@ -5,14 +5,14 @@ package com.enow.persistence.dto;
  */
 public class NodeDTO {
     private String roadMapID;
-    private String mapID;
+    private String nodeID;
     private String topic;
     private String payload;
     private String refer;
 
-    public NodeDTO(String roadMapID, String mapID, String topic, String payload, String refer) {
+    public NodeDTO(String roadMapID, String nodeID, String topic, String payload, String refer) {
         this.roadMapID = roadMapID;
-        this.mapID = mapID;
+        this.nodeID = nodeID;
         this.topic = topic;
         this.payload = payload;
         this.refer = refer;
@@ -26,12 +26,12 @@ public class NodeDTO {
         this.roadMapID = roadMapID;
     }
 
-    public String getMapID() {
-        return mapID;
+    public String getNodeID() {
+        return nodeID;
     }
 
-    public void setMapID(String mapID) {
-        this.mapID = mapID;
+    public void setNodeID(String nodeID) {
+        this.nodeID = nodeID;
     }
 
     public String getTopic() {

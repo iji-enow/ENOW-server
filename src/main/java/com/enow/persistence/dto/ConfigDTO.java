@@ -5,6 +5,6 @@ package com.enow.persistence.dto;
  */
 public class ConfigDTO {
     private String roadMapID;
-    private String mapID;
+    private String nodeID;
     private String topic;
 }

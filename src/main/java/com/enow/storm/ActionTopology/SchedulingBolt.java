@@ -81,7 +81,7 @@ public class SchedulingBolt extends BaseRichBolt {
         }
 
         String roadMapId = (String) _jsonObject.get("roadMapId");
-        String mapId = (String) _jsonObject.get("mapId");
+        String nodeId = (String) _jsonObject.get("nodeId");
         JSONArray incomingJSON = (JSONArray) _jsonObject.get("incomingNode");
         String[] incomingNodes = null;
         if (incomingJSON != null) {
@@ -94,8 +94,8 @@ public class SchedulingBolt extends BaseRichBolt {
                 JSONObject tempJSON = new JSONObject();
                 List<NodeDTO> checker = new ArrayList<>();
                 String id;
-                for (String nodeId : incomingNodes) {
-                    id = _redis.toID(roadMapId, nodeId);
+                for (String incomingNodeId : incomingNodes) {
+                    id = _redis.toID(roadMapId, incomingNodeId);
                     NodeDTO tempDTO = _redis.getNode(id);
                     if (tempDTO != null) {
                         checker.add(tempDTO);
@@ -103,8 +103,8 @@ public class SchedulingBolt extends BaseRichBolt {
                 }
                 // If incomingJSON is empty, the verified value is going to be false
                 if (checker.size() == incomingJSON.size()) {
-                    NodeDTO redundancy = _redis.getNode(_redis.toID(roadMapId, mapId));
-                    // If Current MapId has been saved on Redis
+                    NodeDTO redundancy = _redis.getNode(_redis.toID(roadMapId, nodeId));
+                    // If Current nodeId has been saved on Redis
                     if(redundancy == null) {
                         JSONArray arr_temp = new JSONArray();
                         for (NodeDTO node : checker) {
@@ -146,7 +146,7 @@ public class SchedulingBolt extends BaseRichBolt {
         // Go to next bolt
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.info("entered Action topology roadMapId : " + _jsonObject.get("roadMapId") + " mapId : " + _jsonObject.get("mapId"));
+            _LOG.info("entered Action topology roadMapId : " + _jsonObject.get("roadMapId") + " nodeId : " + _jsonObject.get("nodeId"));
             _collector.ack(input);
         } catch (Exception e) {
         	_LOG.warn("ack failed");
