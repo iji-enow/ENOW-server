@@ -26,9 +26,10 @@ These are the new features you should expect in the coming months:
 - [x] ~~Create test Document on MongoDB~~
 - [x] ~~Connect Apache Storm to MongoDB~~
 - [x] ~~Connect Apache Storm to Redis for storing status of server~~
-- [ ] Connect Apache Storm to Console
-- [ ] Connect Apache Storm to Devices
-- [ ] Build on `StormSubmitter`
+- [x] ~~Connect Apache Storm to Console~~
+- [x] ~~Connect Apache Storm to Devices~~
+- [x] ~~Build on `StormSubmitter`~~
+- [ ] Send Info of Storm UI
 
 Apache Storm
 ------------
@@ -202,8 +203,6 @@ __PROCESSING:__
 
 - 만약 이미 방문한적이 있는 `mapId`라면 `verified`값을 `false`로 전환한다.
 
-- `verified`값이 `true`면 각각의 `Trigger` 토픽에서 쏟아져나오는 `jsonObject`값들을 `Redis`에 저장한다.
-
 <!-- When node needs multiple `previousData`, wait for all of `incomingNodes`
 -->
 
@@ -235,7 +234,7 @@ __INPUT:__
 - `ExecutingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `ExecutingBolt`에서 실행한 `jsonObject`의 `topic`과 일치하는 `topic`을 `Redis`에서 찾아 갱신하여준다.
+- `ExecutingBolt`에서 실행한 `jsonObject`을 `Redis`에 저장하고, `refer`값을 갱신한다.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `CallingFeedBolt`
