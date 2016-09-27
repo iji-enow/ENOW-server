@@ -37,29 +37,10 @@ class sourceControl:
         if not self.preCode or not self.body or self.postCode:
             print("At least one of the source is empty\n")
         '''
-
         fileDir = os.path.dirname(os.path.realpath('__file__'))
-
-        pathPreCode = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
         pathbodyCode = os.path.join(fileDir, 'enow/jython/pythonSrc/body.py')
-        pathPostCode = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
-#         fPreCode = open(pathPreCode, "wb")
-        fBodyCode = open(pathbodyCode, "wb")
-#         fPostCode = open(pathPostCode, "wb")
-
-#         fPreCode.seek(0)
-        fBodyCode.seek(0)
-#         fPostCode.seek(0)
-
-        fBodyCode.truncate()
-        fBodyCode.seek(0)
-
-#         if self.preCode:
-#             fPreCode.writelines(self.preCode)
-        fBodyCode.write(self.body)
-#         if self.postCode:
-#             fPostCode.writelines(self.postCode)
-
-#         fPreCode.close()
-        fBodyCode.close()
-#         fPostCode.close()
+        
+        with open(pathbodyCode, "wb") as file:
+            file.seek(0)
+            file.truncate()
+            file.write(self.body)

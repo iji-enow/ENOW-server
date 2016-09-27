@@ -4,9 +4,11 @@ import thread
 import json
 import logging
 import os
+from Queue import PriorityQueue
 from symbol import parameters
 import collections
 import bson
+import time
 from bson.json_util import dumps
 from bson.json_util import loads
 from pymongo import MongoClient
@@ -30,7 +32,8 @@ import pydevd
 
 class ExecutingBolt(storm.BasicBolt):
     # Initialize this instance
-
+    program_semaphore = 0
+    program_queue = PriorityQueue()
     def __init__(self):
         pass
 
@@ -47,6 +50,16 @@ class ExecutingBolt(storm.BasicBolt):
         self.execute_collection = self.source_db['recipes']
         # Create a new counter for this instance
         # storm.logInfo("Counter bolt instance starting...")
+        
+    def fileToLog(self):
+        log_str = ""
+        logPath = os.path.join(fileDir, "enow/jython/pythonSrc/log/log.txt")
+        with open(logPath, 'r+') as file:
+            log_str = file.readlines();
+            file.seek(0)
+            file.truncate()
+        
+        return log_str
 
     def tupleToJson(self, tuple):
         dictObject = tuple.values[0]
@@ -71,7 +84,7 @@ class ExecutingBolt(storm.BasicBolt):
             # the 'SOURCE' and 'PARAMETER' is the one currently executing
 
             # Getting the whole payload object from the tuple
-            # pydevd.settrace()
+            # 
             l_payload_json = jsonObject["payload"]
             l_mapId_string = jsonObject["nodeId"]
             l_roadMapId_string = jsonObject["roadMapId"]
@@ -110,15 +123,38 @@ class ExecutingBolt(storm.BasicBolt):
             self.Building.setcode(source.encode("ascii"))
             self.Building.setPayload(payload.encode("ascii"))
             self.Building.setPreviousData(previousData.encode("ascii"))
-            tmp = self.Building.run()
-            # Handle the result and convert it to JSON object
-            jsonResult = json.loads(tmp, strict=False)
-            jsonObject["payload"] = jsonResult
             
-
-            storm.emit([jsonObject])
+#             if l_mapId_string == "2":
+#                 pydevd.settrace()
+            
+            if ExecutingBolt.program_semaphore == 0:
+                ExecutingBolt.program_semaphore = 1
+                time.sleep(1)
+                tmp = self.Building.run()
+                jsonObject["log"] = self.fileToLog()
+                jsonResult = json.loads(tmp, strict=False)
+                jsonObject["payload"] = jsonResult
+                storm.emit([jsonObject])
+                ExecutingBolt.program_semaphore = 0
+            else:
+                ExecutingBolt.program_queue.put(l_mapId_string)
+                while True:
+                    if ExecutingBolt.program_semaphore == 0:
+                        if ExecutingBolt.program_queue.queue[0] == l_mapId_string:
+                            ExecutingBolt.program_semaphore == 1
+                            ExecutingBolt.program_queue.get()
+                            tmp = self.Building.run()
+                            jsonObject["log"] = self.fileToLog()
+                            jsonResult = json.loads(tmp, strict=False)
+                            jsonObject["payload"] = jsonResult
+                            storm.emit([jsonObject])
+                            ExecutingBolt.program_semaphore == 0
+                        
+            
+            # Handle the result and convert it to JSON object
         else:
-            storm.emit([jsonObject], "")
+            jsonObject["payload"] = ""
+            storm.emit([jsonObject])
 
 # Start the bolt when it's invoked
 ExecutingBolt().run()

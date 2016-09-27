@@ -39,7 +39,7 @@ def eventHandlerFacade(_event, _context, _callback):
                        level=logging.DEBUG,
                        format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
                        filename=loggerStdoutFilePath,
-                       filemode='a'
+                       filemode='r+'
                        )
 
     stdout_logger = logging.getLogger('STDOUT')

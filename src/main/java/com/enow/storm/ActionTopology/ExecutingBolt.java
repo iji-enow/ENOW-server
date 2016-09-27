@@ -18,7 +18,7 @@ import com.esotericsoftware.minlog.Log;
 
 import java.util.Map;
 
-/*
+
 public class ExecutingBolt extends ShellBolt implements IRichBolt {
     // Call the countbolt.py using Python
 	protected static final Logger _LOG = LogManager.getLogger(ExecutingBolt.class);
@@ -45,8 +45,8 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
 		
 	}
 }
-*/
 
+/*
 public class ExecutingBolt extends BaseRichBolt {
     // This Bolt is for Test
     protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);
@@ -83,3 +83,4 @@ public class ExecutingBolt extends BaseRichBolt {
         declarer.declare(new Fields("jsonObject"));
     }
 }
+*/

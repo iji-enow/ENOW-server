@@ -19,5 +19,8 @@ def postProcess(event, context, callback):
                    "callback" : jsonCallbackDump}
 
     jsonPayloadDump = json.dumps(jsonPayload)
+    
+    sys.stdout.flush()
+    sys.stderr.flush()
 
     sys.stdout.write(jsonPayloadDump.decode("utf-8").encode("ascii"))

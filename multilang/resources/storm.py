@@ -20,6 +20,7 @@ import sys
 import os
 import traceback
 from collections import deque
+import threading
 
 try:
     import simplejson as json
@@ -200,6 +201,7 @@ class Bolt(object):
             reportError(traceback.format_exc(e))
 
 class BasicBolt(object):
+
     def initialize(self, stormconf, context):
         pass
 
