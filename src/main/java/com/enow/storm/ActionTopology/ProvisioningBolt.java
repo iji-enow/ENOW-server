@@ -2,6 +2,7 @@ package com.enow.storm.ActionTopology;
 
 import com.enow.daos.redisDAO.INodeDAO;
 import com.enow.facility.DAOFacility;
+import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
 import com.esotericsoftware.minlog.Log;
@@ -53,6 +54,16 @@ public class ProvisioningBolt extends BaseRichBolt {
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
         // Confirm verification
         if (verified) {
+            // Store this node for subsequent node
+            String result = "nothing";
+            try {
+                NodeDTO dto = _redis.jsonObjectToNode(_jsonObject);
+                result = _redis.addNode(dto);
+                _LOG.debug("Succeed in inserting current node to Redis : " + result);
+            } catch (Exception e) {
+                e.printStackTrace();
+                _LOG.warn("Fail in inserting current node to Redis : " + result);
+            }
             // Check this node is the last node
             if(!lastNode) {
                 // When this node is the last node, delete the node that will not be used
@@ -62,6 +73,7 @@ public class ProvisioningBolt extends BaseRichBolt {
                 _redis.updateRefer(_redis.jsonObjectToNode(_jsonObject));
             }
         }
+
         // Go to next bolt
         _collector.emit(new Values(_jsonObject));
         try {
