@@ -234,7 +234,7 @@ __INPUT:__
 - `ExecutingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `ExecutingBolt`에서 실행한 `jsonObject`을 `Redis`에 저장하고, `refer`값을 갱신한다.
+- `ExecutingBolt`에서 실행 후 `result`를 포함 `jsonObject`을 `Redis`에 저장하고, `refer`값을 갱신한다.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `CallingFeedBolt`

@@ -42,10 +42,8 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		// TODO Auto-generated method stub
 		declarer.declare(new Fields("jsonObject"));
-		
 	}
 }
-
 /*
 public class ExecutingBolt extends BaseRichBolt {
     // This Bolt is for Test
