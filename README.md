@@ -10,6 +10,7 @@ ENOW-Server ![travis](https://travis-ci.org/ENOW-IJI/ENOW-server.svg?branch=mast
 ENOW-Server Version 0.0.1
 Copyright © 2016 ENOW. All rights reserved.
 ```
+
 Todo List
 ---------
 These are the new features you should expect in the coming months:
@@ -29,11 +30,19 @@ These are the new features you should expect in the coming months:
 - [x] ~~Connect Apache Storm to Console~~
 - [x] ~~Connect Apache Storm to Devices~~
 - [x] ~~Build on `StormSubmitter`~~
-- [ ] Send Info of Storm UI
+- [ ] Send Info of Storm UI to ENOW-Console
 
-Apache Storm
+[Apache Storm](http://storm.apache.org/)
 ------------
-We use a free and open source distributed realtime computation system, Apache Storm. It's easy to reliably process unbounded streams of data, doing for realtime processing what Hadoop did for batch processing and simple, can be used with any programming language.
+We use a free and open source distributed realtime computation system, [Apache Storm](http://storm.apache.org/). It's easy to reliably process unbounded streams of data, doing for realtime processing what Hadoop did for batch processing and simple, can be used with any programming language.
+
+Kafka Integration
+-----------------
+Apache Kafka is publish-subscribe messaging rethought as a distributed commit log. A single Kafka broker can handle hundreds of megabytes of reads and writes per second from thousands of clients, so this is suitable for massive IoT platform.
+
+Apache Storm basically support Kafka Integration by this self but we use `storm-kafka` instead of `storm-kafka-client`.
+
+
 
 Topologies
 ----------
@@ -234,7 +243,7 @@ __INPUT:__
 - `ExecutingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `ExecutingBolt`에서 실행 후 `result`를 포함 `jsonObject`을 `Redis`에 저장하고, `refer`값을 갱신한다.
+- `ExecutingBolt`에서 실행 후 `result`를 포함한 `jsonObject`을 `Redis`에 저장하고, `refer`값을 갱신한다.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `CallingFeedBolt`
