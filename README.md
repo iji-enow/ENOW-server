@@ -38,11 +38,9 @@ We use a free and open source distributed realtime computation system, [Apache S
 
 Kafka Integration
 -----------------
-Apache Kafka is publish-subscribe messaging rethought as a distributed commit log. A single Kafka broker can handle hundreds of megabytes of reads and writes per second from thousands of clients, so this is suitable for massive IoT platform.
+[Apache Kafka](http://kafka.apache.org/) is publish-subscribe messaging rethought as a distributed commit log. A single Kafka broker can handle hundreds of megabytes of reads and writes per second from thousands of clients, so this is suitable for massive IoT platform.
 
 Apache Storm basically support Kafka Integration by this self but we use `storm-kafka` instead of `storm-kafka-client`.
-
-
 
 Topologies
 ----------

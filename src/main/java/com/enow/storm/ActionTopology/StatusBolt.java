@@ -2,7 +2,8 @@ package com.enow.storm.ActionTopology;
 
 import com.enow.daos.redisDAO.IStatusDAO;
 import com.enow.facility.DAOFacility;
-import com.enow.persistence.dto.StatusDTO;
+import com.enow.persistence.redis.IRedisDB;
+import com.enow.persistence.redis.RedisDB;
 import com.esotericsoftware.minlog.Log;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,13 +29,13 @@ public class StatusBolt extends BaseRichBolt {
     protected static final Logger _LOG = LogManager.getLogger(StatusBolt.class);
     private OutputCollector _collector;
     private JSONParser _parser;
-    private IStatusDAO _dao;
+    private IRedisDB _redis;
 
     @Override
     public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
         _collector = collector;
         _parser = new JSONParser();
-        _dao = DAOFacility.getInstance().createStatusDAO();
+        _redis = RedisDB.getInstance();
     }
 
     @Override
@@ -52,12 +53,13 @@ public class StatusBolt extends BaseRichBolt {
             _jsonObject = (JSONObject) _parser.parse(jsonString);
             _LOG.debug("Succeed in inserting messages to _jsonObject : \n" + _jsonObject.toJSONString());
             // Save the payload came from connected devices.
-            _dao.addStatus(_dao.jsonObjectToStatus(_jsonObject));
+            _redis.addStatus(_redis.jsonObjectToStatus(_jsonObject));
         } catch (ParseException e1) {
             e1.printStackTrace();
             _LOG.error("error : 2");
             return;
         }
+
         // Go to next bolt
         _collector.emit(new Values(input));
         try {
