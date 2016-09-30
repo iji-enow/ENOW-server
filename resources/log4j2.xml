@@ -19,7 +19,7 @@
 		</Logger>
 		<Root level="info">
 			<Appender-Ref ref="STDOUT" />
-			<AppenderRef ref="Kafka" />
+			<!--<AppenderRef ref="Kafka" />-->
 			<AppenderRef ref="EnowFile" />
 		</Root>
 	</Loggers>
