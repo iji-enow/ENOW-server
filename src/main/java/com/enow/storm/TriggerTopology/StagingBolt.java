@@ -110,7 +110,7 @@ public class StagingBolt extends BaseRichBolt {
 							tmpJsonObject.put("order", false);
 							tmpJsonObject.put("nodeId", initNodeId);
 							tmpJsonObject.put("topic", "enow" + "/" + nodeId.get("serverId") + "/"
-									+ nodeId.get("brokerId") + "/" + nodeId.get("deviceId"));
+									+ nodeId.get("brokerId") + "/" + nodeId.get("deviceId") + "/status" );
 							tmpJsonObject.put("verified", true);
 							tmpJsonObject.put("lambda", nodeId.get("lambda"));
 
@@ -176,7 +176,7 @@ public class StagingBolt extends BaseRichBolt {
 								tmpJsonObject.put("nodeId", orderNodeId);
 								tmpJsonObject.put("topic",
 										tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
-												+ tmpJsonObject.get("brokerId") + "/" + nodeId.get("deviceId"));
+												+ tmpJsonObject.get("brokerId") + "/" + nodeId.get("deviceId") + "/order");
 								tmpJsonObject.put("verified", true);
 								tmpJsonObject.put("lambda", nodeId.get("lambda"));
 
@@ -232,9 +232,8 @@ public class StagingBolt extends BaseRichBolt {
 
 						nodeId = (JSONObject) nodeIds.get(currentNodeId);
 
-						//since order kafka is from client directly check whether corporationName,serverId,brokerId,deviceId all matches to nodeId
-						_jsonObject.put("topic", "enow" + "/" + nodeId.get("serverId") + "/" + nodeId.get("brokerId")
-								+ "/" + nodeId.get("deviceId"));
+						_jsonObject.put("topic", "enow/" + nodeId.get("serverId") + "/" + nodeId.get("brokerId")
+								+ "/" + nodeId.get("deviceId") +"/status");
 						_jsonObject.put("verified", true);
 						_jsonObject.put("lambda", nodeId.get("lambda"));
 						_jsonObject.put("order", false);
