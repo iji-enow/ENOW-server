@@ -62,30 +62,40 @@ public class StagingBolt extends BaseRichBolt {
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
 
 		if (_jsonObject.containsKey("error")) {
+			//if _jsonObject contains key error it means indexingBolt occured an error log error : 1
 			_LOG.error("error : 1");
 			_jsonError.put("error", "error");
 			_jsonArray.add(_jsonError);
 		} else {
 			try {
 				// mongoDao = new MongoDAO("192.168.99.100",27017);
+				
+				//connecting to MongoDB with ip address 127.0.0.1 and port 27017
 				mongoDao = new MongoDAO("127.0.0.1", 27017);
 
-				mongoDao.setDBCollection("enow", "recipes");
+				//connecting to execute collection in enow db
+				mongoDao.setDBCollection("enow", "execute");
 
+				//get document which roadMapId equals to _jsonObject.get("roadMapId")
 				iterable = mongoDao.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
 
 				if (_jsonObject.get("spoutName").equals("event")) {
+					//input from event kafka
+					
 					try {
 						roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
-
+						
+						//get nodeIds,initNode,incomingNode,outingNode,lastNode from document which roadMapId equals to _jsonObject.get("roadMapId")
 						nodeIds = (JSONObject) roadMapId.get("nodeIds");
-						initNodeArray = (JSONArray) roadMapId.get("initNode");
+						initNodeArray = (JSONArray) roadMapId.get("initNode"); 
+						lastNodeArray = (JSONArray) roadMapId.get("lastNode");
 						incomingNode = (JSONObject) roadMapId.get("incomingNode");
 						outingNode = (JSONObject) roadMapId.get("outingNode");
-						lastNodeArray = (JSONArray) roadMapId.get("lastNode");
+						
 
 						String jsonString = _jsonObject.toJSONString();
 
+						//repeat running for each initNode in initNodeArray
 						for (int i = 0; i < initNodeArray.size(); i++) {
 							String initNodeId = (String) initNodeArray.get(i);
 
@@ -93,6 +103,7 @@ public class StagingBolt extends BaseRichBolt {
 
 							JSONObject tmpJsonObject = new JSONObject();
 
+							//set appropriate value for necessary keys
 							tmpJsonObject = (JSONObject) parser.parse(jsonString);
 							tmpJsonObject.put("payload", null);
 							tmpJsonObject.put("previousData", null);
@@ -126,16 +137,19 @@ public class StagingBolt extends BaseRichBolt {
 							_jsonArray.add(tmpJsonObject);
 						}
 					} catch (ParseException e) {
-						// iterable.first().toJson() 이 json형식의 string이 아닌 경우
-						// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
+						//if iterable.first().toJson() is not a json type log error : 2
+						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
 						_LOG.error("error : 2");
 						_jsonError.put("error", "error");
 						_jsonArray.add(_jsonError);
 					}
 				} else if (_jsonObject.get("spoutName").equals("order")) {
+					//input from order kafka
+					
 					try {
 						roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 
+						//get nodeIds,initNode,incomingNode,outingNode,lastNode from document which roadMapId equals to _jsonObject.get("roadMapId")
 						nodeIds = (JSONObject) roadMapId.get("nodeIds");
 						orderNodeArray = (JSONArray) roadMapId.get("orderNode");
 						incomingNode = (JSONObject) roadMapId.get("incomingNode");
@@ -144,13 +158,18 @@ public class StagingBolt extends BaseRichBolt {
 
 						String jsonString = _jsonObject.toJSONString();
 
+						
+						//repeat running for each initNode in initNodeArray
 						for (int i = 0; i < orderNodeArray.size(); i++) {
 							String orderNodeId = (String) orderNodeArray.get(i);
 
 							nodeId = (JSONObject) nodeIds.get(orderNodeId);
 							JSONObject tmpJsonObject = new JSONObject();
 						
-							if (_jsonObject.get("corporationName").equals("enow") && _jsonObject.get("serverId").equals(nodeId.get("serverId")) && _jsonObject.get("brokerId").equals(nodeId.get("brokerId")) && _jsonObject.get("deviceId").equals(nodeId.get("deviceId"))) {
+							if (_jsonObject.get("corporationName").equals("enow") && _jsonObject.get("serverId").equals("server0") && _jsonObject.get("brokerId").equals(nodeId.get("brokerId")) && _jsonObject.get("deviceId").equals(nodeId.get("deviceId"))) {
+								//since order kafka is from client directly check whether corporationName,serverId,brokerId,deviceId all matches to nodeId
+								
+								//set appropriate value for necessary keys
 								tmpJsonObject = (JSONObject) parser.parse(jsonString);
 								tmpJsonObject.put("previousData", null);
 								tmpJsonObject.put("order", true);
@@ -190,16 +209,19 @@ public class StagingBolt extends BaseRichBolt {
 							}
 						}
 					} catch (ParseException e) {
-						// iterable.first().toJson() 이 json형식의 string이 아닌 경우
-						// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
+						//if iterable.first().toJson() is not a json type log error : 3
+						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
 						_LOG.error("error : 3");
 						_jsonError.put("error", "error");
 						_jsonArray.add(_jsonError);
 					}
 				} else if (_jsonObject.get("spoutName").equals("proceed")) {
+					//input from proceed kafka
+					
 					try {
 						roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 
+						//get nodeIds,initNode,incomingNode,outingNode,lastNode from document which roadMapId equals to _jsonObject.get("roadMapId")
 						nodeIds = (JSONObject) roadMapId.get("nodeIds");
 						initNodeArray = (JSONArray) roadMapId.get("initNode");
 						incomingNode = (JSONObject) roadMapId.get("incomingNode");
@@ -210,6 +232,7 @@ public class StagingBolt extends BaseRichBolt {
 
 						nodeId = (JSONObject) nodeIds.get(currentNodeId);
 
+						//since order kafka is from client directly check whether corporationName,serverId,brokerId,deviceId all matches to nodeId
 						_jsonObject.put("topic", "enow" + "/" + nodeId.get("serverId") + "/" + nodeId.get("brokerId")
 								+ "/" + nodeId.get("deviceId"));
 						_jsonObject.put("verified", true);
@@ -238,20 +261,21 @@ public class StagingBolt extends BaseRichBolt {
 
 						_jsonArray.add(_jsonObject);
 					} catch (ParseException e) {
-						// iterable.first().toJson() 이 json형식의 string이 아닌 경우
-						// 발생 하지만 tojson이기에 그럴 일이 발생하지 않을 것이라 가정
+						//if iterable.first().toJson() is not a json type log error : 4
+						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
 						_LOG.error("error : 4");
 						_jsonError.put("error", "error");
 						_jsonArray.add(_jsonError);
 
 					}
 				} else {
+					//if input tuple is not from event kafka or order kafka or proceed kafka log error : 5
 					_LOG.error("error : 5");
 					_jsonError.put("error", "error");
 					_jsonArray.add(_jsonError);
 				}
-
 			} catch (UnknownHostException e) {
+				//if MongoDB connection falied log error : 6
 				_LOG.error("error : 6");
 				_jsonError.put("error", "error");
 				_jsonArray.add(_jsonError);
@@ -260,7 +284,10 @@ public class StagingBolt extends BaseRichBolt {
 
 		collector.emit(new Values(_jsonArray));
 
-		try {
+		try {	
+			collector.ack(input);
+			
+			//log entered roadMapId and nodeId if error has not occured
 			if(_jsonArray.size() ==1 && _jsonArray.get(0).containsKey("error")){
 				
 			}else{
@@ -269,8 +296,6 @@ public class StagingBolt extends BaseRichBolt {
 							+ tmp.get("nodeId"));
 				}
 			}
-			
-			collector.ack(input);
 		} catch (Exception e) {
 			Log.warn("ack failed");
 			collector.fail(input);

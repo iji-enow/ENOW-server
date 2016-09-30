@@ -22,9 +22,7 @@ sys.path.append(enow_Path)
 sys.path.append(enow_jython_Path)
 sys.path.append(enow_jython_Building_Path)
 sys.path.append(enow_jython_runtimePackage_Path)
-sys.path.append("/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc")
 from enow.jython.Building import Building
-import pydevd
 # from jython.Building import Building
 # Counter is a nice way to count things,
 # but it is a Python 2.7 thing
