@@ -16,7 +16,7 @@ How to use
 - If you would like to implement ENOW-Server locally with IDE like eclipse, IntelliJ, run LocalSubmitter.
 
 - Or you can use this command on the ENOW-Server directory.
-```
+```bash
 $STORM_HOME/bin/storm jar ./target/enow-storm-1.0.jar com.enow.storm.main.main Trigger Action -c storm.local.hostname=\"nimbus\" -c nimbus.seeds=\"[\\\"192.168.99.100\\\"]\"
 ```
 - Or you can simply use docker-compose to run ENOW-Server.
