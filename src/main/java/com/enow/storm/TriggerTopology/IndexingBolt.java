@@ -113,6 +113,7 @@ public class IndexingBolt extends BaseRichBolt {
 								serverIdCheck = false;
 							}
 
+							/*
 							//connecting to broker collection in lists db
 							mongoDao.setDBCollection("lists", "broker");
 
@@ -147,6 +148,7 @@ public class IndexingBolt extends BaseRichBolt {
 								deviceIdCheck = false;
 								_LOG.debug("There are more than two machine ID on MongoDB");
 							}
+							*/
 
 							//connecting to execute collection in enow db
 							mongoDao.setDBCollection("enow", "execute");
