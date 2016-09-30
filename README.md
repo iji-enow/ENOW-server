@@ -11,6 +11,11 @@ ENOW-Server Version 0.0.1
 Copyright © 2016 ENOW. All rights reserved.
 ```
 
+How to use
+---------------
+- if you want to run with IDE like eclipse, IntelliJ run LocalSubmitter
+- 
+
 Todo List
 ---------
 These are the new features you should expect in the coming months:
@@ -36,7 +41,7 @@ These are the new features you should expect in the coming months:
 ------------
 We use a free and open source distributed realtime computation system, [Apache Storm](http://storm.apache.org/). It's easy to reliably process unbounded streams of data, doing for realtime processing what Hadoop did for batch processing and simple, can be used with any programming language.
 
-Kafka Integration
+[Kafka Integration](http://kafka.apache.org/)
 -----------------
 [Apache Kafka](http://kafka.apache.org/) is publish-subscribe messaging rethought as a distributed commit log. A single Kafka broker can handle hundreds of megabytes of reads and writes per second from thousands of clients, so this is suitable for massive IoT platform.
 
@@ -50,12 +55,14 @@ TriggerTopology
 ---------------
 TriggerTopology literally can activate the component of Road-Map so that IoT devices are connected each other. before ordering devices, TriggerTopology refine the information of event and link refined one to database for using.
 
+<br>
+
 ### IndexingBolt :
 
 __INPUT:__
-- `eventKafka` ⇨ `jsonObject(Event)` from `Console`
-- `orderKafka` ⇨ `jsonObject(Order)` from `user device`
-- `proceedKafka` ⇨ `jsonObject(Proceed)`from `ActionTopology`
+- `eventKafka` from `Console` ⇨ `jsonObject(Event)`
+- `orderKafka` from `user device` ⇨ `jsonObject(Order)`
+- `proceedKafka` from `ActionTopology` ⇨ `jsonObject(Proceed)`
 
 
 __`jsonObject(Event)` :__</br>
@@ -69,7 +76,7 @@ __`jsonObject(orderKafka)` :__</br>
 ```JSON
 {
     "corporationName":"enow",
-    "serverId":"serverId1",
+    "serverId":"server0",
     "brokerId":"brokerId1",
     "deviceId":"deviceId1",
     "roadMapId":"1",
@@ -80,9 +87,9 @@ __`jsonObject(orderKafka)` :__</br>
 __`jsonObject(Proceed)` :__</br>
 ```JSON
 {
-    "topic":"enow/serverId1/brokerId1/deviceId1",
+    "topic":"enow/server0/brokerId1/deviceId1",
     "roadMapId":"1",
-    "mapId":"1",
+    "nodeId":"1",
     "incomingNode":["2", "4"],
     "outingNode":["11", "13"],
     "previousData":{"2" : "value1", "4" : "value2"},
@@ -104,14 +111,13 @@ __PROCESSING:__
  -->
 - `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
 
-- `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`의 정보를 받아온다.
+- `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`를 받아온다.
 
 - `proceedKafka`에서 `ActionTopology`로부터 받은 `jsonObject(Proceed)`를 받아온다.
 
 - `eventKafka`, `proceedKafka`와 `orderKafka`에서 받아온 `jsonObject`가 필요한 모든 `key`값을 갖고 있는지 확인한다.
 
-- `orderKafka`에서 받아온 `jsonObject`는 사용자가 직접 보내준 값이므로 `corporationName`,`serverId`,`brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
-
+- `orderKafka`에서 받아온 `jsonObject(Order)`는 사용자가 직접 보내준 값이므로 `brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `StagingBolt`
@@ -129,11 +135,11 @@ __PROCESSING:__
 <!--
 If `jsonObject(Event)` is received, find `roadMapId` which is same as `roadMapId` in `jsonObject(Event)` then start `initNodes`
 -->
-- `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `initNode`들을 실행한다.
+- `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `initNode`들에 필요한 `key`들에 `value`값을 할당해준다.
 
-- `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾아 `orderNode` 중 `jsonObject(Order)`의 `corporationName`,`serverId`,`brokerId`,`deviceId`와 일치하는 `mapId`를 실행한다.
+- `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `orderNode` 중 `jsonObject(Order)`의 `corporationName`,`serverId`,`brokerId`,`deviceId`와 일치하는 `orderNode`들에 필요한 `key`들에 `value`값을 할당해준다.
 
-- `proceedKafka`에서 `jsonObject(Proceed)`를 받은 경우 `MongoDB`에서 `jsonObject(proceed)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후  `jsonObject(proceed)`의 `mapId`와 일치하는 `mapId`의 `incomingNode`와 `outingNode`를 `jsonObject(Proceed)`에 할당해준다.
+- `jsonObject(Proceed)`를 받은 경우 `MongoDB`에서 `jsonObject(proceed)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `jsonObject(proceed)`의 `nodeId`와 일치하는 `nodeId`에 필요한 `key`들에 `value`값을 할당해준다.
 
 __OUTPUT:__
 - `jsonArray` ⇨ `CallingTriggerBolt`
@@ -188,13 +194,13 @@ __`jsonObject(Status)` :__</br>
 ```
 
 __PROCESSING:__
-- `JsonObject(Status)`들을 `topic`별로 `Redis`에 저장한다.
+- `jsonObject(Status)`들을 `topic`별로 `Redis`에 저장한다.
 <!--
 Save Each `JsonObjects` came from `StatusKafka` to `Redis`.
 -->
 
 __OUTPUT:__
-- 없다.
+- none.
 
 <br>
 
@@ -206,7 +212,7 @@ __INPUT:__
 __PROCESSING:__
 - `order`값이 `false` 또는 `rambda`값이 `false`일 때, 현재 노드가 다수의 `incomingNode`들을 가지면, 각각 노드들의 `payload` 정보를 현재 `jsonObject`가 지닌 `topic`에 근거하여 `Redis`에서 읽어들여 `jsonObject`에 저장한다.
 
-- `incomingNodes`가 `null`이 아니고, 처음 방문한 `mapId`라면 `Redis`에서 각각 `incomingNodes`에 저장된 값들을 꺼내 `jsonObject`안의 `previousData`에 저장한다.
+- `incomingNode`가 `null`이 아니고, 처음 방문한 `mapId`라면 `Redis`에서 각각 `incomingNode`에 저장된 값들을 꺼내 `jsonObject`안의 `previousData`에 저장한다.
 
 - 만약 이미 방문한적이 있는 `mapId`라면 `verified`값을 `false`로 전환한다.
 
@@ -241,7 +247,7 @@ __INPUT:__
 - `ExecutingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `ExecutingBolt`에서 실행 후 `result`를 포함한 `jsonObject`을 `Redis`에 저장하고, `refer`값을 갱신한다.
+- `ExecutingBolt`에서 실행 후 `result`를 포함한 `jsonObject`를 `Redis`에 저장하고, `refer`값을 갱신한다.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `CallingFeedBolt`
@@ -254,9 +260,9 @@ __INPUT:__
 - `ProvisioningBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `ProvisioningBolt`에서 받은 `jsonObject`의 `mapId`를 `jsonObject`의 `outingNode`들의 `mapId` 별로 바꿔 `Feed topic`,`Proceed topic`으로 보내준다.
+- `ProvisioningBolt`에서 받은 `jsonObject`의 `nodeId`를 `jsonObject`의 `outingNode`들의 `nodeId` 별로 바꿔 `Feed topic`,`Proceed topic`으로 보내준다.
 
-- `rambda`값이 `true`일 경우에는 `Feed topic`로 보내지 않는다.
+- `rambda`값이 `true`일 경우에는 `Feed topic`으로 보내지 않는다.
 
 __OUTPUT:__
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Feed`
@@ -284,16 +290,16 @@ __JsonObject :__</br>
 
 ```
 
-topic : 회사명/서버명/브로커명(사용자의 mqtt의 ip)/디바이스명 으로 구성.
-roadMapId : 로드맵 아이디
-mapId : roadMapId안에 존재하는 노드들의 아이디
-incomingNode : 현재 mapId로 들어오는 node들
-outingNode : 현재 mapId에서 나가는 node들
+topic : corporationName/serverId/brokerId(ip of user's mqtt)/deviceId 으로 구성.
+roadMapId : road map id
+nodeId : 현재 node id
+incomingNode : 현재 nodeId로 들어오는 node들
+outingNode : 현재 nodeId에서 나가는 node들
 previousData : 이전 node들의 실행 결과
 payload : 현제 node의 센서값 혹은 사용자로부터 들어온 값
 lastNode : 마지막 노드라면 true,아니라면 false
-order : 사용자가 직접 입력하는 형태라면 true, 아니라면 false
-verified : incomingNode들이 모두
+orderNode : 사용자가 직접 입력하는 형태라면 true, 아니라면 false
+verified : incomingNode들이 모두 들어왔다면 true, 아니라면 false
 
 __Status :__ </br>
 ```JSON

@@ -16,10 +16,8 @@
 	<Loggers>
 		<Logger name="com.enow.storm" level="info" additivity="false">
 			<AppenderRef ref="STDOUT" />
-			<AppenderRef ref="Kafka" />
-			<AppenderRef ref="EnowFile" />
 		</Logger>
-		<Root level="error">
+		<Root level="info">
 			<Appender-Ref ref="STDOUT" />
 			<AppenderRef ref="Kafka" />
 			<AppenderRef ref="EnowFile" />
