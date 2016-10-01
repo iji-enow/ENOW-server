@@ -64,7 +64,7 @@ public class StagingBolt extends BaseRichBolt {
 		if (_jsonObject.containsKey("error")) {
 			//if _jsonObject contains key error it means indexingBolt occured an error log error : 1
 			_LOG.error("error : 1");
-			_jsonError.put("error", "error");
+			_jsonError.put("error", "true");
 			_jsonArray.add(_jsonError);
 		} else {
 			try {
@@ -110,7 +110,7 @@ public class StagingBolt extends BaseRichBolt {
 							tmpJsonObject.put("order", false);
 							tmpJsonObject.put("nodeId", initNodeId);
 							tmpJsonObject.put("topic", "enow" + "/" + nodeId.get("serverId") + "/"
-									+ nodeId.get("brokerId") + "/" + nodeId.get("deviceId") + "/status" );
+									+ nodeId.get("brokerId") + "/" + nodeId.get("deviceId"));
 							tmpJsonObject.put("verified", true);
 							tmpJsonObject.put("lambda", nodeId.get("lambda"));
 
@@ -140,7 +140,7 @@ public class StagingBolt extends BaseRichBolt {
 						//if iterable.first().toJson() is not a json type log error : 2
 						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
 						_LOG.error("error : 2");
-						_jsonError.put("error", "error");
+						_jsonError.put("error", "true");
 						_jsonArray.add(_jsonError);
 					}
 				} else if (_jsonObject.get("spoutName").equals("order")) {
@@ -158,10 +158,12 @@ public class StagingBolt extends BaseRichBolt {
 
 						String jsonString = _jsonObject.toJSONString();
 
+						int count = 0;
 						
 						//repeat running for each initNode in initNodeArray
 						for (int i = 0; i < orderNodeArray.size(); i++) {
 							String orderNodeId = (String) orderNodeArray.get(i);
+							
 
 							nodeId = (JSONObject) nodeIds.get(orderNodeId);
 							JSONObject tmpJsonObject = new JSONObject();
@@ -176,7 +178,7 @@ public class StagingBolt extends BaseRichBolt {
 								tmpJsonObject.put("nodeId", orderNodeId);
 								tmpJsonObject.put("topic",
 										tmpJsonObject.get("corporationName") + "/" + tmpJsonObject.get("serverId") + "/"
-												+ tmpJsonObject.get("brokerId") + "/" + nodeId.get("deviceId") + "/order");
+												+ tmpJsonObject.get("brokerId") + "/" + nodeId.get("deviceId"));
 								tmpJsonObject.put("verified", true);
 								tmpJsonObject.put("lambda", nodeId.get("lambda"));
 
@@ -204,15 +206,21 @@ public class StagingBolt extends BaseRichBolt {
 								}
 
 								_jsonArray.add(tmpJsonObject);
-							} else {
-
-							}
+								count++;
+							}		
 						}
+						
+						if(count == 0){
+							_LOG.error("error : 3");
+							_jsonError.put("error", "true");
+							_jsonArray.add(_jsonError);
+						}
+						
 					} catch (ParseException e) {
 						//if iterable.first().toJson() is not a json type log error : 3
 						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
-						_LOG.error("error : 3");
-						_jsonError.put("error", "error");
+						_LOG.error("error : 4");
+						_jsonError.put("error", "true");
 						_jsonArray.add(_jsonError);
 					}
 				} else if (_jsonObject.get("spoutName").equals("proceed")) {
@@ -233,7 +241,7 @@ public class StagingBolt extends BaseRichBolt {
 						nodeId = (JSONObject) nodeIds.get(currentNodeId);
 
 						_jsonObject.put("topic", "enow/" + nodeId.get("serverId") + "/" + nodeId.get("brokerId")
-								+ "/" + nodeId.get("deviceId") +"/status");
+								+ "/" + nodeId.get("deviceId"));
 						_jsonObject.put("verified", true);
 						_jsonObject.put("lambda", nodeId.get("lambda"));
 						_jsonObject.put("order", false);
@@ -262,21 +270,21 @@ public class StagingBolt extends BaseRichBolt {
 					} catch (ParseException e) {
 						//if iterable.first().toJson() is not a json type log error : 4
 						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
-						_LOG.error("error : 4");
-						_jsonError.put("error", "error");
+						_LOG.error("error : 5");
+						_jsonError.put("error", "true");
 						_jsonArray.add(_jsonError);
 
 					}
 				} else {
 					//if input tuple is not from event kafka or order kafka or proceed kafka log error : 5
-					_LOG.error("error : 5");
-					_jsonError.put("error", "error");
+					_LOG.error("error : 6");
+					_jsonError.put("error", "true");
 					_jsonArray.add(_jsonError);
 				}
 			} catch (UnknownHostException e) {
 				//if MongoDB connection falied log error : 6
-				_LOG.error("error : 6");
-				_jsonError.put("error", "error");
+				_LOG.error("error : 7");
+				_jsonError.put("error", "true");
 				_jsonArray.add(_jsonError);
 			}
 		}

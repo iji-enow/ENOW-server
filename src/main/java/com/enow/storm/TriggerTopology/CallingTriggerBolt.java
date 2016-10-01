@@ -52,7 +52,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		
 		if(_jsonArray.size() == 0){
 			//if _jsonArray has no value log error : 1
-			_LOG.error("error : 1");
+			_LOG.error("json has no value");
 			errorCheck = true;
 		}else if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("error")){
 			//if _jsonArray.get(0).containsKey("error") it means indexingBolt or StagingBolt occured an error log error : 2
