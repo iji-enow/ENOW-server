@@ -4,6 +4,7 @@ import json
 import codecs
 import logging
 import os
+from time import sleep
 sys.path.append(r'/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc')
 
 fileDir = os.path.dirname(os.path.realpath('__file__'))
@@ -52,20 +53,20 @@ def eventHandlerFacade(_event, _context, _callback):
 
     eventHandler(_event, _context, _callback)
 
-    lock.acquire()
-    threadExit = True
-    lock.release()
-
 
 def Main():
 
     jsonDump = ""
     parameterDump = ""
     previousDataDump = ""
+    _event = None
     old_stdout = sys.stdout
     old_stderr = sys.stderr
     while True:
         binaryString = sys.stdin.readline()
+        
+        if not binaryString:
+            break
 
         if binaryString == b"endl\n":
             break
@@ -74,7 +75,10 @@ def Main():
 
     while True:
         binaryString = sys.stdin.readline()
-
+        
+        if not binaryString:
+            break
+        
         if binaryString == b"endl\n":
             break
 
@@ -82,6 +86,9 @@ def Main():
 
     while True:
         binaryString = sys.stdin.readline()
+        
+        if not binaryString:
+            break
         
         if binaryString == b"endl\n":
             break
@@ -93,6 +100,7 @@ def Main():
     _context = dict()
     _callback = dict()
     _previousData = json.loads(previousDataDump)
+    
     
     
     """
@@ -121,14 +129,16 @@ def Main():
     stackSize = []
     stackSize.append(kilobytes(_context["memory_limit_in_mb"]))
     thread.stack_size(kilobytes(64))
-    
+
     """
     setting up a logger for debugging
     """
     try:
         thread.start_new_thread(eventHandlerFacade, (_event, _context, _callback))
     except:
-        pass
+        sys.stderr.write(str("Error\n"))
+    
+    sleep(1)
 
     sys.stdout = old_stdout
     sys.stderr = old_stderr

@@ -31,7 +31,6 @@ class runtime:
         command.append(jythonPath)
         command.append("-u")
         command.append(sourceDir)
-        pydevd.settrace()
 
         process = Popen(args=command,
                     stdin=PIPE,

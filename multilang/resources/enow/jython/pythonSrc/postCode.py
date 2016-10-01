@@ -20,4 +20,3 @@ def postProcess(event, context, callback):
     jsonPayloadDump = json.dumps(jsonPayload)
     
     sys.stdout.write(jsonPayloadDump.decode("utf-8").encode("ascii"))
-    sys.stdout.flush()

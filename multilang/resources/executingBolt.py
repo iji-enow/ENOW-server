@@ -63,7 +63,7 @@ class ExecutingBolt(storm.BasicBolt):
         with open(logPath, 'r+') as file:
             log_str = file.readlines();
             file.seek(0)
-            file.truncate()    
+            file.truncate()   
         return log_str
     
     def process(self, tup):
@@ -111,6 +111,8 @@ class ExecutingBolt(storm.BasicBolt):
             # Get dumped data from json objects
             rawSource = l_info_json["code"]
             rawPayload = json.dumps(l_payload_json)
+            if rawPayload == "null":
+                rawPayload = "{\"payload\" : \"none\"}"
             rawPreviousData = json.dumps(l_previousData_json)
             # Replace carriage returns
             payload = rawPayload.replace("\r", "")
@@ -123,12 +125,10 @@ class ExecutingBolt(storm.BasicBolt):
             self.Building.setPayload(payload.encode("ascii"))
             self.Building.setPreviousData(previousData.encode("ascii"))
             
-                
             if ExecutingBolt.program_semaphore == 0:
                 ExecutingBolt.program_semaphore = 1
                 time.sleep(1)
                 tmp = self.Building.run()
-                jsonObject["log"] = self.fileToLog()
                 if tmp == "":
                     jsonObject["pyError"] = "true"
                     jsonObject["log"] = self.fileToLog()
