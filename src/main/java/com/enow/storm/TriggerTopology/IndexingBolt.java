@@ -41,7 +41,6 @@ public class IndexingBolt extends BaseRichBolt {
 		JSONObject _jsonObject;
 		JSONObject _jsonError = new JSONObject();
 		boolean corporationNameCheck = false;
-		boolean deviceIdCheck = false;
 		boolean roadMapIdCheck = false;
 		boolean brokerIdCheck = false;
 		boolean serverIdCheck = false;
@@ -50,7 +49,7 @@ public class IndexingBolt extends BaseRichBolt {
 		if (input.toString().length() == 0) {
 			//if input tuple has no value log error : 1
 			_LOG.error("error : 1");
-			_jsonError.put("error", "error");
+			_jsonError.put("error", "true");
 			_jsonObject = _jsonError;
 		} else {
 			//input tuple has a value
@@ -76,13 +75,13 @@ public class IndexingBolt extends BaseRichBolt {
 						} else {
 							//if _jsonObject from event kafka doesn't have all necessary keys log error : 2
 							_LOG.error("error : 2");
-							_jsonError.put("error", "error");
+							_jsonError.put("error", "true");
 							_jsonObject = _jsonError;
 						}
 					} catch (ParseException e) {
 						//if input tuple from event kafka is not a json type log error : 3
 						_LOG.error("error : 3");
-						_jsonError.put("error", "error");
+						_jsonError.put("error", "true");
 						_jsonObject = _jsonError;
 					}
 				} else if (input.getSourceComponent().equals("order-spout")) {
@@ -113,9 +112,9 @@ public class IndexingBolt extends BaseRichBolt {
 								serverIdCheck = false;
 							}
 
-							/*
-							//connecting to broker collection in lists db
-							mongoDao.setDBCollection("lists", "broker");
+							
+							//connecting to brokerList collection in connectionData db
+							mongoDao.setDBCollection("connectionData", "brokerList");
 
 							if (mongoDao
 									.collectionCount(new Document("brokerId", (String) _jsonObject.get("brokerId"))) == 0) {
@@ -130,25 +129,6 @@ public class IndexingBolt extends BaseRichBolt {
 								brokerIdCheck = false;
 								_LOG.debug("There are more than two broker ID on MongoDB");
 							}
-
-							
-							//connecting to device collection in lists db
-							mongoDao.setCollection("device");
-
-							if (mongoDao
-									.collectionCount(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 0) {
-								//if MongoDB collection device has no same value as _jsonObject.get(device) 
-								deviceIdCheck = false;
-							} else if (mongoDao
-									.collectionCount(new Document("deviceId", (String) _jsonObject.get("deviceId"))) == 1) {
-								//if MongoDB collection device has one same value as _jsonObject.get(device) 
-								deviceIdCheck = true;
-							} else {
-								//if MongoDB collection device has more than two same values as _jsonObject.get(device)
-								deviceIdCheck = false;
-								_LOG.debug("There are more than two machine ID on MongoDB");
-							}
-							*/
 
 							//connecting to execute collection in enow db
 							mongoDao.setDBCollection("enow", "execute");
@@ -167,24 +147,24 @@ public class IndexingBolt extends BaseRichBolt {
 								_LOG.debug("There are more than two Phase Road-map Id on MongoDB");
 							}
 
-							if (corporationNameCheck && serverIdCheck && brokerIdCheck && deviceIdCheck && roadMapIdCheck) {
+							if (corporationNameCheck && serverIdCheck && brokerIdCheck && roadMapIdCheck) {
 								_jsonObject.put("spoutName", "order");
 							} else {
 								//if more than one out of corporationNameCheck,serverIdCheck, brokerIdCheck, deviceIdCheck, and roadMapIdCheck is false log error : 4
 								_LOG.error("error : 4");
-								_jsonError.put("error", "error");
+								_jsonError.put("error", "true");
 								_jsonObject = _jsonError;
 							}
 						} else {
 							//if _jsonObject from order kafka doesn't have all necessary keys log error : 5
 							_LOG.error("error : 5");
-							_jsonError.put("error", "error");
+							_jsonError.put("error", "true");
 							_jsonObject = _jsonError;
 						}
 					} catch (ParseException e) {
 						//if input tuple from order kafka is not a json type log error : 6
 						_LOG.error("error : 6");
-						_jsonError.put("error", "error");
+						_jsonError.put("error", "true");
 						_jsonObject = _jsonError;
 					}
 				} else if (input.getSourceComponent().equals("proceed-spout")) {
@@ -205,25 +185,25 @@ public class IndexingBolt extends BaseRichBolt {
 						} else {
 							//if _jsonObject from proceed kafka doesn't have all necessary keys log error : 7
 							_LOG.error("error : 7");
-							_jsonError.put("error", "error");
+							_jsonError.put("error", "true");
 							_jsonObject = _jsonError;
 						}
 					} catch (ParseException e) {
 						//if input tuple from proceed kafka is not a json type log error : 8
 						_LOG.error("error : 8");
-						_jsonError.put("error", "error");
+						_jsonError.put("error", "true");
 						_jsonObject = _jsonError;
 					}
 				} else {
 					//if input tuple is not from event kafka or order kafka or proceed kafka log error : 9
 					_LOG.error("error : 9");
-					_jsonError.put("error", "error");
+					_jsonError.put("error", "true");
 					_jsonObject = _jsonError;
 				}
 			} catch (UnknownHostException e) {
 				//if MongoDB connection falied log error : 10
 				_LOG.error("error : 10");
-				_jsonError.put("error", "error");
+				_jsonError.put("error", "true");
 				_jsonObject = _jsonError;
 			}
 		}

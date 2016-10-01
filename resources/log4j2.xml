@@ -2,7 +2,7 @@
 <Configuration>
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
+			<PatternLayout pattern="[%t] %-5level %logger{36} - %msg%n" />
 		</Console>
 		<Kafka name="Kafka" topic="log">
 			<PatternLayout
@@ -10,7 +10,7 @@
 			<Property name="bootstrap.servers">localhost:9092</Property>
 		</Kafka>
 		<File name="EnowFile" fileName="logs/enow.log">
-			<PatternLayout pattern = "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} / %msg%n"/>
+			<PatternLayout pattern = "%-5level %logger{36} / %msg%n"/>
 		</File>
 	</Appenders>
 	<Loggers>
