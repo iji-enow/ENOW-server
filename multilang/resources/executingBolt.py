@@ -45,7 +45,7 @@ class ExecutingBolt(storm.BasicBolt):
             sys.exit(1)
 
         self.source_db = self.client['enow']
-        self.execute_collection = self.source_db['recipes']
+        self.execute_collection = self.source_db['execute']
         # Create a new counter for this instance
         # storm.logInfo("Counter bolt instance starting...")
         
@@ -130,8 +130,12 @@ class ExecutingBolt(storm.BasicBolt):
                 time.sleep(1)
                 tmp = self.Building.run()
                 jsonObject["log"] = self.fileToLog()
-                jsonResult = json.loads(tmp, strict=False)
-                jsonObject["payload"] = jsonResult
+                
+                if tmp == "":
+                    jsonObject["pyError"] = "true"
+                else:
+                    jsonResult = json.loads(tmp, strict=False)
+                    jsonObject["payload"] = jsonResult
                 storm.emit([jsonObject])
                 ExecutingBolt.program_semaphore = 0
             else:
@@ -143,8 +147,11 @@ class ExecutingBolt(storm.BasicBolt):
                             ExecutingBolt.program_queue.get()
                             tmp = self.Building.run()
                             jsonObject["log"] = self.fileToLog()
-                            jsonResult = json.loads(tmp, strict=False)
-                            jsonObject["payload"] = jsonResult
+                            if tmp == "":
+                                jsonObject["pyError"] = "true"
+                            else:
+                                jsonResult = json.loads(tmp, strict=False)
+                                jsonObject["payload"] = jsonResult
                             storm.emit([jsonObject])
                             ExecutingBolt.program_semaphore == 0
                         
