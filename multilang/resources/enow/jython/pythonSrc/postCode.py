@@ -1,7 +1,6 @@
 import json
 import sys
 from json.decoder import JSONObject
-
 '''
 A function wraps up the whole process
     Description :
@@ -16,11 +15,9 @@ def postProcess(event, context, callback):
     jsonPayload = {
                    "event" : jsonEventDump,
                    "context" : jsonContextDump,
-                   "callback" : jsonCallbackDump}
+                   "callback" : jsonCallbackDump }
 
     jsonPayloadDump = json.dumps(jsonPayload)
     
-    sys.stdout.flush()
-    sys.stderr.flush()
-
     sys.stdout.write(jsonPayloadDump.decode("utf-8").encode("ascii"))
+    sys.stdout.flush()

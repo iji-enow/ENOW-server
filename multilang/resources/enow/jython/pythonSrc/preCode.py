@@ -4,6 +4,7 @@ import json
 import codecs
 import logging
 import os
+sys.path.append(r'/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc')
 
 fileDir = os.path.dirname(os.path.realpath('__file__'))
 modulePath = os.path.join(fileDir, 'enow/jython/pythonSrc')
@@ -12,6 +13,7 @@ sys.path.append(modulePath)
 from body import eventHandler
 from postCode import postProcess
 from StreamToLogger import StreamToLogger
+import pydevd
 '''
 List : Global Variables
     Descriptions :
@@ -29,8 +31,6 @@ def kilobytes(megabytes):
 def eventHandlerFacade(_event, _context, _callback):
     global threadExit
     global lock
-    old_stdout = sys.stdout
-    old_stderr = sys.stderr
 
     CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
     loggerStdoutFilePath = os.path.join(CURRENT_DIR, 'log', 'log.txt')
@@ -39,7 +39,7 @@ def eventHandlerFacade(_event, _context, _callback):
                        level=logging.DEBUG,
                        format='%(asctime)s:%(levelname)s:%(name)s:%(message)s',
                        filename=loggerStdoutFilePath,
-                       filemode='r+'
+                       filemode='a'
                        )
 
     stdout_logger = logging.getLogger('STDOUT')
@@ -52,9 +52,6 @@ def eventHandlerFacade(_event, _context, _callback):
 
     eventHandler(_event, _context, _callback)
 
-    sys.stdout = old_stdout
-    sys.stderr = old_stderr
-
     lock.acquire()
     threadExit = True
     lock.release()
@@ -65,11 +62,10 @@ def Main():
     jsonDump = ""
     parameterDump = ""
     previousDataDump = ""
+    old_stdout = sys.stdout
+    old_stderr = sys.stderr
     while True:
         binaryString = sys.stdin.readline()
-
-        if not binaryString:
-            break
 
         if binaryString == b"endl\n":
             break
@@ -79,9 +75,6 @@ def Main():
     while True:
         binaryString = sys.stdin.readline()
 
-        if not binaryString:
-            break
-
         if binaryString == b"endl\n":
             break
 
@@ -89,19 +82,19 @@ def Main():
 
     while True:
         binaryString = sys.stdin.readline()
-
-        if not binaryString:
-            break
-
+        
         if binaryString == b"endl\n":
             break
 
         previousDataDump += codecs.encode(binaryString, 'utf-8')
 
-    _event = json.loads(jsonDump)
+    if jsonDump != "null":
+        _event = json.loads(jsonDump)
     _context = dict()
     _callback = dict()
     _previousData = json.loads(previousDataDump)
+    
+    
     """
     context object written in json
     ATTRIBUTES:
@@ -124,27 +117,21 @@ def Main():
     """
     global lock
     lock = thread.allocate_lock()
-    global threadExit
 
     stackSize = []
     stackSize.append(kilobytes(_context["memory_limit_in_mb"]))
     thread.stack_size(kilobytes(64))
-
+    
     """
     setting up a logger for debugging
     """
     try:
         thread.start_new_thread(eventHandlerFacade, (_event, _context, _callback))
     except:
-        print("Unable to start thread")
+        pass
 
-    while True:
-        lock.acquire()
-        if threadExit == True:
-            lock.release()
-            break
-        lock.release()
-
+    sys.stdout = old_stdout
+    sys.stderr = old_stderr
     postProcess(_event, _context, _callback)
 
 if __name__ == "__main__":

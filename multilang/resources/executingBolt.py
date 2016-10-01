@@ -17,7 +17,8 @@ enow_Path = os.path.join(fileDir, 'enow/')
 enow_jython_Path = os.path.join(fileDir, 'enow/jython')
 enow_jython_Building_Path = os.path.join(fileDir, 'enow/jython/Building')
 enow_jython_runtimePackage_Path = os.path.join(fileDir, 'enow/jython/runtimePackage')
-
+sys.path.append(r'/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc')
+import pydevd;
 sys.path.append(enow_Path)
 sys.path.append(enow_jython_Path)
 sys.path.append(enow_jython_Building_Path)
@@ -45,25 +46,25 @@ class ExecutingBolt(storm.BasicBolt):
             sys.exit(1)
 
         self.source_db = self.client['enow']
-        self.execute_collection = self.source_db['recipes']
+        self.execute_collection = self.source_db['execute']
         # Create a new counter for this instance
         # storm.logInfo("Counter bolt instance starting...")
-        
-    def fileToLog(self):
-        log_str = ""
-        logPath = os.path.join(fileDir, "enow/jython/pythonSrc/log/log.txt")
-        with open(logPath, 'r+') as file:
-            log_str = file.readlines();
-            file.seek(0)
-            file.truncate()
-        
-        return log_str
 
     def tupleToJson(self, tuple):
         dictObject = tuple.values[0]
         jsonObject_str = json.dumps(dictObject)
         jsonObject = json.loads(jsonObject_str)
         return jsonObject
+    
+    
+    def fileToLog(self):
+        log_str = ""
+        logPath = os.path.join(fileDir, "enow/jython/pythonSrc/log/log.txt")
+        with open(logPath, 'r+') as file:
+            log_str = file.readlines();
+            file.seek(0)
+            file.truncate()    
+        return log_str
     
     def process(self, tup):
         # Get the word from the inbound tuple
@@ -122,18 +123,22 @@ class ExecutingBolt(storm.BasicBolt):
             self.Building.setPayload(payload.encode("ascii"))
             self.Building.setPreviousData(previousData.encode("ascii"))
             
-#             if l_mapId_string == "2":
-#                 pydevd.settrace()
-            
+                
             if ExecutingBolt.program_semaphore == 0:
                 ExecutingBolt.program_semaphore = 1
                 time.sleep(1)
                 tmp = self.Building.run()
-                jsonObject["log"] = self.fileToLog()
-                jsonResult = json.loads(tmp, strict=False)
-                jsonObject["payload"] = jsonResult
-                storm.emit([jsonObject])
-                ExecutingBolt.program_semaphore = 0
+                if tmp == "":
+                    jsonObject["pyError"] = "true"
+                    jsonObject["log"] = self.fileToLog()
+                    ExecutingBolt.program_semaphore = 0
+                    storm.emit([jsonObject])
+                else:
+                    jsonResult = json.loads(tmp, strict=False)
+                    jsonObject["log"] = self.fileToLog()
+                    jsonObject["payload"] = jsonResult
+                    ExecutingBolt.program_semaphore = 0
+                    storm.emit([jsonObject])
             else:
                 ExecutingBolt.program_queue.put(l_mapId_string)
                 while True:
@@ -142,13 +147,17 @@ class ExecutingBolt(storm.BasicBolt):
                             ExecutingBolt.program_semaphore == 1
                             ExecutingBolt.program_queue.get()
                             tmp = self.Building.run()
-                            jsonObject["log"] = self.fileToLog()
-                            jsonResult = json.loads(tmp, strict=False)
-                            jsonObject["payload"] = jsonResult
-                            storm.emit([jsonObject])
-                            ExecutingBolt.program_semaphore == 0
-                        
-            
+                            if tmp == "":
+                                jsonObject["pyError"] = "true"
+                                jsonObject["log"] = self.fileToLog()
+                                ExecutingBolt.program_semaphore = 0
+                                storm.emit([jsonObject])
+                            else:
+                                jsonResult = json.loads(tmp, strict=False)
+                                jsonObject["log"] = self.fileToLog()
+                                jsonObject["payload"] = jsonResult
+                                ExecutingBolt.program_semaphore = 0
+                                storm.emit([jsonObject])
             # Handle the result and convert it to JSON object
         else:
             jsonObject["payload"] = ""
