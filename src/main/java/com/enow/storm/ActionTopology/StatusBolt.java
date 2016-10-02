@@ -44,7 +44,7 @@ public class StatusBolt extends BaseRichBolt {
         JSONObject _jsonObject;
 
         if ((null == input.toString()) || (input.toString().length() == 0)) {
-        	_LOG.error("error : 1");
+        	_LOG.warn("error:1");
             return;
         }
 
@@ -56,14 +56,14 @@ public class StatusBolt extends BaseRichBolt {
             _redis.addStatus(_redis.jsonObjectToStatus(_jsonObject));
         } catch (ParseException e1) {
             e1.printStackTrace();
-            _LOG.error("error : 2");
+            _LOG.warn("error:2");
             return;
         }
 
         // Go to next bolt
         _collector.emit(new Values(input));
         try {
-            _LOG.info("entered Status Topology topic : " + _jsonObject.get("topic"));
+            _LOG.info("topic:" + _jsonObject.get("topic"));
             _collector.ack(input);
         } catch (Exception e) {
         	_LOG.warn("ack failed");

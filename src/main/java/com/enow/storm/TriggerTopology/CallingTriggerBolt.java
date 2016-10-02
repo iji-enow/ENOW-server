@@ -52,11 +52,10 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		
 		if(_jsonArray.size() == 0){
 			//if _jsonArray has no value log error : 1
-			_LOG.error("json has no value");
+			_LOG.warn("noValueEntered");
 			errorCheck = true;
 		}else if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("error")){
 			//if _jsonArray.get(0).containsKey("error") it means indexingBolt or StagingBolt occured an error log error : 2
-			_LOG.error("error : 2");
 			errorCheck = true;
 		}else{
 			//repeat producing json String in _jsonArray
@@ -79,7 +78,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 				
 			}else{
 				for(JSONObject tmp : _jsonArray){
-					_LOG.info("exited Trigger topology roadMapId : " + tmp.get("roadMapId") + " nodeId : " + tmp.get("nodeId"));
+					_LOG.info(tmp.get("roadMapId") + "," + tmp.get("nodeId") + " " + tmp.toString());
 				}
 			}
 		} catch (Exception e) {

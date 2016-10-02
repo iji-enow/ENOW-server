@@ -63,7 +63,6 @@ public class StagingBolt extends BaseRichBolt {
 
 		if (_jsonObject.containsKey("error")) {
 			//if _jsonObject contains key error it means indexingBolt occured an error log error : 1
-			_LOG.error("error : 1");
 			_jsonError.put("error", "true");
 			_jsonArray.add(_jsonError);
 		} else {
@@ -139,7 +138,7 @@ public class StagingBolt extends BaseRichBolt {
 					} catch (ParseException e) {
 						//if iterable.first().toJson() is not a json type log error : 2
 						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
-						_LOG.error("error : 2");
+						_LOG.warn("error:1");
 						_jsonError.put("error", "true");
 						_jsonArray.add(_jsonError);
 					}
@@ -211,7 +210,7 @@ public class StagingBolt extends BaseRichBolt {
 						}
 						
 						if(count == 0){
-							_LOG.error("error : 3");
+							_LOG.warn("error:2");
 							_jsonError.put("error", "true");
 							_jsonArray.add(_jsonError);
 						}
@@ -219,7 +218,7 @@ public class StagingBolt extends BaseRichBolt {
 					} catch (ParseException e) {
 						//if iterable.first().toJson() is not a json type log error : 3
 						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
-						_LOG.error("error : 4");
+						_LOG.warn("error:3");
 						_jsonError.put("error", "true");
 						_jsonArray.add(_jsonError);
 					}
@@ -270,20 +269,20 @@ public class StagingBolt extends BaseRichBolt {
 					} catch (ParseException e) {
 						//if iterable.first().toJson() is not a json type log error : 4
 						//but as you see iterable.first().toJson() is toJson. We suppose that this error won't happen
-						_LOG.error("error : 5");
+						_LOG.warn("error:4");
 						_jsonError.put("error", "true");
 						_jsonArray.add(_jsonError);
 
 					}
 				} else {
 					//if input tuple is not from event kafka or order kafka or proceed kafka log error : 5
-					_LOG.error("error : 6");
+					_LOG.warn("error:5");
 					_jsonError.put("error", "true");
 					_jsonArray.add(_jsonError);
 				}
 			} catch (UnknownHostException e) {
 				//if MongoDB connection falied log error : 6
-				_LOG.error("error : 7");
+				_LOG.warn("error:6");
 				_jsonError.put("error", "true");
 				_jsonArray.add(_jsonError);
 			}
@@ -299,8 +298,7 @@ public class StagingBolt extends BaseRichBolt {
 				
 			}else{
 				for (JSONObject tmp : _jsonArray) {			
-					_LOG.info("entered Trigger topology roadMapId : " + tmp.get("roadMapId") + " nodeId : "
-							+ tmp.get("nodeId"));
+					_LOG.info(tmp.get("roadMapId") + ","+ tmp.get("nodeId") + " " + tmp.toString());
 				}
 			}
 		} catch (Exception e) {

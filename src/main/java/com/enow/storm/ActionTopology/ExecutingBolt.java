@@ -28,7 +28,6 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
     
     @Override
     public void execute(Tuple input){
-    	_LOG.fatal(input);
     	super.execute(input);
     }
 

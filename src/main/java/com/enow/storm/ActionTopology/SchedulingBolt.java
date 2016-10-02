@@ -43,9 +43,8 @@ public class SchedulingBolt extends BaseRichBolt {
         _LOG.debug("Entering SchedulingBolt");
 
         JSONObject _jsonObject;
-        System.out.println(input);
         if ((null == input.toString()) || (input.toString().length() == 0)) {
-            _LOG.error("error : 1");
+            _LOG.warn("error:1");
             return;
         }
         // Parsing JSONString to JSONObject
@@ -55,8 +54,8 @@ public class SchedulingBolt extends BaseRichBolt {
             _LOG.debug("Succeed in inserting messages to _jsonObject : " + _jsonObject.toJSONString());
         } catch (ParseException e1) {
             e1.printStackTrace();
-            _LOG.warn("Fail in inserting messages to _jsonObject");
-            _LOG.error("error : 2");
+            //_LOG.fatal("Fail in inserting messages to _jsonObject");
+            _LOG.warn("error:2");
             return;
         }
 
@@ -74,8 +73,8 @@ public class SchedulingBolt extends BaseRichBolt {
                 _LOG.debug("Succeed in inserting status to _jsonObject : " + _jsonObject.toJSONString());
             } catch (ParseException e1) {
                 e1.printStackTrace();
-                _LOG.warn("Fail in inserting status to _jsonObject");
-                _LOG.error("error : 3");
+                _LOG.debug("Fail in inserting status to _jsonObject");
+                _LOG.warn("error:3");
                 return;
             }
         }
@@ -113,8 +112,8 @@ public class SchedulingBolt extends BaseRichBolt {
                                 arr_temp.add(_parser.parse(node.getPayload()));
                             } catch (ParseException e1) {
                                 e1.printStackTrace();
-                                _LOG.warn("Fail in inserting status to _jsonObject");
-                                _LOG.error("error : 4");
+                                _LOG.debug("Fail in inserting status to _jsonObject");
+                                _LOG.warn("error:4");
                                 return;
                             }
                         }
@@ -134,7 +133,7 @@ public class SchedulingBolt extends BaseRichBolt {
         // Go to next bolt
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.info("entered Action topology roadMapId : " + _jsonObject.get("roadMapId") + " nodeId : " + _jsonObject.get("nodeId"));
+            _LOG.info(_jsonObject.get("roadMapId") + "," + _jsonObject.get("nodeId") + " " + _jsonObject.toString());
             _collector.ack(input);
         } catch (Exception e) {
             _LOG.warn("ack failed");
