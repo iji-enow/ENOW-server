@@ -2,8 +2,6 @@ from subprocess import PIPE, Popen
 import os
 import codecs
 import sys
-sys.path.append(r'/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc')
-import pydevd
 '''
 Class : runtime
     Descriptions :

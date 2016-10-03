@@ -5,7 +5,6 @@ import codecs
 import logging
 import os
 from time import sleep
-sys.path.append(r'/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc')
 
 fileDir = os.path.dirname(os.path.realpath('__file__'))
 modulePath = os.path.join(fileDir, 'enow/jython/pythonSrc')
@@ -14,7 +13,6 @@ sys.path.append(modulePath)
 from body import eventHandler
 from postCode import postProcess
 from StreamToLogger import StreamToLogger
-import pydevd
 '''
 List : Global Variables
     Descriptions :
@@ -138,7 +136,7 @@ def Main():
     except:
         sys.stderr.write(str("Error\n"))
     
-    sleep(1)
+    sleep(5)
 
     sys.stdout = old_stdout
     sys.stderr = old_stderr

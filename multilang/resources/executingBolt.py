@@ -17,8 +17,6 @@ enow_Path = os.path.join(fileDir, 'enow/')
 enow_jython_Path = os.path.join(fileDir, 'enow/jython')
 enow_jython_Building_Path = os.path.join(fileDir, 'enow/jython/Building')
 enow_jython_runtimePackage_Path = os.path.join(fileDir, 'enow/jython/runtimePackage')
-sys.path.append(r'/Users/jeasungpark/Downloads/Eclipse.app/Contents/Eclipse/plugins/org.python.pydev_5.1.2.201606231256/pysrc')
-import pydevd;
 sys.path.append(enow_Path)
 sys.path.append(enow_jython_Path)
 sys.path.append(enow_jython_Building_Path)
