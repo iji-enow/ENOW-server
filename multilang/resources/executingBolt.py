@@ -16,18 +16,18 @@ from pymongo import MongoClient
 ========================================
     ENOW CODE EXECUTION MODULE
 ========================================
-    Description : 
+    Description :
          This module is for receiving 4 different components to execute python program in STORM
          The 4 components are as follow
              * CODE : Python source code stored in MongoDB
              * PARAMETER : Python program command line arguments
              * PAYLOAD : Payload come from either a device or lambda node
              * PREVIOUS DATA : Data containing results from previous execution
-    
-    Features : 
+
+    Features :
         * Query MongoDB about the CODE and PARAMETER
         * Supports multi-threaded environment
-        * Logs are stored in the log.txt. After executing the CODE, the program then read 
+        * Logs are stored in the log.txt. After executing the CODE, the program then read
         the logs and return them back to STORM.
 '''
 # The root directory of the current python project
@@ -56,10 +56,10 @@ class ExecutingBolt(storm.BasicBolt):
     ========================================
         Function : initialize
     ========================================
-        Description : 
+        Description :
              The function declares an interface for communicating with the runtimeMain
             class and generates an instance of MongoDB to communicate with the local MongoDB
-        Parameter : 
+        Parameter :
             conf : system related
             context : system related
     '''
@@ -79,12 +79,12 @@ class ExecutingBolt(storm.BasicBolt):
     ========================================
         Function : tupleToJson
     ========================================
-        Description : 
-             The function receives a tuple as a parameter and returns JSON object which was 
+        Description :
+             The function receives a tuple as a parameter and returns JSON object which was
              originally in the tuple
-        Parameter : 
+        Parameter :
             tuple : (TYPE)TUPLE
-        Return Value : 
+        Return Value :
             jsonObject : (TYPE)json
     '''
     def tupleToJson(self, tuple):
@@ -96,9 +96,9 @@ class ExecutingBolt(storm.BasicBolt):
     ========================================
         Function : fileToLog
     ========================================
-        Description : 
+        Description :
              The function returns string data logged while executing the CODE
-        Parameter : 
+        Parameter :
             None
         Return Value :
             log_str : (TYPE)List of json string
@@ -109,18 +109,18 @@ class ExecutingBolt(storm.BasicBolt):
         with open(logPath, 'r+') as file:
             log_str = file.readlines();
             file.seek(0)
-            file.truncate()   
+            file.truncate()
         return log_str
     '''
     ========================================
         Function : process
     ========================================
-        Description : 
+        Description :
              The function reads data from both parameter and MongoDB
             and initiates execution sequence.
-        Parameter : 
+        Parameter :
             tup : (TYPE)TUPLE
-        Return Value : 
+        Return Value :
             None
     '''
     def process(self, tup):
@@ -174,6 +174,7 @@ class ExecutingBolt(storm.BasicBolt):
                 # Wait till the other threads know the current thread is executing
                 time.sleep(1)
                 tmp = self.Building.run()
+                jsonObject["previousData"] = "null"
                 # Verify the result whether the execution succeed or not
                 if tmp == "":
                     jsonObject["pyError"] = "true"
@@ -198,6 +199,7 @@ class ExecutingBolt(storm.BasicBolt):
                             ExecutingBolt.program_semaphore == 1
                             ExecutingBolt.program_queue.get()
                             tmp = self.Building.run()
+                            jsonObject["previousData"] = "null"
                             jsonObject["log"] = self.fileToLog()
                             # Verify the result whether the execution succeed or not
                             if tmp == "":
@@ -207,8 +209,8 @@ class ExecutingBolt(storm.BasicBolt):
                                 jsonObject["payload"] = jsonResult
                             ExecutingBolt.program_semaphore == 0
                             storm.emit([jsonObject])
-                            
-                            
+
+
             # Handle the result and convert it to JSON object
         else:
             jsonObject["payload"] = ""
