@@ -2,15 +2,15 @@
 <Configuration>
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="%-5level %logger{2} %msg%n" />
+			<PatternLayout pattern="%-5level|%logger{2}|%msg%n" />
 		</Console>
 		<Kafka name="Kafka" topic="log">
 			<PatternLayout
-				pattern="%-5level %logger{2} %msg%n" />
+				pattern="%-5level|%logger{2}|%msg%n" />
 			<Property name="bootstrap.servers">localhost:9092</Property>
 		</Kafka>
 		<File name="EnowFile" fileName="logs/enow.log">
-			<PatternLayout pattern = "%-5level %logger{2} %msg%n"/>
+			<PatternLayout pattern = "%-5level|%logger{2}|%msg%n"/>
 		</File>
 	</Appenders>
 	<Loggers>

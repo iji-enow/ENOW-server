@@ -133,7 +133,7 @@ public class SchedulingBolt extends BaseRichBolt {
         // Go to next bolt
         _collector.emit(new Values(_jsonObject));
         try {
-            _LOG.info(_jsonObject.get("roadMapId") + "," + _jsonObject.get("nodeId") + " " + _jsonObject.toString());
+            _LOG.info(_jsonObject.get("roadMapId") + "," + _jsonObject.get("nodeId") + "|" + _jsonObject.get("topic") +"|" + _jsonObject.toString());
             _collector.ack(input);
         } catch (Exception e) {
             _LOG.warn("ack failed");

@@ -125,11 +125,11 @@ public class CallingFeedBolt extends BaseRichBolt {
 			// Report the issues to Logger
 			for (JSONObject tmp : _jsonArrayFeed) {
 				_LOG.info(tmp.get("roadMapId") + ","
-						+ tmp.get("nodeId") + " " + tmp.toString());
+						+ tmp.get("nodeId") + "|" + tmp.get("topic") +"|" + tmp.toString());
 			}
 			for (JSONObject tmp : _jsonArrayProceed) {
 				_LOG.info(tmp.get("roadMapId") + ","
-						+ tmp.get("nodeId") + " " + tmp.toString());
+						+ tmp.get("nodeId") + "|" + tmp.get("topic") +"|" + tmp.toString());
 			}
 			_collector.ack(input);
 		} catch (Exception e) {

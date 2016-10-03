@@ -78,7 +78,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 				
 			}else{
 				for(JSONObject tmp : _jsonArray){
-					_LOG.info(tmp.get("roadMapId") + "," + tmp.get("nodeId") + " " + tmp.toString());
+					_LOG.info(tmp.get("roadMapId") + "," + tmp.get("nodeId") + "|" + tmp.get("topic") +"|" + tmp.toString());
 				}
 			}
 		} catch (Exception e) {
