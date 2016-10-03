@@ -109,8 +109,13 @@ __`jsonObject(Proceed)` :__</br>
 ```
 
 __PROCESSING:__
-
-<!--
+ <!--
+ From `eventKafka` get `jsonObject(Event)`
+ From `orderKafka` get `jsonObject(Order)`
+ From `proceedKafka` get `jsonObject(Proceed)`
+ Check whether `jsonObject` has all necessary `key` values
+ Since `jsonObject(Order)` is from `user device` directly confirm whether `serverId`,`brokerId`and `deviceId` values are all registered in `MongoDB`
+ -->
 - `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
 
 - `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`를 받아온다.
@@ -120,22 +125,9 @@ __PROCESSING:__
 - `eventKafka`, `proceedKafka`와 `orderKafka`에서 받아온 `jsonObject`가 필요한 모든 `key`값을 갖고 있는지 확인한다.
 
 - `orderKafka`에서 받아온 `jsonObject(Order)`는 사용자가 직접 보내준 값이므로 `brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
--->
-
-- Receive `jsonObject(Event)` from `cosole` at `eventKafka`
-
-- Receive `jsonObject(Order)` from `user device` at `orderKafka`
-
-- Receive `jsonObject(Proceed)` from `ActionTopology` at `proceedKafka`
-
-- Verify `jsonObject` from `eventKafka`, `preceedKafka` and `orderKafka` whether it has all the neccessary `key` values  
-
-- Verify whether values of `brokerId` and `deviceId` are registerd in MongoDB since `jsonObject` from `orderKafka` is obtained directly from the user.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `StagingBolt`
-
-
 
 <br>
 
@@ -147,19 +139,14 @@ __INPUT:__
 - `IndexingBolt` ⇨  `jsonObject(Proceed)`
 
 __PROCESSING:__
-
 <!--
+If `jsonObject(Event)` is received, find `roadMapId` which is same as `roadMapId` in `jsonObject(Event)` then start `initNodes`
+-->
 - `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `initNode`들에 필요한 `key`들에 `value`값을 할당해준다.
 
 - `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `orderNode` 중 `jsonObject(Order)`의 `corporationName`,`serverId`,`brokerId`,`deviceId`와 일치하는 `orderNode`들에 필요한 `key`들에 `value`값을 할당해준다.
 
 - `jsonObject(Proceed)`를 받은 경우 `MongoDB`에서 `jsonObject(proceed)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `jsonObject(proceed)`의 `nodeId`와 일치하는 `nodeId`에 필요한 `key`들에 `value`값을 할당해준다.
--->
-- If you have received `jsonObject(Event)`, find `roadMapId` consistent with the `roadMapId` of `jsonObject(Event)` at MongoDB and assign the values to the neccessary `keys` for `initNode`
-
-- If you have received `jsonObject(Order)`, find `roadMapId` consistent with the `roadMapId` of `jsonobject(Order)` at MongoDB and assign the values to the neccessary `keys` for `orderNode` that corresponds to `corporationName`, `serverId`, `brokerId` and `deviceId` of `jsonObject(Order)` among `orderNode`
-
-- If you have received `jsonObject(Proceed)`, find `roadMapId` consistent with the `roadMapId` of `jsonObject(Proceed)` at MongoDB and assign the values to the neccessary `keys` for `nodeId` that corresponds to `nodeId` of `jsonObject(Proceed)`
 
 __OUTPUT:__
 - `jsonArray` ⇨ `CallingTriggerBolt`
@@ -172,15 +159,10 @@ __INPUT:__
 - `StagingBolt` ⇨ `jsonArray`
 
 __PROCESSING:__
-
-<!--
 - `StagingBolt`에서 받은 `jsonArray`를 `jsonObject`로 바꿔 `Trigger topic`으로 보내준다.
--->
-- Send the `Trigger topic` after changing `jsonArray` to `jsonObject` received from `StagingBolt`
 
 __OUTPUT:__
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Trigger`
-
 
 __`jsonObject.toJSONString` :__</br>
 ```JSON
@@ -219,11 +201,10 @@ __`jsonObject(Status)` :__</br>
 ```
 
 __PROCESSING:__
-
-<!--
 - `jsonObject(Status)`들을 `topic`별로 `Redis`에 저장한다.
+<!--
+Save Each `JsonObjects` came from `StatusKafka` to `Redis`.
 -->
-- Save `jsonObject(Status)` by `topic` in `Redis`
 
 __OUTPUT:__
 - none.
@@ -256,11 +237,14 @@ __INPUT:__
 - `SchedulingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
-- `MongoDB`에서 source code 와 parameter를 받아온다.
+- Receive `source` and `parameter` from `MongoDB`
 
-- `jsonObject`에서 `payload`를 받아온다.
+- Extract `payload` from `jsonObject`
 
-- `source code`에 `parameter`와 `payload`값을 넣어 실행한다. 단, `lambda`가 `true`일 경우에는 `payload` 값은 `""`이다.
+- Put the payload and the parameter from source and execute.
+The condition is as follow
+  * if the program is lambda, the payload has empty STRING
+  * if the program is device, the payload has json STRING with value passed from the device
 
 __OUTPUT:__
 - `jsonObject` ⇨ `ProvisioningBolt`
