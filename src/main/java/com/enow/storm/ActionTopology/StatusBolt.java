@@ -63,7 +63,7 @@ public class StatusBolt extends BaseRichBolt {
         // Go to next bolt
         _collector.emit(new Values(input));
         try {
-            _LOG.info("topic:" + _jsonObject.get("topic"));
+            //_LOG.info("topic:" + _jsonObject.get("topic"));
             _collector.ack(input);
         } catch (Exception e) {
         	_LOG.warn("ack failed");
