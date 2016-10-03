@@ -22,7 +22,7 @@ import java.util.UUID;
 
 public class RemoteSubmitter {
     private static final String[] TOPICS = new String[]{"event", "proceed", "order", "trigger", "status"};
-    //private static final String zkhost = "192.168.99.100:2181";
+    // private static final String zkhost = "192.168.99.100:2181";
     private static final String zkhost = "127.0.0.1:2181";
     private LocalCluster cluster = new LocalCluster();
     public static void main(String[] args) throws Exception {
@@ -32,8 +32,8 @@ public class RemoteSubmitter {
     }
 
     protected void runMain(String[] args) throws Exception {
-            submitTopologyRemoteCluster(args[0], getTriggerTopology(), getConfig());
-            submitTopologyRemoteCluster(args[1], getActionTopology(), getConfig());
+        submitTopologyRemoteCluster(args[0], getTriggerTopology(), getConfig());
+        submitTopologyRemoteCluster(args[1], getActionTopology(), getConfig());
     }
 
     protected void submitTopologyRemoteCluster(String arg, StormTopology topology, Config config) throws Exception {
