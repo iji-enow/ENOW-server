@@ -217,11 +217,10 @@ __INPUT:__
 - `triggerKafka` ⇨ `jsonObject(Trigger)`
 
 __PROCESSING:__
-- `order`값이 `false` 또는 `rambda`값이 `false`일 때, 현재 노드가 다수의 `incomingNode`들을 가지면, 각각 노드들의 `payload` 정보를 현재 `jsonObject`가 지닌 `topic`에 근거하여 `Redis`에서 읽어들여 `jsonObject`에 저장한다.
-
-- `incomingNode`가 `null`이 아니고, 처음 방문한 `mapId`라면 `Redis`에서 각각 `incomingNode`에 저장된 값들을 꺼내 `jsonObject`안의 `previousData`에 저장한다.
-
-- 만약 이미 방문한적이 있는 `mapId`라면 `verified`값을 `false`로 전환한다.
+- Status 토픽에서 들어온 정보를 현재 처리중인 노드와 동기화한다. (만약 해당 노드가 orderNode나 lambdaNode 라면 이 과정을 무시한다.)
+- 이전 노드에서 값을 받아오는 중간 단계 노드라면 Redis에 저장된 payload 값들을 꺼내 previousData에 저장한다.
+- 이전 노드의 처리가 다 끝나지 않았다면 verified 값을 false 로 전환하고, 다음 stream 을 기다린다.
+- 만약 n:n 처리를 위해 서버에 여러번 방문하는 노드라면 Redis에 해당 노드의 정보가 저장되어있는지 확인 후 redundancy 값으로 인식하여 verifiec 값을 false 로 변경한다.
 
 <!-- When node needs multiple `previousData`, wait for all of `incomingNodes`
 -->
