@@ -12,7 +12,27 @@ import time
 from bson.json_util import dumps
 from bson.json_util import loads
 from pymongo import MongoClient
+'''
+========================================
+    ENOW CODE EXECUTION MODULE
+========================================
+    Description : 
+         This module is for receiving 4 different components to execute python program in STORM
+         The 4 components are as follow
+             * CODE : Python source code stored in MongoDB
+             * PARAMETER : Python program command line arguments
+             * PAYLOAD : Payload come from either a device or lambda node
+             * PREVIOUS DATA : Data containing results from previous execution
+    
+    Features : 
+        * Query MongoDB about the CODE and PARAMETER
+        * Supports multi-threaded environment
+        * Logs are stored in the log.txt. After executing the CODE, the program then read 
+        the logs and return them back to STORM.
+'''
+# The root directory of the current python project
 fileDir = os.path.dirname(os.path.realpath('__file__'))
+# Add PYTHONPATH for further execution
 enow_Path = os.path.join(fileDir, 'enow/')
 enow_jython_Path = os.path.join(fileDir, 'enow/jython')
 enow_jython_Building_Path = os.path.join(fileDir, 'enow/jython/Building')
@@ -21,40 +41,68 @@ sys.path.append(enow_Path)
 sys.path.append(enow_jython_Path)
 sys.path.append(enow_jython_Building_Path)
 sys.path.append(enow_jython_runtimePackage_Path)
+# import modules in PYTHONPATH
 from enow.jython.Building import Building
-# from jython.Building import Building
-# Counter is a nice way to count things,
-# but it is a Python 2.7 thing
-
-
+# Declare class and inherit storm BasicBolt class
 class ExecutingBolt(storm.BasicBolt):
-    # Initialize this instance
+    # static member variable used for semaphore to block the other thread from execution
     program_semaphore = 0
+    # Queue for enrolling waiting threads
     program_queue = PriorityQueue()
+    # initialize this instance
     def __init__(self):
         pass
-
+    '''
+    ========================================
+        Function : initialize
+    ========================================
+        Description : 
+             The function declares an interface for communicating with the runtimeMain
+            class and generates an instance of MongoDB to communicate with the local MongoDB
+        Parameter : 
+            conf : system related
+            context : system related
+    '''
     def initialize(self, conf, context):
         self._conf = conf
         self._context = context
+        # declare an interface for setting and getting the components described above
         self.Building = Building()
+        # declare an instance of MongoDB client
         try:
             self.client = MongoClient('localhost', 27017)
         except pymongo.errors.ConnectionFailure as e:
             sys.exit(1)
-
         self.source_db = self.client['enow']
         self.execute_collection = self.source_db['execute']
-        # Create a new counter for this instance
-        # storm.logInfo("Counter bolt instance starting...")
-
+    '''
+    ========================================
+        Function : tupleToJson
+    ========================================
+        Description : 
+             The function receives a tuple as a parameter and returns JSON object which was 
+             originally in the tuple
+        Parameter : 
+            tuple : (TYPE)TUPLE
+        Return Value : 
+            jsonObject : (TYPE)json
+    '''
     def tupleToJson(self, tuple):
         dictObject = tuple.values[0]
         jsonObject_str = json.dumps(dictObject)
         jsonObject = json.loads(jsonObject_str)
         return jsonObject
-    
-    
+    '''
+    ========================================
+        Function : fileToLog
+    ========================================
+        Description : 
+             The function returns string data logged while executing the CODE
+        Parameter : 
+            None
+        Return Value :
+            log_str : (TYPE)List of json string
+    '''
     def fileToLog(self):
         log_str = ""
         logPath = os.path.join(fileDir, "enow/jython/pythonSrc/log/log.txt")
@@ -63,29 +111,27 @@ class ExecutingBolt(storm.BasicBolt):
             file.seek(0)
             file.truncate()   
         return log_str
-    
+    '''
+    ========================================
+        Function : process
+    ========================================
+        Description : 
+             The function reads data from both parameter and MongoDB
+            and initiates execution sequence.
+        Parameter : 
+            tup : (TYPE)TUPLE
+        Return Value : 
+            None
+    '''
     def process(self, tup):
-        # Get the word from the inbound tuple
-        # word = tup.values[0]
-        # Increment the counter9
-        # storm.logInfo("Emitting %s" %(word))
-        # Emit the word and count
-        #jsonObject = json.loads(word, strict=False)
-        # Executtion Cycle
-
+        # convert tuple to json object
         jsonObject = self.tupleToJson(tup)
-        
+        # verify whether the input should be executed or not
         if jsonObject["verified"] == True:
-            # Get the document of which type is json
-            # The document indicates that
-            # the 'SOURCE' and 'PARAMETER' is the one currently executing
-
-            # Getting the whole payload object from the tuple
-            # 
+            # receive data needed for execution from the converted json object
             l_payload_json = jsonObject["payload"]
             l_mapId_string = jsonObject["nodeId"]
             l_roadMapId_string = jsonObject["roadMapId"]
-
             # Getting previous execution informations
             l_previousData_json = jsonObject["previousData"]
             l_info_json = None
@@ -122,11 +168,13 @@ class ExecutingBolt(storm.BasicBolt):
             self.Building.setcode(source.encode("ascii"))
             self.Building.setPayload(payload.encode("ascii"))
             self.Building.setPreviousData(previousData.encode("ascii"))
-            
+            # Setting up a semaphore value
             if ExecutingBolt.program_semaphore == 0:
                 ExecutingBolt.program_semaphore = 1
+                # Wait till the other threads know the current thread is executing
                 time.sleep(1)
                 tmp = self.Building.run()
+                # Verify the result whether the execution succeed or not
                 if tmp == "":
                     jsonObject["pyError"] = "true"
                     jsonObject["log"] = self.fileToLog()
@@ -139,14 +187,19 @@ class ExecutingBolt(storm.BasicBolt):
                     ExecutingBolt.program_semaphore = 0
                     storm.emit([jsonObject])
             else:
+                # If another thread is executing, then the current one is stored in the Queue
                 ExecutingBolt.program_queue.put(l_mapId_string)
                 while True:
+                    # If another thread finishes its execution,
                     if ExecutingBolt.program_semaphore == 0:
+                        # the current thread checks if it's my turn
                         if ExecutingBolt.program_queue.queue[0] == l_mapId_string:
+                            # and set the semaphore value
                             ExecutingBolt.program_semaphore == 1
                             ExecutingBolt.program_queue.get()
                             tmp = self.Building.run()
                             jsonObject["log"] = self.fileToLog()
+                            # Verify the result whether the execution succeed or not
                             if tmp == "":
                                 jsonObject["pyError"] = "true"
                             else:

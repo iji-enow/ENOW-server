@@ -1,13 +1,13 @@
 import sys
 import time
-'''
-Class : Building
-    Description :
-     Actual class implementing interface of BuildingType
-'''
 from enow.jython.runtimePackage.runtimeMain import runtimeMain
-
-
+'''
+========================================
+    Class : Building
+========================================
+    Description : 
+         The class works as an interface between the executingBolt and runtimeMain.
+'''
 class Building():
     main = None
     result = None
@@ -17,8 +17,7 @@ class Building():
     previousData = None
 
     def __init__(self):
-        time.sleep(0.000001)
-#        print("Initializing interface")
+        pass
 
     def getcode(self):
         if self.code is not None:
@@ -55,15 +54,16 @@ class Building():
 
     def setPreviousData(self, _previousData):
         self.previousData = _previousData
-
-    def run(self):
-        '''
+    '''
+    ========================================
         Function : run
-            Description :
-             A bridge connecting the actual part of implementation and the method shown outside
-        '''
+    ========================================
+        Description : 
+         The function initiates execution sequence
+    '''
+    def run(self):
+        # checks if the class misses any member variable required for execution
         if self.parameter is not None and self.code is not None and self.payload is not None:
-            #             print("Running Jython program")
             self.main = runtimeMain(_source=self.code,
                                     _parameter=self.parameter,
                                     _payload=self.payload,
@@ -71,5 +71,3 @@ class Building():
             self.main.controllSource()
             self.result = self.main.run()
             return self.result
-#        else:
-#             print("At least one of the items are not set\n")
