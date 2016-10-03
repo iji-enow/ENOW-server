@@ -47,7 +47,6 @@ public class ProvisioningBolt extends BaseRichBolt {
             e1.printStackTrace();
         }
 
-        _LOG.info(_jsonObject_str);
         Boolean verified = (Boolean) _jsonObject.get("verified");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
         // Confirm verification
@@ -60,7 +59,7 @@ public class ProvisioningBolt extends BaseRichBolt {
                 _LOG.debug("Succeed in inserting current node to Redis : " + result);
             } catch (Exception e) {
                 e.printStackTrace();
-                _LOG.warn("Fail in inserting current node to Redis : " + result);
+                _LOG.debug("Fail in inserting current node to Redis : " + result);
             }
             // Check this node is the last node
             if(!lastNode) {

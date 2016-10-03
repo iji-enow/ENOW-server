@@ -2,24 +2,26 @@
 <Configuration>
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="[%t] %-5level %logger{36} - %msg%n" />
+			<PatternLayout pattern="%-5level %logger{2} %msg%n" />
 		</Console>
 		<Kafka name="Kafka" topic="log">
 			<PatternLayout
-				pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} / %msg%n" />
+				pattern="%-5level %logger{2} %msg%n" />
 			<Property name="bootstrap.servers">localhost:9092</Property>
 		</Kafka>
 		<File name="EnowFile" fileName="logs/enow.log">
-			<PatternLayout pattern = "%-5level %logger{36} / %msg%n"/>
+			<PatternLayout pattern = "%-5level %logger{2} %msg%n"/>
 		</File>
 	</Appenders>
 	<Loggers>
 		<Logger name="com.enow.storm" level="info" additivity="false">
 			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="Kafka" />
 			<AppenderRef ref="EnowFile" />
 		</Logger>
 		<Root level="error">
 			<Appender-Ref ref="STDOUT" />
+			<AppenderRef ref="Kafka" />
 			<AppenderRef ref="EnowFile" />
 		</Root>
 	</Loggers>

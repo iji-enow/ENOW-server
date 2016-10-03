@@ -124,12 +124,12 @@ public class CallingFeedBolt extends BaseRichBolt {
 		try {
 			// Report the issues to Logger
 			for (JSONObject tmp : _jsonArrayFeed) {
-				_LOG.info("exited Action topology to feed roadMapId : " + tmp.get("roadMapId") + " nodeId : "
-						+ tmp.get("nodeId"));
+				_LOG.info(tmp.get("roadMapId") + ","
+						+ tmp.get("nodeId") + " " + tmp.toString());
 			}
 			for (JSONObject tmp : _jsonArrayProceed) {
-				_LOG.info("exited Action topology to proceed roadMapId : " + tmp.get("roadMapId") + " nodeId : "
-						+ tmp.get("nodeId"));
+				_LOG.info(tmp.get("roadMapId") + ","
+						+ tmp.get("nodeId") + " " + tmp.toString());
 			}
 			_collector.ack(input);
 		} catch (Exception e) {
