@@ -15,14 +15,14 @@
 	</Appenders>
 	<Loggers>
 		<Logger name="com.enow.storm" level="info" additivity="false">
-			<AppenderRef ref="STDOUT" />
-			<AppenderRef ref="Kafka" />
-			<AppenderRef ref="EnowFile" />
+			<Appender-Ref ref="STDOUT" />
+			<Appender-Ref ref="Kafka" />
+			<Appender-Ref ref="EnowFile" />
 		</Logger>
 		<Root level="error">
 			<Appender-Ref ref="STDOUT" />
-			<AppenderRef ref="Kafka" />
-			<AppenderRef ref="EnowFile" />
+			<Appender-Ref ref="Kafka" />
+			<Appender-Ref ref="EnowFile" />
 		</Root>
 	</Loggers>
 </Configuration>
