@@ -115,7 +115,7 @@ __`jsonObject(Proceed)` :__</br>
 
 __PROCESSING:__
 
- <!--
+<!--
 - `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
 
 - `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`를 받아온다.
