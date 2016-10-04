@@ -109,13 +109,8 @@ __`jsonObject(Proceed)` :__</br>
 ```
 
 __PROCESSING:__
+
  <!--
- From `eventKafka` get `jsonObject(Event)`
- From `orderKafka` get `jsonObject(Order)`
- From `proceedKafka` get `jsonObject(Proceed)`
- Check whether `jsonObject` has all necessary `key` values
- Since `jsonObject(Order)` is from `user device` directly confirm whether `serverId`,`brokerId`and `deviceId` values are all registered in `MongoDB`
- -->
 - `eventKafka`에서 `Console`로부터 받은 `jsonObject(Event)`를 받아온다.
 
 - `orderKafka`에서 `user device`로부터 받은 `jsonObject(Order)`를 받아온다.
@@ -125,6 +120,19 @@ __PROCESSING:__
 - `eventKafka`, `proceedKafka`와 `orderKafka`에서 받아온 `jsonObject`가 필요한 모든 `key`값을 갖고 있는지 확인한다.
 
 - `orderKafka`에서 받아온 `jsonObject(Order)`는 사용자가 직접 보내준 값이므로 `brokerId`,`deviceId` 값이 `MongoDB`에 등록되어 있는지 확인한다.
+-->
+
+- Receive `jsonObject(Event)` from `console` at `eventKafka`
+
+- Receive `jsonObject(Order)` from `user device` at `orderKafka`
+
+- Receive `jsonObject(Proceed)` from `ActionTopology` at `proceedKafka`
+
+- Verify `jsonObject` from `eventKafka`, `preceedKafka` and `orederKafka` whether it has all the neccessary `key` values  
+
+- Verify whether values of `brokerId` and `deviceId` are registerd at `MongoDB` since `jsonObject(Order)` from `orderKafka` is obtained directly from the `user device`.
+
+
 
 __OUTPUT:__
 - `jsonObject` ⇨ `StagingBolt`
@@ -139,14 +147,20 @@ __INPUT:__
 - `IndexingBolt` ⇨  `jsonObject(Proceed)`
 
 __PROCESSING:__
+
 <!--
-If `jsonObject(Event)` is received, find `roadMapId` which is same as `roadMapId` in `jsonObject(Event)` then start `initNodes`
--->
 - `jsonObject(Event)`를 받은 경우 `MongoDB`에서 `jsonObject(Event)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `initNode`들에 필요한 `key`들에 `value`값을 할당해준다.
 
 - `jsonObject(Order)`를 받은 경우 `MongoDB`에서 `jsonObject(Order)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `orderNode` 중 `jsonObject(Order)`의 `corporationName`,`serverId`,`brokerId`,`deviceId`와 일치하는 `orderNode`들에 필요한 `key`들에 `value`값을 할당해준다.
 
 - `jsonObject(Proceed)`를 받은 경우 `MongoDB`에서 `jsonObject(proceed)`의 `roadMapId`와 일치하는 `roadMapId`를 찾은 후 `jsonObject(proceed)`의 `nodeId`와 일치하는 `nodeId`에 필요한 `key`들에 `value`값을 할당해준다.
+-->
+
+- If you have received `jsonObject(Event)`, find `roadMapId` consistent with the `roadMapId` of `jsonObject(Event)` at `MongoDB` and assign the values to the neccessary `keys` for `initNodes`
+
+- If you have received `jsonObject(Order)`, find `roadMapId` consistent with the `roadMapId` of `jsonObject(Order)` at `MongoDB` and assign the values to the neccessary `keys` for `orderNodes` that corresponds to `corporationName`, `serverId`, `brokerId` and `deviceId` of `jsonObject(Order)` among `orderNodes`
+
+- If you have received `jsonObject(Proceed)`, find `roadMapId` consistent with the `roadMapId` of `jsonObject(Proceed)` at `MongoDB` and assign the values to the neccessary `keys` for `nodeId` that corresponds to `nodeId` of `jsonObject(Proceed)`
 
 __OUTPUT:__
 - `jsonArray` ⇨ `CallingTriggerBolt`
@@ -159,7 +173,13 @@ __INPUT:__
 - `StagingBolt` ⇨ `jsonArray`
 
 __PROCESSING:__
+
+<!--
 - `StagingBolt`에서 받은 `jsonArray`를 `jsonObject`로 바꿔 `Trigger topic`으로 보내준다.
+-->
+
+- Send the `Trigger topic` after changing `jsonArray` to `jsonObject` received from `StagingBolt`
+
 
 __OUTPUT:__
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Trigger`
@@ -201,10 +221,13 @@ __`jsonObject(Status)` :__</br>
 ```
 
 __PROCESSING:__
-- `jsonObject(Status)`들을 `topic`별로 `Redis`에 저장한다.
+
 <!--
-Save Each `JsonObjects` came from `StatusKafka` to `Redis`.
+- `jsonObject(Status)`들을 `topic`별로 `Redis`에 저장한다.
 -->
+
+- Save `jsonObject(Status)` by `topic` in `redis`
+
 
 __OUTPUT:__
 - none.
@@ -217,13 +240,19 @@ __INPUT:__
 - `triggerKafka` ⇨ `jsonObject(Trigger)`
 
 __PROCESSING:__
+
+<!--
 - Status 토픽에서 들어온 정보를 현재 처리중인 노드와 동기화한다. (만약 해당 노드가 orderNode나 lambdaNode 라면 이 과정을 무시한다.)
 - 이전 노드에서 값을 받아오는 중간 단계 노드라면 Redis에 저장된 payload 값들을 꺼내 previousData에 저장한다.
 - 이전 노드의 처리가 다 끝나지 않았다면 verified 값을 false 로 전환하고, 다음 stream 을 기다린다.
 - 만약 n:n 처리를 위해 서버에 여러번 방문하는 노드라면 Redis에 해당 노드의 정보가 저장되어있는지 확인 후 redundancy 값으로 인식하여 verifiec 값을 false 로 변경한다.
-
-<!-- When node needs multiple `previousData`, wait for all of `incomingNodes`
 -->
+
+- If `order` value is false or `lambda` value is false and current node has multiple `incomingNode`, save `payload` information for each node at `jsonObject` based on the `topic` of current `jsonObject` from `redis`
+
+- If `incomingNode` is not null and it is first visit for `nodeId`, bring the saved valued at each `incomingNode` from `redis` and save in `previousData` of `jsonObject`
+
+- If is is not first visit, change the `verified` value to false
 
 __OUTPUT:__
 - `jsonObject` ⇨ `ExecutingBolt`
@@ -236,14 +265,15 @@ __INPUT:__
 - `SchedulingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
+
 - Receive `source` and `parameter` from `MongoDB`
 
 - Extract `payload` from `jsonObject`
 
-- Put the payload and the parameter from source and execute.
+- Put the `payload` and the `parameter` from source and execute.
 The condition is as follow
-  * if the program is lambda, the payload has empty STRING
-  * if the program is device, the payload has json STRING with value passed from the device
+  * if the program is `lambda`, the `payload` has empty STRING
+  * if the program is `device`, the `payload` has json STRING with value passed from the device
 
 __OUTPUT:__
 - `jsonObject` ⇨ `ProvisioningBolt`
@@ -256,7 +286,12 @@ __INPUT:__
 - `ExecutingBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
+
+<!--
 - `ExecutingBolt`에서 실행 후 `result`를 포함한 `jsonObject`를 `Redis`에 저장하고, `refer`값을 갱신한다.
+-->
+
+- Save `jsonObject` which includes `result`( the result of running `ExecutingBolt`) at `redis` and update the `refer` value.
 
 __OUTPUT:__
 - `jsonObject` ⇨ `CallingFeedBolt`
@@ -269,9 +304,15 @@ __INPUT:__
 - `ProvisioningBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
+<!--
 - `ProvisioningBolt`에서 받은 `jsonObject`의 `nodeId`를 `jsonObject`의 `outingNode`들의 `nodeId` 별로 바꿔 `Feed topic`,`Proceed topic`으로 보내준다.
 
 - `rambda`값이 `true`일 경우에는 `Feed topic`으로 보내지 않는다.
+-->
+
+- After changing `nodeId` of `jsonObject` from `ProvisioningBolt` to `outingNodes` send to `Feed topic`, `Preceed topic`
+
+- If `lambda` value is true, do not send to `Feed topic`
 
 __OUTPUT:__
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Feed`
@@ -299,6 +340,7 @@ __JsonObject :__</br>
 
 ```
 
+<!--
 topic : corporationName/serverId/brokerId(ip of user's mqtt)/deviceId 으로 구성.
 roadMapId : road map id
 nodeId : 현재 node id
@@ -309,6 +351,18 @@ payload : 현제 node의 센서값 혹은 사용자로부터 들어온 값
 lastNode : 마지막 노드라면 true,아니라면 false
 orderNode : 사용자가 직접 입력하는 형태라면 true, 아니라면 false
 verified : incomingNode들이 모두 들어왔다면 true, 아니라면 false
+-->
+
+- topic : it is consists of corporationName/serverId/brokerId(ip of user's mqtt)/deviceId
+- roadMapId : road map id
+- nodeId : current node id
+- incomingNode : node coming from current nodel
+- outingNode : node that goes out from current nodel
+- previousData : execution result from past node
+- payload : sensor value of current node or value reiceived from the user
+- lastNode : true for last node, false for contrary
+- orderNode : true if it is the user directly inserting type, false for contrary
+- verified : true if all incomingNode are in, false for contrary
 
 __Status :__ </br>
 ```JSON
