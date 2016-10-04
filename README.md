@@ -16,9 +16,12 @@ How to use
 - If you would like to implement ENOW-Server locally with IDE like eclipse, IntelliJ, run LocalSubmitter.
 
 - Or you can use this command on the ENOW-Server directory.
-```bash
-$STORM_HOME/bin/storm jar ./target/enow-storm-1.0.jar com.enow.storm.main.main Trigger Action -c storm.local.hostname=\"nimbus\" -c nimbus.seeds=\"[\\\"192.168.99.100\\\"]\"
-```
+  ```bash
+  $STORM_HOME/bin/storm jar ./target/enow-storm-1.0.jar \\
+  com.enow.storm.main.main Trigger Action \\
+  -c storm.local.hostname=\"nimbus\" \\
+  -c nimbus.seeds=\"[\\\"192.168.99.100\\\"]\"
+  ```
 - Or you can simply use docker-compose to run ENOW-Server.
 
 [https://github.com/ENOW-IJI/ENOW-docker](https://github.com/ENOW-IJI/ENOW-docker)
@@ -34,11 +37,11 @@ These are the new features you should expect in the coming months:
 - [x] ~~Making Connection between Ponte and Kafka~~
 - [x] ~~Sending a message from Device(or Android) to Android(or Device) via ENOW System~~
 - [x] ~~Not using LocalCluster, But using `StormSubmitter`~~
-- [x] Make Trigger & Status topology
+- [x] Make Trigger & Status topologies
 - [x] ~~Connect Apache Storm to Redis~~
 - [x] ~~Create test Document on MongoDB~~
 - [x] ~~Connect Apache Storm to MongoDB~~
-- [x] ~~Connect Apache Storm to Redis for storing status of server~~
+- [x] ~~Connect Apache Storm to Redis for storing status of devices~~
 - [x] ~~Connect Apache Storm to Console~~
 - [x] ~~Connect Apache Storm to Devices~~
 - [x] ~~Build on `StormSubmitter`~~
