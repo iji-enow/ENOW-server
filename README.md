@@ -68,7 +68,9 @@ TriggerTopology literally can activate the component of Road-Map so that IoT dev
 
 __INPUT:__
 - `eventKafka` from `Console` ⇨ `jsonObject(Event)`
+
 - `orderKafka` from `user device` ⇨ `jsonObject(Order)`
+
 - `proceedKafka` from `ActionTopology` ⇨ `jsonObject(Proceed)`
 
 
@@ -143,7 +145,9 @@ __OUTPUT:__
 
 __INPUT:__
 - `IndexingBolt` ⇨  `jsonObject(Event)`
+
 - `IndexingBolt` ⇨  `jsonObject(Order)`
+
 - `IndexingBolt` ⇨  `jsonObject(Proceed)`
 
 __PROCESSING:__
@@ -304,6 +308,7 @@ __INPUT:__
 - `ProvisioningBolt` ⇨ `jsonObject`
 
 __PROCESSING:__
+
 <!--
 - `ProvisioningBolt`에서 받은 `jsonObject`의 `nodeId`를 `jsonObject`의 `outingNode`들의 `nodeId` 별로 바꿔 `Feed topic`,`Proceed topic`으로 보내준다.
 
@@ -316,6 +321,7 @@ __PROCESSING:__
 
 __OUTPUT:__
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Feed`
+
 - `jsonObject.toJSONString` ⇨ `KafkaProducer` ⇨ `topic : Proceed`
 
 <br><br>
@@ -354,14 +360,23 @@ verified : incomingNode들이 모두 들어왔다면 true, 아니라면 false
 -->
 
 - topic : it is consists of corporationName/serverId/brokerId(ip of user's mqtt)/deviceId
+
 - roadMapId : road map id
+
 - nodeId : current node id
+
 - incomingNode : node coming from current nodel
-- outingNode : node that goes out from current nodel
+
+- outingNode : node that goes out from current node
+
 - previousData : execution result from past node
+
 - payload : sensor value of current node or value reiceived from the user
+
 - lastNode : true for last node, false for contrary
+
 - orderNode : true if it is the user directly inserting type, false for contrary
+
 - verified : true if all incomingNode are in, false for contrary
 
 __Status :__ </br>
