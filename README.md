@@ -415,15 +415,15 @@ result: <br>
 ```
 
 > `_"previousData"_` : `ExecutingBolt` has result of previous execution. numbering of `RESULT N` follows _stack_ rule and if the number of `RESULT N` is higher the result value is more lastest.<br><br>
-`_"PARAMETER"_` : delivers necessary parameter for run.<br><br>
+`_"PARAMETER"_` : delivers necessary parameter to run.<br><br>
 __i.e)__ ⇨ _"-l --profile"_<br><br>
-`_"PAYLOAD"_` : delivers necessary input value for run.<br><br>
+`_"PAYLOAD"_` : delivers necessary input value to run.<br><br>
   __i.e)__ ⇨
   _"{
     'led on' : 1,
     'match object' : 'cat'}
   }"_<br><br>
-`_"SOURCE"_` : delivers necessary source(`PYTHON`) for run.<br><br>
+`_"SOURCE"_` : delivers necessary source(`PYTHON`) to run.<br><br>
 __i.e)__ ⇨ _"def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")"_
 
 
