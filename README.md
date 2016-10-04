@@ -414,19 +414,20 @@ result: <br>
 }
 ```
 
-> `_"previousData"_` : 이전에 실행했던 `ExecutingBolt` 에서의 결과값을 담고 있다. `RESULT N` 에서의 넘버링은 _스택_ 의 규칙을 따르며 넘버링이 클 수록 최근의 결과값이다.<br><br>
-`_"PARAMETER"_` : 실행에 필요한 파라미터를 세팅하여 넘겨준다.<br><br>
+> `_"previousData"_` : `ExecutingBolt` has result of previous execution. numbering of `RESULT N` follows _stack_ rule and if the number of `RESULT N` is higher the result value is more lastest.<br><br>
+`_"PARAMETER"_` : delivers necessary parameter for run.<br><br>
 __i.e)__ ⇨ _"-l --profile"_<br><br>
-`_"PAYLOAD"_` : 실행에 필요한 입력값을 전달해 준다.<br><br>
+`_"PAYLOAD"_` : delivers necessary input value for run.<br><br>
   __i.e)__ ⇨
   _"{
     'led on' : 1,
     'match object' : 'cat'}
   }"_<br><br>
-`_"SOURCE"_` : 실행에 필요한 소스(`PYTHON`)를 전달해 준다.<br><br>
+`_"SOURCE"_` : delivers necessary source(`PYTHON`) for run.<br><br>
 __i.e)__ ⇨ _"def eventHandler(event, context, callback):\n\tevent[\"identification\"] = \"modified\"\n\tprint(\"succeed\")"_
 
-  실행에 필요한 소스의 기본형은 다음과 같다.
+
+necessary source for run is as follow
 
   >`def eventHandler(event, context, callback):`
 
