@@ -442,9 +442,3 @@ Apache Storm & Kafka:
 - [https://github.com/nathanmarz/storm/wiki/Trident-state](https://github.com/nathanmarz/storm/wiki/Trident-state)
 - [https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+Producer+Example](https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+Producer+Example)
 - [https://github.com/wurstmeister/storm-kafka-0.8-plus-test](https://github.com/wurstmeister/storm-kafka-0.8-plus-test)
-<!--
-Redis:
-- [https://github.com/CaptBoscho/SOC-Redis-Plugin/blob/master/src/main/java/daos/UserDAO.java](https://github.com/CaptBoscho/SOC-Redis-Plugin/blob/master/src/main/java/daos/UserDAO.java)
-
-MongoDB:
--->
