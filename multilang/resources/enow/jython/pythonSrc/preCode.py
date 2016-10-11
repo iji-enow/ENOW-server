@@ -10,7 +10,6 @@ fileDir = os.path.dirname(os.path.realpath('__file__'))
 modulePath = os.path.join(fileDir, 'enow/jython/pythonSrc')
 sys.path.append(modulePath)
 
-from body import eventHandler
 from postCode import postProcess
 from StreamToLogger import StreamToLogger
 '''
@@ -27,12 +26,17 @@ lock = 0
 def kilobytes(megabytes):
     return megabytes * 1024 * 1024
 
-def eventHandlerFacade(_event, _context, _callback):
+def eventHandlerFacade(_event, _context, _callback, _mapId_hashed_string):
     global threadExit
     global lock
+    global modulePath
+    
+    l_bodyPath_string = os.path.join(modulePath, _mapId_hashed_string)
+    sys.path.append(l_bodyPath_string)
+    import body
+    from body import eventHandler
 
-    CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
-    loggerStdoutFilePath = os.path.join(CURRENT_DIR, 'log', 'log.txt')
+    loggerStdoutFilePath = os.path.join(modulePath, _mapId_hashed_string, 'log', 'log.txt')
 
     logging.basicConfig(
                        level=logging.DEBUG,
@@ -57,6 +61,7 @@ def Main():
     jsonDump = ""
     parameterDump = ""
     previousDataDump = ""
+    mapId_hashed_string = ""
     _event = None
     old_stdout = sys.stdout
     old_stderr = sys.stderr
@@ -92,14 +97,23 @@ def Main():
             break
 
         previousDataDump += codecs.encode(binaryString, 'utf-8')
+        
+    while True:
+        binaryString = sys.stdin.readline()
+        
+        if not binaryString:
+            break
+        
+        if binaryString == b"endl\n":
+            break
+
+        mapId_hashed_string += codecs.encode(binaryString, 'utf-8')
 
     if jsonDump != "null":
         _event = json.loads(jsonDump)
     _context = dict()
     _callback = dict()
     _previousData = json.loads(previousDataDump)
-    
-    
     
     """
     context object written in json
@@ -121,8 +135,6 @@ def Main():
     """
     setting up a thread for executing a body code
     """
-    global lock
-    lock = thread.allocate_lock()
 
     stackSize = []
     stackSize.append(kilobytes(_context["memory_limit_in_mb"]))
@@ -132,11 +144,11 @@ def Main():
     setting up a logger for debugging
     """
     try:
-        thread.start_new_thread(eventHandlerFacade, (_event, _context, _callback))
+        thread.start_new_thread(eventHandlerFacade, (_event, _context, _callback, mapId_hashed_string))
     except:
         sys.stderr.write(str("Error\n"))
     
-    sleep(5)
+    sleep(1)
 
     sys.stdout = old_stdout
     sys.stderr = old_stderr

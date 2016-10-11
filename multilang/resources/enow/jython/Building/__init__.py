@@ -15,6 +15,7 @@ class Building():
     parameter = None
     payload = None
     previousData = None
+    mapId_hashed_string = None
 
     def __init__(self):
         pass
@@ -42,6 +43,12 @@ class Building():
             return self.previousData
         else:
             return ""
+        
+    def getPath(self):
+        if self.mapId_hashed_string is not None:
+            return self.mapId_hashed_string
+        else:
+            return ""
 
     def setcode(self, _code):
         self.code = _code
@@ -54,6 +61,9 @@ class Building():
 
     def setPreviousData(self, _previousData):
         self.previousData = _previousData
+        
+    def setPath(self, mapId_hashed_string):
+        self.mapId_hashed_string = mapId_hashed_string
     '''
     ========================================
         Function : run
@@ -63,11 +73,12 @@ class Building():
     '''
     def run(self):
         # checks if the class misses any member variable required for execution
-        if self.parameter is not None and self.code is not None and self.payload is not None:
+        if self.parameter is not None and self.code is not None and self.payload is not None and self.mapId_hashed_string is not None:
             self.main = runtimeMain(_source=self.code,
                                     _parameter=self.parameter,
                                     _payload=self.payload,
-                                    _previousData = self.previousData)
+                                    _previousData = self.previousData,
+                                    _mapId_hashed_string = self.mapId_hashed_string)
             self.main.controllSource()
             self.result = self.main.run()
             return self.result

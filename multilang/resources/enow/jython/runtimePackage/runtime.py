@@ -19,7 +19,7 @@ class runtime:
             _args : A string containing a list of parameter for executing the source program
             _payloads : A string containing the payload for the source program. Usually json string.
     '''
-    def run(self, _args, _payloads, _previousData):
+    def run(self, _args, _payloads, _previousData, _mapId_hashed_string):
 
         fileDir = os.path.dirname(os.path.realpath('__file__'))
         sourceDir = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
@@ -40,6 +40,8 @@ class runtime:
         process.stdin.write(_args)
         process.stdin.write(b"\nendl\n")
         process.stdin.write(_previousData)
+        process.stdin.write(b"\nendl\n")
+        process.stdin.write(_mapId_hashed_string)
         process.stdin.close()
 
         self.resultString = process.stdout.read().decode("utf-8")

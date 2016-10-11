@@ -13,7 +13,7 @@ Class : RemoteSubmitter
 '''
 
 class runtimeMain:
-    def __init__(self, _source, _parameter, _payload, _previousData):
+    def __init__(self, _source, _parameter, _payload, _previousData, _mapId_hashed_string):
         self.source = _source
         self.parameter = _parameter
         self.payload = _payload
@@ -21,13 +21,14 @@ class runtimeMain:
         self.runtime = None
         self.sourceControl = None
         self.result = None
+        self.mapId_hashed_string = _mapId_hashed_string
     '''
     Function : controllSource()
         Description : 
          Instantiate a sourceControl object and assign it on the sourceControl member variable.
     '''
     def controllSource(self):
-        self.sourceControl = sourceControl(body=self.source)
+        self.sourceControl = sourceControl(body=self.source, _mapId_hashed_string = self.mapId_hashed_string)
     '''
     Function : run()
         Description : 
@@ -37,7 +38,8 @@ class runtimeMain:
         self.runtime = runtime() 
         self.runtime.run(_args=self.parameter,
                          _payloads = self.payload,
-                         _previousData = self.previousData)
+                         _previousData = self.previousData,
+                         _mapId_hashed_string = self.mapId_hashed_string)
         self.result = self.runtime.getResult()
         return self.result
         

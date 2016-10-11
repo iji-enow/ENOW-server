@@ -9,6 +9,7 @@ from symbol import parameters
 import collections
 import bson
 import time
+import hashlib
 from bson.json_util import dumps
 from bson.json_util import loads
 from pymongo import MongoClient
@@ -103,9 +104,9 @@ class ExecutingBolt(storm.BasicBolt):
         Return Value :
             log_str : (TYPE)List of json string
     '''
-    def fileToLog(self):
+    def fileToLog(self, l_mapId_hashed_string):
         log_str = ""
-        logPath = os.path.join(fileDir, "enow/jython/pythonSrc/log/log.txt")
+        logPath = os.path.join(fileDir, "enow/jython/pythonSrc", l_mapId_hashed_string, "log/log.txt")
         with open(logPath, 'r+') as file:
             log_str = file.readlines();
             file.seek(0)
@@ -132,6 +133,16 @@ class ExecutingBolt(storm.BasicBolt):
             l_payload_json = jsonObject["payload"]
             l_mapId_string = jsonObject["nodeId"]
             l_roadMapId_string = jsonObject["roadMapId"]
+            # Creating a file hierarchy for local body.py source and log.txt
+            l_mapId_hashed_string = str(hashlib.sha256(l_mapId_string).hexdigest())
+            l_bodyRoot_string = os.path.join(fileDir, "enow/jython/pythonSrc", l_mapId_hashed_string)
+            if not os.path.exists(l_bodyRoot_string):
+                os.makedirs(l_bodyRoot_string)
+                l_logDir_string = os.path.join(l_bodyRoot_string, "log")
+                os.makedirs(l_logDir_string)
+                l_logText_string = os.path.join(l_logDir_string, "log.txt")
+                with open(l_logText_string, 'w+') as file:
+                    pass
             # Getting previous execution informations
             l_previousData_json = jsonObject["previousData"]
             l_info_json = None
@@ -168,49 +179,21 @@ class ExecutingBolt(storm.BasicBolt):
             self.Building.setcode(source.encode("ascii"))
             self.Building.setPayload(payload.encode("ascii"))
             self.Building.setPreviousData(previousData.encode("ascii"))
-            # Setting up a semaphore value
-            if ExecutingBolt.program_semaphore == 0:
-                ExecutingBolt.program_semaphore = 1
-                # Wait till the other threads know the current thread is executing
-                time.sleep(1)
-                tmp = self.Building.run()
-                jsonObject["previousData"] = "null"
-                # Verify the result whether the execution succeed or not
-                if tmp == "":
-                    jsonObject["pyError"] = "true"
-                    jsonObject["log"] = self.fileToLog()
-                    ExecutingBolt.program_semaphore = 0
-                    storm.emit([jsonObject])
-                else:
-                    jsonResult = json.loads(tmp, strict=False)
-                    jsonObject["log"] = self.fileToLog()
-                    jsonObject["payload"] = jsonResult
-                    ExecutingBolt.program_semaphore = 0
-                    storm.emit([jsonObject])
+            self.Building.setPath(l_mapId_hashed_string.encode("ascii"))
+            tmp = self.Building.run()
+            jsonObject["previousData"] = "null"
+            # Verify the result whether the execution succeed or not
+            if tmp == "":
+                jsonObject["pyError"] = "true"
+                jsonObject["log"] = self.fileToLog(l_mapId_hashed_string)
+                ExecutingBolt.program_semaphore = 0
+                storm.emit([jsonObject])
             else:
-                # If another thread is executing, then the current one is stored in the Queue
-                ExecutingBolt.program_queue.put(l_mapId_string)
-                while True:
-                    # If another thread finishes its execution,
-                    if ExecutingBolt.program_semaphore == 0:
-                        # the current thread checks if it's my turn
-                        if ExecutingBolt.program_queue.queue[0] == l_mapId_string:
-                            # and set the semaphore value
-                            ExecutingBolt.program_semaphore == 1
-                            ExecutingBolt.program_queue.get()
-                            tmp = self.Building.run()
-                            jsonObject["previousData"] = "null"
-                            jsonObject["log"] = self.fileToLog()
-                            # Verify the result whether the execution succeed or not
-                            if tmp == "":
-                                jsonObject["pyError"] = "true"
-                            else:
-                                jsonResult = json.loads(tmp, strict=False)
-                                jsonObject["payload"] = jsonResult
-                            ExecutingBolt.program_semaphore == 0
-                            storm.emit([jsonObject])
-
-
+                jsonResult = json.loads(tmp, strict=False)
+                jsonObject["log"] = self.fileToLog(l_mapId_hashed_string)
+                jsonObject["payload"] = jsonResult
+                ExecutingBolt.program_semaphore = 0
+                storm.emit([jsonObject])
             # Handle the result and convert it to JSON object
         else:
             jsonObject["payload"] = ""

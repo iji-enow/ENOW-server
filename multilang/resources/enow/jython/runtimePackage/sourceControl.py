@@ -21,10 +21,11 @@ class sourceControl:
         Unless there is a reason to modify both the preCode and postCode,
         do not put anything on both the preCode and postCode parameter.
     '''
-    def __init__(self, preCode = None, body = None, postCode = None):
+    def __init__(self, preCode = None, body = None, postCode = None, _mapId_hashed_string = None):
         self.preCode = preCode
         self.body = body
         self.postCode = postCode
+        self.mapId_hashed_string = _mapId_hashed_string
 
         self.storeSources()
     '''
@@ -38,7 +39,7 @@ class sourceControl:
             print("At least one of the source is empty\n")
         '''
         fileDir = os.path.dirname(os.path.realpath('__file__'))
-        pathbodyCode = os.path.join(fileDir, 'enow/jython/pythonSrc/body.py')
+        pathbodyCode = os.path.join(fileDir, 'enow/jython/pythonSrc', self.mapId_hashed_string, 'body.py')
         
         with open(pathbodyCode, "wb") as file:
             file.seek(0)
