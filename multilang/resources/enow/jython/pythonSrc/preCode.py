@@ -1,10 +1,11 @@
 import sys
-import thread
+import threading
 import json
 import codecs
 import logging
 import os
 from time import sleep
+from pymongo import MongoClient
 
 fileDir = os.path.dirname(os.path.realpath('__file__'))
 modulePath = os.path.join(fileDir, 'enow/jython/pythonSrc')
@@ -20,15 +21,11 @@ List : Global Variables
         loggerStderr : A variable logging the stream passed out on STDERR
         lock = A semaphore assigned from thread
 '''
-threadExit = False
-lock = 0
 
 def kilobytes(megabytes):
     return megabytes * 1024 * 1024
 
 def eventHandlerFacade(_event, _context, _callback, _mapId_hashed_string):
-    global threadExit
-    global lock
     global modulePath
     
     l_bodyPath_string = os.path.join(modulePath, _mapId_hashed_string)
@@ -135,20 +132,10 @@ def Main():
     """
     setting up a thread for executing a body code
     """
-
-    stackSize = []
-    stackSize.append(kilobytes(_context["memory_limit_in_mb"]))
-    thread.stack_size(kilobytes(64))
-
-    """
-    setting up a logger for debugging
-    """
-    try:
-        thread.start_new_thread(eventHandlerFacade, (_event, _context, _callback, mapId_hashed_string))
-    except:
-        sys.stderr.write(str("Error\n"))
+    thread_running = threading.Thread(name="Running", target=eventHandlerFacade, kwargs={'_event' : _event, '_context' : _context, "_callback" : _callback, '_mapId_hashed_string' : str(mapId_hashed_string) })
     
-    sleep(1)
+    thread_running.start()
+    thread_running.join()
 
     sys.stdout = old_stdout
     sys.stderr = old_stderr
