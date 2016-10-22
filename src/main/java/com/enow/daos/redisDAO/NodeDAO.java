@@ -7,7 +7,6 @@ package com.enow.daos.redisDAO;
 import java.util.*;
 
 import com.enow.persistence.dto.NodeDTO;
-import com.enow.persistence.redis.RedisDB;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import redis.clients.jedis.Jedis;
@@ -15,7 +14,14 @@ import redis.clients.jedis.Jedis;
 
 public class NodeDAO implements INodeDAO {
 
+    private Jedis _jedis;
+
     private static final String NODE_PREFIX = "node-";
+
+    @Override
+    public void setJedisConnection(Jedis jedis) {
+        _jedis = jedis;
+    }
 
     @Override
     public String toID(String roadMapID, String nodeID) {
@@ -25,7 +31,6 @@ public class NodeDAO implements INodeDAO {
 
     @Override
     public NodeDTO jsonObjectToNode(JSONObject jsonObject){
-
         String roadMapID = (String) jsonObject.get("roadMapId");
         String nodeID = (String) jsonObject.get("nodeId");
         String topic = (String) jsonObject.get("topic");
@@ -46,10 +51,9 @@ public class NodeDAO implements INodeDAO {
 
     @Override
     public String addNode(NodeDTO dto) {
-        Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getNodeID();
 
-        Set<String> keys = jedis.keys("node-*");
+        Set<String> keys = _jedis.keys("node-*");
         Iterator<String> iter = keys.iterator();
         ArrayList<String> ids = new ArrayList<>();
 
@@ -64,30 +68,26 @@ public class NodeDAO implements INodeDAO {
             }
         }
         if(!nodeExists) {
-            jedis.lpush(NODE_PREFIX + id, dto.getTopic());
-            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
-            jedis.lpush(NODE_PREFIX + id, dto.getRefer());
+            _jedis.lpush(NODE_PREFIX + id, dto.getTopic());
+            _jedis.lpush(NODE_PREFIX + id, dto.getPayload());
+            _jedis.lpush(NODE_PREFIX + id, dto.getRefer());
             return id;
         } else {
-            jedis.del(NODE_PREFIX + id);
-            jedis.lpush(NODE_PREFIX + id, dto.getTopic());
-            jedis.lpush(NODE_PREFIX + id, dto.getPayload());
-            jedis.lpush(NODE_PREFIX + id, dto.getRefer());
+            _jedis.del(NODE_PREFIX + id);
+            _jedis.lpush(NODE_PREFIX + id, dto.getTopic());
+            _jedis.lpush(NODE_PREFIX + id, dto.getPayload());
+            _jedis.lpush(NODE_PREFIX + id, dto.getRefer());
             return id + " overwritten";
         }
     }
     @Override
     public NodeDTO getNode(String ID) {
-        Jedis jedis = RedisDB.getConnection();
         StringTokenizer tokenizer = new StringTokenizer(ID, "-");
         String roadMapID = tokenizer.nextToken();
         String nodeID = tokenizer.nextToken();
         String id = roadMapID + "-" + nodeID;
-        List<String> result = jedis.lrange(NODE_PREFIX + id, 0, -1);
+        List<String> result = _jedis.lrange(NODE_PREFIX + id, 0, -1);
         if (result.size() > 2) {
-            System.out.println("result.get(0) : " + result.get(0));
-            System.out.println("result.get(1) : " + result.get(1));
-            System.out.println("result.get(2) : " + result.get(2));
             NodeDTO dto = new NodeDTO(roadMapID, nodeID, result.get(2), result.get(1), result.get(0));
             return dto;
         } else {
@@ -97,9 +97,8 @@ public class NodeDAO implements INodeDAO {
 
     @Override
     public List<NodeDTO> getAllNodes() {
-        Jedis jedis = RedisDB.getConnection();
         List<NodeDTO> nodes = new ArrayList<>();
-        Set<String> keys = jedis.keys("node-*");
+        Set<String> keys = _jedis.keys("node-*");
         for (String key : keys) {
             key = key.substring(5, key.length());
             nodes.add(getNode(key));
@@ -109,40 +108,36 @@ public class NodeDAO implements INodeDAO {
 
     @Override
     public void updateNode(NodeDTO dto) {
-        Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getNodeID();
-        jedis.lpop(NODE_PREFIX + id);
-        jedis.lpop(NODE_PREFIX + id);
-        jedis.lpush(NODE_PREFIX + id, dto.getPayload());
-        jedis.lpush(NODE_PREFIX + id, dto.getRefer());
+        _jedis.lpop(NODE_PREFIX + id);
+        _jedis.lpop(NODE_PREFIX + id);
+        _jedis.lpush(NODE_PREFIX + id, dto.getPayload());
+        _jedis.lpush(NODE_PREFIX + id, dto.getRefer());
     }
 
     @Override
     public void updateRefer(NodeDTO dto) {
-        Jedis jedis = RedisDB.getConnection();
         String id = dto.getRoadMapID() + "-" + dto.getNodeID();
         Integer refer = Integer.parseInt(dto.getRefer());
         --refer;
         if (refer > 0) {
-            jedis.lpop(NODE_PREFIX + id);
-            jedis.lpush(NODE_PREFIX + id, "" + refer);
+            _jedis.lpop(NODE_PREFIX + id);
+            _jedis.lpush(NODE_PREFIX + id, "" + refer);
         } else {
-            jedis.del(NODE_PREFIX + id);
+            _jedis.del(NODE_PREFIX + id);
         }
     }
 
     @Override
     public void deleteAllNodes() {
-        Jedis jedis = RedisDB.getConnection();
-        Set<String> keys = jedis.keys("node-*");
+        Set<String> keys = _jedis.keys("node-*");
         Iterator<String> iter = keys.iterator();
         while (iter.hasNext()) {
-            jedis.del(iter.next());
+            _jedis.del(iter.next());
         }
     }
     @Override
     public void deleteNode(String ID) {
-        Jedis jedis = RedisDB.getConnection();
-        jedis.del(NODE_PREFIX + ID);
+        _jedis.del(NODE_PREFIX + ID);
     }
 }

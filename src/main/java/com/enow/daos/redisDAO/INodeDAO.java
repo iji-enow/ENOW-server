@@ -6,10 +6,12 @@ package com.enow.daos.redisDAO;
 
 import com.enow.persistence.dto.NodeDTO;
 import org.json.simple.JSONObject;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
 
 public interface INodeDAO {
+    void setJedisConnection(Jedis jedis);
     String toID(String roadMapID, String mapID);
     /**
      * change jsonObject to NodeDTO,

@@ -15,8 +15,14 @@ import java.util.Set;
  */
 public class StatusDAO implements IStatusDAO {
 
+    private Jedis _jedis;
+
     private static final String STATUS_PREFIX = "status-";
 
+    @Override
+    public void setJedisConnection(Jedis jedis) {
+        _jedis = jedis;
+    }
 
     @Override
     public StatusDTO jsonObjectToStatus(JSONObject jsonObject) {
@@ -28,10 +34,9 @@ public class StatusDAO implements IStatusDAO {
 
     @Override
     public String addStatus(StatusDTO dto) {
-        Jedis jedis = RedisDB.getConnection();
         String id = dto.getTopic();
 
-        Set<String> keys = jedis.keys("status-*");
+        Set<String> keys = _jedis.keys("status-*");
         Iterator<String> iter = keys.iterator();
         ArrayList<String> ids = new ArrayList<>();
 
@@ -46,19 +51,18 @@ public class StatusDAO implements IStatusDAO {
             }
         }
         if (!statusExists) {
-            jedis.lpush("status-" + id, dto.getPayload());
+            _jedis.lpush("status-" + id, dto.getPayload());
             return id;
         } else {
-            jedis.del("status-" + id);
-            jedis.lpush("status-" + id, dto.getPayload());
+            _jedis.del("status-" + id);
+            _jedis.lpush("status-" + id, dto.getPayload());
             return id + " overwritten";
         }
     }
 
     @Override
     public StatusDTO getStatus(String topic) {
-        Jedis jedis = RedisDB.getConnection();
-        List<String> result = jedis.lrange(STATUS_PREFIX + topic, 0, 0);
+        List<String> result = _jedis.lrange(STATUS_PREFIX + topic, 0, 0);
         if (result.size() > 0) {
             StatusDTO dto = new StatusDTO(topic, result.get(0));
             return dto;
@@ -69,9 +73,8 @@ public class StatusDAO implements IStatusDAO {
 
     @Override
     public List<StatusDTO> getAllStatus() {
-        Jedis jedis = RedisDB.getConnection();
         List<StatusDTO> allStatus = new ArrayList<>();
-        Set<String> keys = jedis.keys("status-*");
+        Set<String> keys = _jedis.keys("status-*");
         for (String key : keys) {
             key = key.substring(5, key.length());
             allStatus.add(getStatus(key));
@@ -81,24 +84,21 @@ public class StatusDAO implements IStatusDAO {
 
     @Override
     public void updateStatus(StatusDTO dto) {
-        Jedis jedis = RedisDB.getConnection();
-        jedis.rpop(STATUS_PREFIX + dto.getTopic());
-        jedis.rpush(STATUS_PREFIX + dto.getTopic(), dto.getPayload());
+        _jedis.rpop(STATUS_PREFIX + dto.getTopic());
+        _jedis.rpush(STATUS_PREFIX + dto.getTopic(), dto.getPayload());
     }
 
     @Override
     public void deleteStatus(String topic) {
-        Jedis jedis = RedisDB.getConnection();
-        jedis.del(STATUS_PREFIX + topic);
+        _jedis.del(STATUS_PREFIX + topic);
     }
 
     @Override
     public void deleteAllStatus() {
-        Jedis jedis = RedisDB.getConnection();
-        Set<String> keys = jedis.keys("status-*");
+        Set<String> keys = _jedis.keys("status-*");
         Iterator<String> iter = keys.iterator();
         while (iter.hasNext()) {
-            jedis.del(iter.next());
+            _jedis.del(iter.next());
         }
     }
 }

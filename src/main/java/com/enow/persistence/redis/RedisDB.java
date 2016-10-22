@@ -20,14 +20,14 @@ public class RedisDB implements IRedisDB {
     private static RedisDB instance;
     private static Jedis connection;
 
-    public static RedisDB getInstance(String IP, int PORT) {
+    static public RedisDB getInstance(String IP, int PORT) {
         if(instance == null) {
             instance = new RedisDB(IP, PORT);
         }
         return instance;
     }
 
-    public static Jedis getConnection(String IP, int PORT) {
+    static public Jedis getConnection(String IP, int PORT) {
         return getInstance(IP, PORT).connection;
     }
 
@@ -61,47 +61,55 @@ public class RedisDB implements IRedisDB {
     @Override
     public NodeDTO jsonObjectToNode(JSONObject jsonObject){
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         return dao.jsonObjectToNode(jsonObject);
     }
     @Override
     public String addNode(NodeDTO dto) {
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         return dao.addNode(dto);
     }
 
     @Override
     public NodeDTO getNode(String ID){
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         return dao.getNode(ID);
     }
 
     @Override
     public List<NodeDTO> getAllNodes() {
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         return dao.getAllNodes();
     }
 
     @Override
     public void updateNode(NodeDTO dto) {
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         dao.updateNode(dto);
     }
 
     @Override
     public void updateRefer(NodeDTO dto) {
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         dao.updateRefer(dto);
     }
 
     @Override
     public void deleteNode(String ID) {
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         dao.deleteNode(ID);
     }
 
     @Override
     public void deleteAllNodes() {
         INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
         dao.deleteAllNodes();
     }
 
@@ -114,36 +122,42 @@ public class RedisDB implements IRedisDB {
     @Override
     public String addStatus(StatusDTO dto) {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        dao.setJedisConnection(connection);
         return dao.addStatus(dto);
     }
 
     @Override
     public StatusDTO getStatus(String topic) {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        dao.setJedisConnection(connection);
         return dao.getStatus(topic);
     }
 
     @Override
     public List<StatusDTO> getAllStatus() {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        dao.setJedisConnection(connection);
         return dao.getAllStatus();
     }
 
     @Override
     public void updateStatus(StatusDTO dto) {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        dao.setJedisConnection(connection);
         dao.updateStatus(dto);
     }
 
     @Override
     public void deleteStatus(String topic) {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        dao.setJedisConnection(connection);
         dao.deleteStatus(topic);
     }
 
     @Override
     public void deleteAllStatus() {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
+        dao.setJedisConnection(connection);
         dao.deleteAllStatus();
     }
 }
