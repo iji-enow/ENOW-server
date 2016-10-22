@@ -23,7 +23,6 @@ import java.util.UUID;
 public class RemoteSubmitter {
     private static final String[] TOPICS = new String[]{"event", "proceed", "order", "trigger", "status"};
     // private static final String zkhost = "192.168.99.100:2181";
-    private static final String zkhost = "127.0.0.1:2181";
     private LocalCluster cluster = new LocalCluster();
     public static void main(String[] args) throws Exception {
         RedisDB.getInstance(args[4], Integer.parseInt(args[5])).deleteAllNodes();
@@ -32,8 +31,8 @@ public class RemoteSubmitter {
     }
 
     protected void runMain(String[] args) throws Exception {
-        submitTopologyRemoteCluster(args[0], getTriggerTopology(), getConfig(args));
-        submitTopologyRemoteCluster(args[1], getActionTopology(), getConfig(args));
+        submitTopologyRemoteCluster(args[0], getTriggerTopology(args[7]), getConfig(args));
+        submitTopologyRemoteCluster(args[1], getActionTopology(args[7]), getConfig(args));
     }
 
     protected void submitTopologyRemoteCluster(String arg, StormTopology topology, Config config) throws Exception {
@@ -62,7 +61,7 @@ public class RemoteSubmitter {
         return config;
     }
 
-    protected StormTopology getTriggerTopology() {
+    protected StormTopology getTriggerTopology(String zkhost) {
         BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
         // event spouts setting
@@ -93,7 +92,7 @@ public class RemoteSubmitter {
         builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).shuffleGrouping("staging-bolt");
         return builder.createTopology();
     }
-    protected StormTopology getActionTopology() {
+    protected StormTopology getActionTopology(String zkhost) {
         BrokerHosts hosts = new ZkHosts(zkhost);
         TopologyBuilder builder = new TopologyBuilder();
         // trigger spouts setting

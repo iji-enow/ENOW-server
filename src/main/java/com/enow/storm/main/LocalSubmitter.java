@@ -73,8 +73,8 @@ public class LocalSubmitter {
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("executing-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
 
-        RedisDB.getInstance().deleteAllNodes();
-        // RedisDB.getInstance().deleteAllStatus();
+        RedisDB.getInstance("localhost", 6379).deleteAllNodes();
+        RedisDB.getInstance("localhost", 6379).deleteAllStatus();
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("TriggerTopology", config, builder.createTopology());
