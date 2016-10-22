@@ -23,6 +23,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 	protected static final Logger _LOG = LogManager.getLogger(CallingTriggerBolt.class);
 	private OutputCollector collector;
 	private Properties props;
+	private Producer<String, String> producer;
 
 	@Override
 
@@ -44,7 +45,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		JSONObject _jsonError = new JSONObject();
 		boolean errorCheck = false;
 		
-		Producer<String, String> producer = new KafkaProducer<String, String>(props);
+		producer = new KafkaProducer<String, String>(props);
 
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
