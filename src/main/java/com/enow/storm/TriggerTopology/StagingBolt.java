@@ -32,11 +32,16 @@ import com.mongodb.client.MongoDatabase;
 public class StagingBolt extends BaseRichBolt {
 	protected static final Logger _LOG = LogManager.getLogger(StagingBolt.class);
 	private OutputCollector collector;
+	private MongoDAO mongoDao;
+	private String mongoIp;
+	private int mongoPort;
 
 	@Override
 
-	public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
+		this.mongoIp = (String)conf.get("mongodb.ip");
+		this.mongoPort = (int)conf.get("mongodb.port");
 	}
 
 	@Override
@@ -55,8 +60,8 @@ public class StagingBolt extends BaseRichBolt {
 		JSONArray orderNodeArray;
 		JSONArray lastNodeArray;
 		JSONParser parser = new JSONParser();
-		MongoDAO mongoDao;
 		JSONObject _jsonError = new JSONObject();
+		JSONObject _jsonStop = new JSONObject();
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
@@ -65,7 +70,10 @@ public class StagingBolt extends BaseRichBolt {
 			//if _jsonObject contains key error it means indexingBolt occured an error log error : 1
 			_jsonError.put("error", "true");
 			_jsonArray.add(_jsonError);
-		} else {
+		} else if(_jsonObject.containsKey("error")){
+			_jsonStop.put("stop", "true");
+			_jsonArray.add(_jsonStop);
+		}else {
 			try {
 				// connecting to MongoDB with docker ip address 192.168.99.100 and port 27017
 				// mongoDao = new MongoDAO("192.168.99.100",27017);

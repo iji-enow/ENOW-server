@@ -43,7 +43,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		JSONObject _jsonError = new JSONObject();
-		boolean errorCheck = false;
+		boolean errorStopCheck = false;
 		
 		producer = new KafkaProducer<String, String>(props);
 
@@ -54,10 +54,13 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		if(_jsonArray.size() == 0){
 			//if _jsonArray has no value log error : 1
 			_LOG.warn("noValueEntered");
-			errorCheck = true;
+			errorStopCheck = true;
 		}else if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("error")){
 			//if _jsonArray.get(0).containsKey("error") it means indexingBolt or StagingBolt occured an error log error : 2
-			errorCheck = true;
+			errorStopCheck = true;
+		}else if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("stop")){
+			//if _jsonArray.get(0).containsKey("error") it means indexingBolt or StagingBolt occured an error log error : 2
+			errorStopCheck = true;
 		}else{
 			//repeat producing json String in _jsonArray
 			for (JSONObject tmpJsonObject : _jsonArray) {
@@ -66,7 +69,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 				producer.send(data);
 				collector.emit(new Values(tmpJsonObject.toJSONString()));
 			}
-			errorCheck = false;
+			errorStopCheck = false;
 		}
 		
 		
@@ -75,7 +78,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 			collector.ack(input);
 			//log exited roadMapId and nodeId if error has not occured 
 			
-			if(errorCheck){
+			if(errorStopCheck){
 				
 			}else{
 				for(JSONObject tmp : _jsonArray){
