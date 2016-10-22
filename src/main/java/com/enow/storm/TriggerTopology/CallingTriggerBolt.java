@@ -33,7 +33,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		props = new Properties();
 		props.put("producer.type", "sync");
 		props.put("batch.size", "1");
-		//props.put("bootstrap.servers", "192.168.99.100:9092");
+//		props.put("bootstrap.servers", "192.168.99.100:9092");
 		props.put("bootstrap.servers", "127.0.0.1:9092");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");

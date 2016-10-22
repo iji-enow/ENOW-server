@@ -55,12 +55,13 @@ public class IndexingBolt extends BaseRichBolt {
 			//input tuple has a value
 			
 			String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
-			
+
 			
 			try {
+				// connecting to MongoDB with docker ip address 192.168.99.100 and port 27017
 				// mongoDao = new MongoDAO("192.168.99.100",27017);
 				
-				//connecting to MongoDB with ip address 127.0.0.1 and port 27017
+				// connecting to MongoDB with ip address 127.0.0.1 and port 27017
 				mongoDao = new MongoDAO("127.0.0.1", 27017);
 				
 				if (input.getSourceComponent().equals("event-spout")) {

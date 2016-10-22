@@ -26,14 +26,14 @@ public class RemoteSubmitter {
     private static final String zkhost = "127.0.0.1:2181";
     private LocalCluster cluster = new LocalCluster();
     public static void main(String[] args) throws Exception {
-        RedisDB.getInstance().deleteAllNodes();
-        // RedisDB.getInstance().deleteAllStatus();
+        RedisDB.getInstance(args[4], Integer.parseInt(args[5])).deleteAllNodes();
+        RedisDB.getInstance(args[4], Integer.parseInt(args[5])).deleteAllStatus();
         new RemoteSubmitter().runMain(args);
     }
 
     protected void runMain(String[] args) throws Exception {
-        submitTopologyRemoteCluster(args[0], getTriggerTopology(), getConfig());
-        submitTopologyRemoteCluster(args[1], getActionTopology(), getConfig());
+        submitTopologyRemoteCluster(args[0], getTriggerTopology(), getConfig(args));
+        submitTopologyRemoteCluster(args[1], getActionTopology(), getConfig(args));
     }
 
     protected void submitTopologyRemoteCluster(String arg, StormTopology topology, Config config) throws Exception {
@@ -50,8 +50,13 @@ public class RemoteSubmitter {
         }
     }
 
-    protected Config getConfig() {
+    protected Config getConfig(String[] args) {
         Config config = new Config();
+        config.put("mongodb.ip", args[2]);
+        config.put("mongodb.port", Integer.parseInt(args[3]));
+        config.put("redis.ip", args[4]);
+        config.put("redis.port", Integer.parseInt(args[5]));
+        config.put("kafka.properties", args[6]);
         config.setDebug(true);
         config.setNumWorkers(2);
         return config;
@@ -75,7 +80,7 @@ public class RemoteSubmitter {
         orderConfig.scheme = new SchemeAsMultiScheme(new StringScheme());
         orderConfig.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
         orderConfig.ignoreZkOffsets = true;
-        //  kafka.api.OffsetRequest.LatestTime()
+        // kafka.api.OffsetRequest.LatestTime()
         // Set spouts
         builder.setSpout("event-spout", new KafkaSpout(eventConfig));
         builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));

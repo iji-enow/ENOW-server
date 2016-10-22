@@ -20,20 +20,20 @@ public class RedisDB implements IRedisDB {
     private static RedisDB instance;
     private static Jedis connection;
 
-    public static RedisDB getInstance() {
+    public static RedisDB getInstance(String IP, int PORT) {
         if(instance == null) {
-            instance = new RedisDB();
+            instance = new RedisDB(IP, PORT);
         }
         return instance;
     }
 
-    public static Jedis getConnection() {
-        return getInstance().connection;
+    public static Jedis getConnection(String IP, int PORT) {
+        return getInstance(IP, PORT).connection;
     }
 
-    public RedisDB() {
-        //connection = new Jedis("192.168.99.100", 6379);
-        connection = new Jedis("127.0.0.1", 6379);
+    public RedisDB(String IP, int PORT) {
+        // connection = new Jedis("192.168.99.100", 6379);
+        connection = new Jedis(IP, PORT);
     }
 
     // public void setTestDb() {connection.select(10);}

@@ -28,8 +28,10 @@ public class ProvisioningBolt extends BaseRichBolt {
     private OutputCollector _collector;
 
     @Override
-    public void prepare(Map MongoConf, TopologyContext context, OutputCollector collector) {
-        _redis = RedisDB.getInstance();
+    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+        String redisIp = (String) conf.get("redis.ip");
+        int redisPort = (int) conf.get("redis.port");
+        _redis = RedisDB.getInstance(redisIp, redisPort);
         _collector = collector;
     }
 

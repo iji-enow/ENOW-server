@@ -67,15 +67,16 @@ public class StagingBolt extends BaseRichBolt {
 			_jsonArray.add(_jsonError);
 		} else {
 			try {
+				// connecting to MongoDB with docker ip address 192.168.99.100 and port 27017
 				// mongoDao = new MongoDAO("192.168.99.100",27017);
 				
-				//connecting to MongoDB with ip address 127.0.0.1 and port 27017
+				// connecting to MongoDB with ip address 127.0.0.1 and port 27017
 				mongoDao = new MongoDAO("127.0.0.1", 27017);
 
-				//connecting to execute collection in enow db
+				// connecting to execute collection in enow db
 				mongoDao.setDBCollection("enow", "execute");
 
-				//get document which roadMapId equals to _jsonObject.get("roadMapId")
+				// get document which roadMapId equals to _jsonObject.get("roadMapId")
 				iterable = mongoDao.find(new Document("roadMapId", (String) _jsonObject.get("roadMapId")));
 
 				if (_jsonObject.get("spoutName").equals("event")) {
@@ -223,12 +224,13 @@ public class StagingBolt extends BaseRichBolt {
 						_jsonArray.add(_jsonError);
 					}
 				} else if (_jsonObject.get("spoutName").equals("proceed")) {
-					//input from proceed kafka
+					// input from proceed kafka
 					
 					try {
 						roadMapId = (JSONObject) jsonParser.parse(iterable.first().toJson());
 
-						//get nodeIds,initNode,incomingNode,outingNode,lastNode from document which roadMapId equals to _jsonObject.get("roadMapId")
+						// get nodeIds,initNode,incomingNode,outingNode,lastNode
+						// from document which roadMapId equals to _jsonObject.get("roadMapId")
 						nodeIds = (JSONObject) roadMapId.get("nodeIds");
 						initNodeArray = (JSONArray) roadMapId.get("initNode");
 						incomingNode = (JSONObject) roadMapId.get("incomingNode");
