@@ -31,13 +31,13 @@ public class CallingFeedBolt extends BaseRichBolt {
 	private Properties _props;
 
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+		String kafkaProperties = (String) conf.get("kafka.properties");
 		_collector = collector;
 		_props = new Properties();
 		_props.put("producer.type", "sync");
 		_props.put("batch.size", "1");
-		// _props.put("bootstrap.servers", "192.168.99.100:9092");
-		_props.put("bootstrap.servers", "127.0.0.1:9092");
+		_props.put("bootstrap.servers", kafkaProperties);
 		_props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		_props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		_producer = new KafkaProducer<>(_props);

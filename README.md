@@ -45,6 +45,7 @@ These are the new features you should expect in the coming months:
 - [x] ~~Connect Apache Storm to Console~~
 - [x] ~~Connect Apache Storm to Devices~~
 - [x] ~~Build on `StormSubmitter`~~
+- [ ] Starting Apache Storm Server on ENOW-Console
 - [ ] Send Info of Storm UI to ENOW-Console
 
 [Apache Storm](http://storm.apache.org/)

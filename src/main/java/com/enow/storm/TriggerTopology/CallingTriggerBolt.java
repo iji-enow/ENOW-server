@@ -26,15 +26,15 @@ public class CallingTriggerBolt extends BaseRichBolt {
 
 	@Override
 
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+		String kafkaProperties = (String) conf.get("kafka.properties");
 		this.collector = collector;
 		
 		//set kafka properties
 		props = new Properties();
 		props.put("producer.type", "sync");
 		props.put("batch.size", "1");
-//		props.put("bootstrap.servers", "192.168.99.100:9092");
-		props.put("bootstrap.servers", "127.0.0.1:9092");
+		props.put("bootstrap.servers", kafkaProperties);
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 	}
