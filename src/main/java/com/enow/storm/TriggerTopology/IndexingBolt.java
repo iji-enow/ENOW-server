@@ -304,6 +304,8 @@ class StoppingRoadMap extends Thread {
 
 		// 여기서 아까 전에 넣어 놨던 roadMapId를 redis에서 지워지는 작업을 하면 되요.
 		// roadMapId는 this.roadMapId를 쓰시면 되요.
+		// 그리고 원래 실행할때 필요하던 node-roadMapId-nodeId중 roadMapId가 this.roadMapId이랑 같은 것들도
+		// redis에서 지워줘야 되요.
 
 	}
 }
