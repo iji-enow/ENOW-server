@@ -37,7 +37,7 @@ These are the new features you should expect in the coming months:
 - [x] ~~Making Connection between Ponte and Kafka~~
 - [x] ~~Sending a message from Device(or Android) to Android(or Device) via ENOW System~~
 - [x] ~~Not using LocalCluster, But using `StormSubmitter`~~
-- [x] Make Trigger & Status topologies
+- [x] ~~Make Trigger & Status topologies~~
 - [x] ~~Connect Apache Storm to Redis~~
 - [x] ~~Create test Document on MongoDB~~
 - [x] ~~Connect Apache Storm to MongoDB~~
