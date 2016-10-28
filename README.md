@@ -20,12 +20,9 @@ How to use
   ```bash
   mvn clean package -P cluster
   ```
-  **2. Run Server**
+  **2. Run Server on Cluster**
   ```bash
-  $STORM_HOME/bin/storm jar ./target/enow-storm-1.0.jar \\
-  com.enow.storm.main.main Trigger Action \\
-  -c storm.local.hostname=\"nimbus\" \\
-  -c nimbus.seeds=\"[\\\"192.168.99.100\\\"]\"
+  $STORM_HOME/bin/storm jar ./target/enow-storm-1.0.jar com.enow.storm.main.RemoteSubmitter Trigger Action -c storm.local.hostname=\"nimbus\" -c nimbus.seeds=\"[\\\"HOST_IP\\\"]\"
   ```
 - Or you can simply use docker-compose to run ENOW-Server.
 
