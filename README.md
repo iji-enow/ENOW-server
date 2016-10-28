@@ -16,7 +16,7 @@ How to use
 - If you would like to implement ENOW-Server locally with IDE like eclipse, IntelliJ, run LocalSubmitter.
 
 - Or you can use this command on the ENOW-Server directory.
-  **1. Build First**
+  **1. Packaging Server**
   ```bash
   mvn clean package -P cluster
   ```
