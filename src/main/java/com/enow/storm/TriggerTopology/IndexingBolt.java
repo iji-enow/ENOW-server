@@ -3,6 +3,8 @@ package com.enow.storm.TriggerTopology;
 import java.net.UnknownHostException;
 import java.util.Map;
 
+import com.enow.persistence.redis.IRedisDB;
+import com.enow.persistence.redis.RedisDB;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -27,14 +29,18 @@ public class IndexingBolt extends BaseRichBolt {
 	private MongoDAO mongoDao;
 	private String mongoIp;
 	private int mongoPort;
-
+	private IRedisDB _redis;
+	private String redisIp;
+	private int redisPort;
 	@Override
 
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 		this.mongoIp = (String) conf.get("mongodb.ip");
 		this.mongoPort = (int) conf.get("mongodb.port");
-
+		this.redisIp = (String) conf.get("redis.ip");
+		this.redisPort = (int) conf.get("redis.port");
+		_redis = RedisDB.getInstance(redisIp, redisPort);
 	}
 
 	@Override
@@ -59,7 +65,6 @@ public class IndexingBolt extends BaseRichBolt {
 			
 			String msg = input.getValues().toString().substring(1, input.getValues().toString().length() - 1);
 
-			
 			try {
 				// connecting to MongoDB with docker ip address 192.168.99.100 and port 27017
 				// mongoDao = new MongoDAO("192.168.99.100",27017);
@@ -76,34 +81,38 @@ public class IndexingBolt extends BaseRichBolt {
 						if (_jsonObject.containsKey("roadMapId") && _jsonObject.containsKey("status")) {
 							//check whether _jsonObject from event kafka has all necessary keys
 							if(_jsonObject.get("status").equals("start")){	
-								//if()안에 (String)_jsonObject.get("roadMapId")가 
-								//redis에 node-stop-roadMapId의 roadMapId와 일치한다면 을 넣어주세요 
+								// if()안에 (String)_jsonObject.get("roadMapId")가
+								// redis에 node-stop-roadMapId의 roadMapId와 일치한다면 을 넣어주세요
 								if(false){
 									_jsonStop.put("stop", "true");
 									_jsonObject = _jsonError;
 									_LOG.warn("stop:1");
 								}else{
-								_jsonObject.put("spoutName", "event");
+									_jsonObject.put("spoutName", "event");
 								}
 							}else{		
 								//////////////////////////////////////////////////////////////////////////
-								//삭제 시나리오.
-								//redis에 node-stop-roadMapId를 넣어놓고 (roadMapId는 (String)_jsonObject.get("roadMapId");를 사용해서 갖고 오면 된다.)
-								//5초동안 thread를 만들어서 5초 후에 redis에 넣어 놓은 node-stop-roadMapId를 지운다
-								//thead에서 5초가 도는 동안 indexingBolt로 들어오는 값들 중 roadMapId가 thread에 넣어 놓은 roadMapId 값과 일치
-								//하는 값은 무시한다.
+								// 삭제 시나리오.
+								// redis에 node-stop-roadMapId를 넣어놓고
+								// (roadMapId는 (String)_jsonObject.get("roadMapId");를 사용해서 갖고 오면 된다.)
+								// 5초동안 thread를 만들어서 5초 후에 redis에 넣어 놓은 node-stop-roadMapId를 지운다
+								// thead에서 5초가 도는 동안 indexingBolt로 들어오는 값들 중 roadMapId가 thread에 넣어 놓은 roadMapId 값과 일치
+								// 하는 값은 무시한다.
+
 								
-								
-								//여기에 node-stop-roadMapId(이건 그냥 형 마음대로 다른 redis에 들어가 있는 값이랑만 차이가 있음 되요)를 
-								//redis에 추가하는 코드를 넣어주시면 되요 
-								stoppingRoadMap = new StoppingRoadMap((String)_jsonObject.get("roadMapId"));
+								// 여기에 node-stop-roadMapId(이건 그냥 형 마음대로 다른 redis에 들어가 있는 값이랑만 차이가 있음 되요)를
+								// redis에 추가하는 코드를 넣어주시면 되요
+
+								// 레디스에 추가하는 코드
+								String stoppingRoadMapID = (String)_jsonObject.get("roadMapId");
+
+								_redis.addTerminate(stoppingRoadMapID);
+
+								stoppingRoadMap = new StoppingRoadMap(stoppingRoadMapID, _redis);
 								
 								stoppingRoadMap.start();
-								
-								_jsonObject.get("roadMapId");
-								
-								
-								
+
+
 								//////////////////////////////////////////////////////////////////////////
 							}
 						} else {
@@ -128,10 +137,10 @@ public class IndexingBolt extends BaseRichBolt {
 								&& _jsonObject.containsKey("brokerId") && _jsonObject.containsKey("roadMapId")
 								&& _jsonObject.containsKey("deviceId") && _jsonObject.containsKey("payload")) {
 							//check whether _jsonObject from order kafka has all necessary keys
-							
+							String stoppingRoadMapID = (String)_jsonObject.get("roadMapId");
 							//if()안에 (String)_jsonObject.get("roadMapId")가 
 							//redis에 node-stop-roadMapId의 roadMapId와 일치한다면 을 넣어주세요 
-							if (false) {
+							if (_redis.isTerminate(stoppingRoadMapID)) {
 								_jsonStop.put("stop", "true");
 								_jsonObject = _jsonError;
 								_LOG.warn("stop:2");
@@ -237,8 +246,10 @@ public class IndexingBolt extends BaseRichBolt {
 							//check whether _jsonObject form proceed kafka has all necessary keys
 
 							//if()안에 (String)_jsonObject.get("roadMapId")가 
-							//redis에 node-stop-roadMapId의 roadMapId와 일치한다면 을 넣어주세요 
-							if(false){
+							//redis에 node-stop-roadMapId의 roadMapId와 일치한다면 을 넣어주세요
+							String stoppingRoadMapID = (String)_jsonObject.get("roadMapId");
+
+							if(_redis.isTerminate(stoppingRoadMapID)){
 								_jsonStop.put("stop", "true");
 								_jsonObject = _jsonError;
 								_LOG.warn("stop:3");
@@ -289,9 +300,11 @@ public class IndexingBolt extends BaseRichBolt {
 
 class StoppingRoadMap extends Thread {
 	String roadMapId;
+	IRedisDB _redis;
 
-	public StoppingRoadMap(String roadMapId) {
+	public StoppingRoadMap(String roadMapId, IRedisDB _redis) {
 		this.roadMapId = roadMapId;
+		this._redis = _redis;
 	}
 
 	public void run() {
@@ -306,6 +319,8 @@ class StoppingRoadMap extends Thread {
 		// roadMapId는 this.roadMapId를 쓰시면 되요.
 		// 그리고 원래 실행할때 필요하던 node-roadMapId-nodeId중 roadMapId가 this.roadMapId이랑 같은 것들도
 		// redis에서 지워줘야 되요.
+
+		_redis.deleteTerminate(roadMapId);
 
 	}
 }

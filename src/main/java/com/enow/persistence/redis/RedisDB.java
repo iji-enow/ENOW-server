@@ -5,9 +5,11 @@ package com.enow.persistence.redis;
  */
 import com.enow.daos.redisDAO.INodeDAO;
 import com.enow.daos.redisDAO.IStatusDAO;
+import com.enow.daos.redisDAO.ITerminateDAO;
 import com.enow.persistence.dto.NodeDTO;
 import com.enow.facility.DAOFacility;
 import com.enow.persistence.dto.StatusDTO;
+import com.enow.persistence.dto.TerminateDTO;
 import org.json.simple.JSONObject;
 import redis.clients.jedis.Jedis;
 
@@ -159,5 +161,29 @@ public class RedisDB implements IRedisDB {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
         dao.setJedisConnection(connection);
         dao.deleteAllStatus();
+    }
+
+    @Override
+    public String addTerminate(String roadMapID) {
+        ITerminateDAO dao = DAOFacility.getInstance().createTerminateDAO();
+        dao.setJedisConnection(connection);
+        return dao.addTerminate(roadMapID);
+    }
+
+    @Override
+    public boolean isTerminate(String roadMapID) {
+        ITerminateDAO dao = DAOFacility.getInstance().createTerminateDAO();
+        dao.setJedisConnection(connection);
+        return dao.isTerminate(roadMapID);
+    }
+    public void deleteAllTerminate() {
+        ITerminateDAO dao = DAOFacility.getInstance().createTerminateDAO();
+        dao.setJedisConnection(connection);
+        dao.deleteAllTerminate();
+    }
+    public void deleteTerminate(String roadMapID) {
+        ITerminateDAO dao = DAOFacility.getInstance().createTerminateDAO();
+        dao.setJedisConnection(connection);
+        dao.deleteTerminate(roadMapID);
     }
 }
