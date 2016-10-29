@@ -70,7 +70,7 @@ public class StagingBolt extends BaseRichBolt {
 			//if _jsonObject contains key error it means indexingBolt occured an error log error : 1
 			_jsonError.put("error", "true");
 			_jsonArray.add(_jsonError);
-		} else if(_jsonObject.containsKey("error")){
+		} else if(_jsonObject.containsKey("stop")){
 			_jsonStop.put("stop", "true");
 			_jsonArray.add(_jsonStop);
 		}else {
