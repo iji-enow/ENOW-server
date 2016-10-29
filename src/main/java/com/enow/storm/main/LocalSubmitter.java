@@ -28,6 +28,11 @@ public class LocalSubmitter {
     public static void main(String[] args) throws Exception{
         Config config = new Config();
         config.setDebug(true);
+        config.put("mongodb.ip", "127.0.0.1");
+        config.put("mongodb.port", 27017);
+        config.put("redis.ip", "127.0.0.1");
+        config.put("redis.port", 6379);
+        config.put("kafka.properties", "127.0.0.1:9092");
         config.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
         String zkConnString = "localhost:2181";
         BrokerHosts brokerHosts = new ZkHosts(zkConnString);
@@ -73,7 +78,7 @@ public class LocalSubmitter {
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("executing-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
 
-        RedisDB.getInstance("localhost", 6379).clear();
+        RedisDB.getInstance("127.0.0.1", 6379).clear();
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("TriggerTopology", config, builder.createTopology());
