@@ -15,12 +15,12 @@ public class MongoDAO implements IMongoDAO{
 	private MongoCollection<Document> collection;
 	private MongoDatabase dbWrite;
 	
-	public MongoDAO(String url,int port) throws UnknownHostException {
+	public MongoDAO(String url, int port) throws UnknownHostException {
 		mongoClient = new MongoClient(url,port);
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 	}
 	
-	public void setDBCollection(String dataBaseName,String collectionName){
+	public void setDBCollection(String dataBaseName, String collectionName){
 		dbWrite = mongoClient.getDatabase(dataBaseName);
 		collection = dbWrite.getCollection(collectionName);
 	}

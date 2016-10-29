@@ -23,18 +23,19 @@ public class CallingTriggerBolt extends BaseRichBolt {
 	protected static final Logger _LOG = LogManager.getLogger(CallingTriggerBolt.class);
 	private OutputCollector collector;
 	private Properties props;
+	private Producer<String, String> producer;
 
 	@Override
 
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+		String kafkaProperties = (String) conf.get("kafka.properties");
 		this.collector = collector;
 		
 		//set kafka properties
 		props = new Properties();
 		props.put("producer.type", "sync");
 		props.put("batch.size", "1");
-		//props.put("bootstrap.servers", "192.168.99.100:9092");
-		props.put("bootstrap.servers", "127.0.0.1:9092");
+		props.put("bootstrap.servers", kafkaProperties);
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 	}
@@ -42,9 +43,9 @@ public class CallingTriggerBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		JSONObject _jsonError = new JSONObject();
-		boolean errorCheck = false;
+		boolean errorStopCheck = false;
 		
-		Producer<String, String> producer = new KafkaProducer<String, String>(props);
+		producer = new KafkaProducer<String, String>(props);
 
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
@@ -53,10 +54,13 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		if(_jsonArray.size() == 0){
 			//if _jsonArray has no value log error : 1
 			_LOG.warn("noValueEntered");
-			errorCheck = true;
+			errorStopCheck = true;
 		}else if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("error")){
 			//if _jsonArray.get(0).containsKey("error") it means indexingBolt or StagingBolt occured an error log error : 2
-			errorCheck = true;
+			errorStopCheck = true;
+		}else if(_jsonArray.size() == 1 && _jsonArray.get(0).containsKey("stop")){
+			//if _jsonArray.get(0).containsKey("error") it means indexingBolt or StagingBolt occured an error log error : 2
+			errorStopCheck = true;
 		}else{
 			//repeat producing json String in _jsonArray
 			for (JSONObject tmpJsonObject : _jsonArray) {
@@ -65,7 +69,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 				producer.send(data);
 				collector.emit(new Values(tmpJsonObject.toJSONString()));
 			}
-			errorCheck = false;
+			errorStopCheck = false;
 		}
 		
 		
@@ -74,7 +78,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 			collector.ack(input);
 			//log exited roadMapId and nodeId if error has not occured 
 			
-			if(errorCheck){
+			if(errorStopCheck){
 				
 			}else{
 				for(JSONObject tmp : _jsonArray){

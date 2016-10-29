@@ -44,6 +44,7 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
 	}
 }
 /*
+// test code for not existing python code
 public class ExecutingBolt extends BaseRichBolt {
     // This Bolt is for Test
     protected static final Logger _LOG = LogManager.getLogger(ProvisioningBolt.class);

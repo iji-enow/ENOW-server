@@ -1,9 +1,6 @@
 package com.enow.facility;
 
-import com.enow.daos.redisDAO.INodeDAO;
-import com.enow.daos.redisDAO.IStatusDAO;
-import com.enow.daos.redisDAO.NodeDAO;
-import com.enow.daos.redisDAO.StatusDAO;
+import com.enow.daos.redisDAO.*;
 
 /**
  * Created by writtic on 2016. 9. 12..
@@ -16,7 +13,7 @@ public class DAOFacility implements IDAOFacility {
      * Constructor
      */
     private DAOFacility(){
-
+        
     }
 
     /**
@@ -48,6 +45,16 @@ public class DAOFacility implements IDAOFacility {
     @Override
     public IStatusDAO createStatusDAO() {
         return new StatusDAO();
+    }
+
+    /**
+     * Creates a new TerminateDAO
+     *
+     * @return StatusDAO that implements ITerminateDAO
+     */
+    @Override
+    public ITerminateDAO createTerminateDAO() {
+        return new TerminateDAO();
     }
 
 }

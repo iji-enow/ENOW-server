@@ -2,6 +2,7 @@ package com.enow.daos.redisDAO;
 
 import com.enow.persistence.dto.StatusDTO;
 import org.json.simple.JSONObject;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
 
@@ -9,6 +10,7 @@ import java.util.List;
  * Created by writtic on 2016. 9. 13..
  */
 public interface IStatusDAO {
+    void setJedisConnection(Jedis jedis);
     /**
      * change jsonObject to StatusDTO,
      *

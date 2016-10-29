@@ -5,6 +5,7 @@ package com.enow.persistence.redis;
  */
 import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.dto.StatusDTO;
+import com.enow.persistence.dto.TerminateDTO;
 import org.json.simple.JSONObject;
 
 import java.util.List;
@@ -33,4 +34,8 @@ public interface IRedisDB {
     void deleteStatus(String topic);
     void deleteAllStatus();
 
+    String addTerminate(String roadMapID);
+    boolean isTerminate(String roadMapID);
+    void deleteAllTerminate();
+    void deleteTerminate(String roadMapID);
 }
