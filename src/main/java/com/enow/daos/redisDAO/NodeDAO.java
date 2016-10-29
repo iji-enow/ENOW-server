@@ -138,6 +138,10 @@ public class NodeDAO implements INodeDAO {
     }
     @Override
     public void deleteNode(String ID) {
-        _jedis.del(NODE_PREFIX + ID);
+        Set<String> keys = _jedis.keys("node-" + ID + "-*");
+        Iterator<String> iter = keys.iterator();
+        while (iter.hasNext()) {
+            _jedis.del(iter.next());
+        }
     }
 }
