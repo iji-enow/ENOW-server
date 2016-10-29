@@ -181,6 +181,7 @@ class ExecutingBolt(storm.BasicBolt):
             self.Building.setPreviousData(previousData.encode("ascii"))
             self.Building.setPath(l_mapId_hashed_string.encode("ascii"))
             tmp = self.Building.run()
+            
             jsonObject["previousData"] = "null"
             # Verify the result whether the execution succeed or not
             if tmp == "":

@@ -7,7 +7,7 @@
 		<Kafka name="Kafka" topic="log">
 			<PatternLayout
 				pattern="%-5level|%logger{2}|%msg%n" />
-			<Property name="bootstrap.servers">192.168.99.100:9092</Property>
+			<Property name="bootstrap.servers">127.0.0.1:9092</Property>
 		</Kafka>
 		<File name="EnowFile" fileName="logs/enow.log">
 			<PatternLayout pattern = "%-5level|%logger{2}|%msg%n"/>

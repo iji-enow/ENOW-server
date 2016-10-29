@@ -34,7 +34,8 @@ public class StatusBolt extends BaseRichBolt {
     @Override
     public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
         String redisIp = (String) conf.get("redis.ip");
-        int redisPort = (int) conf.get("redis.port");
+        Long lredisPort = (Long) conf.get("redis.port");
+        int  redisPort = lredisPort.intValue();
         _redis = RedisDB.getInstance(redisIp, redisPort);
         _parser = new JSONParser();
         _collector = collector;

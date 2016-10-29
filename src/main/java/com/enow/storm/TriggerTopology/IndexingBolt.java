@@ -37,9 +37,11 @@ public class IndexingBolt extends BaseRichBolt {
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 		this.mongoIp = (String) conf.get("mongodb.ip");
-		this.mongoPort = (int) conf.get("mongodb.port");
+		Long lmongoPort = (Long) conf.get("mongodb.port");
+		this.mongoPort = lmongoPort.intValue();
 		this.redisIp = (String) conf.get("redis.ip");
-		this.redisPort = (int) conf.get("redis.port");
+		Long lredisPort = (Long) conf.get("redis.port");
+        this.redisPort = lredisPort.intValue();
 		_redis = RedisDB.getInstance(redisIp, redisPort);
 	}
 
@@ -91,14 +93,18 @@ public class IndexingBolt extends BaseRichBolt {
 									_jsonObject.put("spoutName", "event");
 								}
 							}else{		
-								
 								String stoppingRoadMapID = (String)_jsonObject.get("roadMapId");
+								
 
 								_redis.addTerminate(stoppingRoadMapID);
 
 								stoppingRoadMap = new StoppingRoadMap(stoppingRoadMapID, _redis);
 								
 								stoppingRoadMap.start();
+								
+								_jsonStop.put("stop", "true");
+								_jsonObject = _jsonStop;
+								_LOG.warn("stop:1");
 
 							}
 						} else {

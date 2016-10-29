@@ -41,7 +41,8 @@ public class StagingBolt extends BaseRichBolt {
 	public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
 		this.collector = collector;
 		this.mongoIp = (String)conf.get("mongodb.ip");
-		this.mongoPort = (int)conf.get("mongodb.port");
+		Long lmongoPort = (Long) conf.get("mongodb.port");
+		this.mongoPort = lmongoPort.intValue();
 	}
 
 	@Override
@@ -70,7 +71,7 @@ public class StagingBolt extends BaseRichBolt {
 			//if _jsonObject contains key error it means indexingBolt occured an error log error : 1
 			_jsonError.put("error", "true");
 			_jsonArray.add(_jsonError);
-		} else if(_jsonObject.containsKey("stop")){
+		}else if(_jsonObject.containsKey("stop")){
 			_jsonStop.put("stop", "true");
 			_jsonArray.add(_jsonStop);
 		}else {
@@ -114,6 +115,7 @@ public class StagingBolt extends BaseRichBolt {
 							//set appropriate value for necessary keys
 							tmpJsonObject = (JSONObject) parser.parse(jsonString);
 							tmpJsonObject.put("payload", null);
+							tmpJsonObject.put("initNode",true);
 							tmpJsonObject.put("previousData", null);
 							tmpJsonObject.put("order", false);
 							tmpJsonObject.put("nodeId", initNodeId);
@@ -189,6 +191,7 @@ public class StagingBolt extends BaseRichBolt {
 												+ tmpJsonObject.get("brokerId") + "/" + nodeId.get("deviceId"));
 								tmpJsonObject.put("verified", true);
 								tmpJsonObject.put("lambda", nodeId.get("lambda"));
+								tmpJsonObject.put("initNode",false);
 
 								tmpJsonObject.remove("corporationName");
 								tmpJsonObject.remove("serverId");
@@ -254,6 +257,7 @@ public class StagingBolt extends BaseRichBolt {
 						_jsonObject.put("verified", true);
 						_jsonObject.put("lambda", nodeId.get("lambda"));
 						_jsonObject.put("order", false);
+						_jsonObject.put("initNode",false);
 
 						_jsonObject.remove("spoutName");
 
@@ -305,6 +309,8 @@ public class StagingBolt extends BaseRichBolt {
 			
 			//log entered roadMapId and nodeId if error has not occured
 			if(_jsonArray.size() ==1 && _jsonArray.get(0).containsKey("error")){
+				
+			}else if(_jsonArray.size() ==1 && _jsonArray.get(0).containsKey("stop")){
 				
 			}else{
 				for (JSONObject tmp : _jsonArray) {			
