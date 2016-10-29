@@ -186,17 +186,16 @@ class ExecutingBolt(storm.BasicBolt):
             if tmp == "":
                 jsonObject["pyError"] = "true"
                 jsonObject["log"] = self.fileToLog(l_mapId_hashed_string)
-                ExecutingBolt.program_semaphore = 0
                 storm.emit([jsonObject])
             else:
                 jsonResult = json.loads(tmp, strict=False)
                 jsonObject["log"] = self.fileToLog(l_mapId_hashed_string)
                 jsonObject["payload"] = jsonResult
-                ExecutingBolt.program_semaphore = 0
                 storm.emit([jsonObject])
             # Handle the result and convert it to JSON object
         else:
             jsonObject["payload"] = ""
+            jsonObject["previousData"] = "null"
             storm.emit([jsonObject])
 
 # Start the bolt when it's invoked

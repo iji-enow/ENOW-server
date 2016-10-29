@@ -105,7 +105,7 @@ def Main():
             break
 
         mapId_hashed_string += codecs.encode(binaryString, 'utf-8')
-
+        
     if jsonDump != "null":
         _event = json.loads(jsonDump)
     _context = dict()
@@ -139,6 +139,8 @@ def Main():
 
     sys.stdout = old_stdout
     sys.stderr = old_stderr
+    
+    _event = json.loads("{ \"job\" : \"completed\" }")
     postProcess(_event, _context, _callback)
 
 if __name__ == "__main__":
