@@ -37,7 +37,7 @@ public class CallingTriggerBolt extends BaseRichBolt {
 		// props.put("batch.size", "1");
 		props.put("replica.fetch.max.bytes", "1500000");
 		props.put("message.max.bytes", "1500000");
-		props.put("max.request.size", "1500000");
+		props.put("fetch.message.max.bytes", "1500000");
 		props.put("bootstrap.servers", kafkaProperties);
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
