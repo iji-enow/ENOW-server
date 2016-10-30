@@ -97,7 +97,9 @@ public class SchedulingBolt extends BaseRichBolt {
 					String id;
 					for (String incomingNodeId : incomingNodes) {
 						id = _redis.toID(roadMapId, incomingNodeId);
-						_redis.deleteNode(id);
+						if(!incomingNodeId.equals(nodeId)) {
+							_redis.deleteNode(id);
+						}
 					}
 				}
 				_LOG.debug("This is initNode : " + _jsonObject.toJSONString());
