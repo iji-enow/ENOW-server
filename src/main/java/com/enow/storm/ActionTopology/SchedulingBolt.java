@@ -126,6 +126,7 @@ public class SchedulingBolt extends BaseRichBolt {
 						if (redundancy == null) {
 							JSONArray arr_temp = new JSONArray();
 							for (NodeDTO node : checker) {
+								// Update refer value for deleting
 								_redis.updateRefer(node);
 								try {
 									arr_temp.add(_parser.parse(node.getPayload()));

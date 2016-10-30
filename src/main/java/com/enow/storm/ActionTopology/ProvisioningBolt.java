@@ -68,9 +68,6 @@ public class ProvisioningBolt extends BaseRichBolt {
             if(lastNode) {
                 // When this node is the last node, delete the node that will not be used
                 _redis.deleteLastNode(_redis.jsonObjectToNode(_jsonObject));
-            } else {
-                // When this node isn't the last node, the reference value is decreased
-                _redis.updateRefer(_redis.jsonObjectToNode(_jsonObject));
             }
         }
         // Go to next bolt
