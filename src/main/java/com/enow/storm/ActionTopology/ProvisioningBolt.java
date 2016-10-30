@@ -72,6 +72,7 @@ public class ProvisioningBolt extends BaseRichBolt {
                 // When this node isn't the last node, the reference value is decreased
                 _redis.updateRefer(_redis.jsonObjectToNode(_jsonObject));
             }
+            _jsonObject.put("payload", null);
         }
         // Go to next bolt
         _collector.emit(new Values(_jsonObject));
