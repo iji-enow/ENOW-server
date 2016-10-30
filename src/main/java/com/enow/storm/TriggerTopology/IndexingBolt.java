@@ -304,7 +304,7 @@ class StoppingRoadMap extends Thread {
 		}
 
 		_redis.deleteTerminate(roadMapId);
-		_redis.deleteAllNodes();
+		_redis.deleteNode(roadMapId);
 
 	}
 }
