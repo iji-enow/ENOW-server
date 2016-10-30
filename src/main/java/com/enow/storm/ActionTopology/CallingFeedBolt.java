@@ -37,6 +37,7 @@ public class CallingFeedBolt extends BaseRichBolt {
 		_props = new Properties();
 		_props.put("producer.type", "sync");
 		// props.put("batch.size", "1");
+		_props.put("replica.fetch.max.bytes", "1500000");
 		_props.put("message.max.bytes", "1500000");
 		_props.put("bootstrap.servers", kafkaProperties);
 		_props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
