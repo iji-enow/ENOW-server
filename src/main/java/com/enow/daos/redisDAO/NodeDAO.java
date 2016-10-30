@@ -136,13 +136,20 @@ public class NodeDAO implements INodeDAO {
             _jedis.del(iter.next());
         }
     }
+
     @Override
     public void deleteNode(String ID) {
-        Set<String> keys = _jedis.keys("node-" + ID + "-*");
+        Set<String> keys = _jedis.keys("node-" + ID);
         Iterator<String> iter = keys.iterator();
         while (iter.hasNext()) {
             System.out.println(iter.next());
             _jedis.del(iter.next());
         }
+    }
+
+    @Override
+    public void deleteLastNode(NodeDTO dto) {
+        String id = dto.getRoadMapID() + "-" + dto.getNodeID();
+        _jedis.del(NODE_PREFIX + id);
     }
 }

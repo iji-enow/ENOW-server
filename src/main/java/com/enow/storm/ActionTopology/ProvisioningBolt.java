@@ -65,14 +65,13 @@ public class ProvisioningBolt extends BaseRichBolt {
                 _LOG.debug("Fail in inserting current node to Redis : " + result);
             }
             // Check this node is the last node
-            if(!lastNode) {
+            if(lastNode) {
                 // When this node is the last node, delete the node that will not be used
-                _redis.updateNode(_redis.jsonObjectToNode(_jsonObject));
+                _redis.deleteLastNode(_redis.jsonObjectToNode(_jsonObject));
             } else {
                 // When this node isn't the last node, the reference value is decreased
                 _redis.updateRefer(_redis.jsonObjectToNode(_jsonObject));
             }
-            _jsonObject.put("payload", null);
         }
         // Go to next bolt
         _collector.emit(new Values(_jsonObject));

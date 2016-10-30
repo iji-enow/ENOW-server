@@ -116,6 +116,13 @@ public class RedisDB implements IRedisDB {
     }
 
     @Override
+    public void deleteLastNode(NodeDTO dto) {
+        INodeDAO dao = DAOFacility.getInstance().createNodeDAO();
+        dao.setJedisConnection(connection);
+        dao.deleteLastNode(dto);
+    }
+
+    @Override
     public StatusDTO jsonObjectToStatus(JSONObject jsonObject) {
         IStatusDAO dao = DAOFacility.getInstance().createStatusDAO();
         return dao.jsonObjectToStatus(jsonObject);
@@ -176,11 +183,13 @@ public class RedisDB implements IRedisDB {
         dao.setJedisConnection(connection);
         return dao.isTerminate(roadMapID);
     }
+    @Override
     public void deleteAllTerminate() {
         ITerminateDAO dao = DAOFacility.getInstance().createTerminateDAO();
         dao.setJedisConnection(connection);
         dao.deleteAllTerminate();
     }
+    @Override
     public void deleteTerminate(String roadMapID) {
         ITerminateDAO dao = DAOFacility.getInstance().createTerminateDAO();
         dao.setJedisConnection(connection);

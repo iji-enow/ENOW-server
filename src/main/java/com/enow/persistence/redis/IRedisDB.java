@@ -24,7 +24,7 @@ public interface IRedisDB {
     void updateRefer(NodeDTO dto);
     void deleteNode(String ID);
     void deleteAllNodes();
-
+    void deleteLastNode(NodeDTO dto);
 
     StatusDTO jsonObjectToStatus(JSONObject jsonObject);
     StatusDTO getStatus(String topic);

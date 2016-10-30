@@ -66,4 +66,9 @@ public interface INodeDAO {
      * Deletes a node
      */
     void deleteNode(String ID);
+
+    /**
+     * Deletes a last node
+     */
+    void deleteLastNode(NodeDTO dto);
 }
