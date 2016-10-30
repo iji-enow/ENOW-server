@@ -74,6 +74,8 @@ public class IndexingBolt extends BaseRichBolt {
 				// connecting to MongoDB with ip address 127.0.0.1 and port 27017
 				mongoDao = new MongoDAO(mongoIp, mongoPort);
 				
+				
+				
 				if (input.getSourceComponent().equals("event-spout")) {
 					//input from event kafka
 					
@@ -262,6 +264,9 @@ public class IndexingBolt extends BaseRichBolt {
 					_jsonError.put("error", "true");
 					_jsonObject = _jsonError;
 				}
+				
+				mongoDao.close();
+				
 			} catch (UnknownHostException e) {
 				//if MongoDB connection falied log error : 10
 				_LOG.warn("error:10");

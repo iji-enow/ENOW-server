@@ -15,4 +15,6 @@ public interface IMongoDAO {
 	public int collectionCount(Document document);
 	
 	public FindIterable<Document> find(Document document);
+	
+	public void close();
 }

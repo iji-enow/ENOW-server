@@ -15,6 +15,7 @@ public class MongoDAO implements IMongoDAO{
 	private MongoCollection<Document> collection;
 	private MongoDatabase dbWrite;
 	
+	
 	public MongoDAO(String url, int port) throws UnknownHostException {
 		mongoClient = new MongoClient(url,port);
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
@@ -39,5 +40,9 @@ public class MongoDAO implements IMongoDAO{
 	
 	public FindIterable<Document> find(Document document){
 		return collection.find(document);
+	}
+	
+	public void close(){
+		mongoClient.close();
 	}
 }

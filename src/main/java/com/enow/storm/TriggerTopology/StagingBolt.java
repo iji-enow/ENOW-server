@@ -294,6 +294,8 @@ public class StagingBolt extends BaseRichBolt {
 					_jsonError.put("error", "true");
 					_jsonArray.add(_jsonError);
 				}
+				
+				mongoDao.close();
 			} catch (UnknownHostException e) {
 				//if MongoDB connection falied log error : 6
 				_LOG.warn("error:6");
