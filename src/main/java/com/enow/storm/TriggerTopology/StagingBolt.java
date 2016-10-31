@@ -186,12 +186,14 @@ public class StagingBolt extends BaseRichBolt {
 								tmpJsonObject.put("verified", true);
 								tmpJsonObject.put("lambda", nodeId.get("lambda"));
 								tmpJsonObject.put("initNode",false);
+								tmpJsonObject.put("paylaod", null);
+
 
 								tmpJsonObject.remove("corporationName");
 								tmpJsonObject.remove("serverId");
 								tmpJsonObject.remove("brokerId");
 								tmpJsonObject.remove("spoutName");
-
+							
 								if (outingNode.containsKey(orderNodeId)) {
 									outingNodeArray = (JSONArray) outingNode.get(orderNodeId);
 

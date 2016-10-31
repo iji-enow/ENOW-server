@@ -142,7 +142,6 @@ public class NodeDAO implements INodeDAO {
         Set<String> keys = _jedis.keys("node-" + ID);
         Iterator<String> iter = keys.iterator();
         while (iter.hasNext()) {
-            System.out.println(iter.next());
             _jedis.del(iter.next());
         }
     }
