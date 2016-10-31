@@ -63,11 +63,13 @@ public class StatusDAO implements IStatusDAO {
     @Override
     public StatusDTO getStatus(String topic) {
         List<String> result = _jedis.lrange(STATUS_PREFIX + topic, 0, 0);
+        StatusDTO dto;
         if (result.size() > 0) {
-            StatusDTO dto = new StatusDTO(topic, result.get(0));
+            dto = new StatusDTO(topic, result.get(0));
             return dto;
         } else {
-            return null;
+            dto = new StatusDTO(topic, "");
+            return dto;
         }
     }
 
