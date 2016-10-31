@@ -18,6 +18,7 @@ public class MongoDAO implements IMongoDAO{
 	
 	public MongoDAO(String url, int port) throws UnknownHostException {
 		mongoClient = new MongoClient(url,port);
+
 		mongoClient.setWriteConcern(WriteConcern.ACKNOWLEDGED);
 	}
 	
