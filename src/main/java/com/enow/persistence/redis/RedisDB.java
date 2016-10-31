@@ -24,8 +24,8 @@ public class RedisDB implements IRedisDB {
 
     public RedisDB(String IP, int PORT) {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(1000);
-        poolConfig.setMaxIdle(10);
+        poolConfig.setMaxTotal(10000);
+        poolConfig.setMaxIdle(100);
         poolConfig.setMinIdle(1);
         poolConfig.setMaxWaitMillis(30000);
         connection = new JedisPool(
@@ -35,7 +35,7 @@ public class RedisDB implements IRedisDB {
         );
     }
 
-    public JedisPool getConnection(String IP, int PORT) {
+    static public JedisPool getConnection(String IP, int PORT) {
         return getInstance(IP, PORT).connection;
     }
 
@@ -75,7 +75,7 @@ public class RedisDB implements IRedisDB {
 
     @Override
     public void shutdown() {
-        connection.close();
+        connection.getResource().close();
     }
 
     @Override
