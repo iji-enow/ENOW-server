@@ -50,6 +50,11 @@ public class RedisDB implements IRedisDB {
         }
         return instance;
     }
+
+    public void finalize() {
+        shutdown();
+    }
+
     /*
     static public RedisDB getInstance(String IP, int PORT) {
         if(instance == null) {
