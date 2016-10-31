@@ -8,7 +8,8 @@ from time import sleep
 from pymongo import MongoClient
 
 fileDir = os.path.dirname(os.path.realpath('__file__'))
-modulePath = os.path.join(fileDir, 'enow/jython/pythonSrc')
+modulePath = fileDir
+# modulePath = os.path.join(fileDir, 'pythonSrc')
 sys.path.append(modulePath)
 
 from postCode import postProcess
