@@ -20,7 +20,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.enow.daos.mongoDAO.MongoDAO;
-import com.esotericsoftware.minlog.Log;
 import com.mongodb.client.FindIterable;
 
 public class StagingBolt extends BaseRichBolt {
@@ -316,7 +315,7 @@ public class StagingBolt extends BaseRichBolt {
 				}
 			}
 		} catch (Exception e) {
-			Log.warn("ack failed");
+			_LOG.warn("ack failed");
 			collector.fail(input);
 		}
 	}
