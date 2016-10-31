@@ -1,6 +1,5 @@
 package com.enow.daos.redisDAO;
 
-import com.enow.persistence.dto.TerminateDTO;
 import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;

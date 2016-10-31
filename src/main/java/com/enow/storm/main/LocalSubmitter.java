@@ -1,5 +1,6 @@
 package com.enow.storm.main;
 
+import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
@@ -25,6 +26,7 @@ import com.enow.storm.TriggerTopology.StagingBolt;
 public class LocalSubmitter {
     public static void main(String[] args) throws Exception{
         Config config = new Config();
+        IRedisDB _redis = RedisDB.getInstance("127.0.0.1", 6379);
         config.setDebug(true);
         config.put("mongodb.ip", "127.0.0.1");
         config.put("mongodb.port", 27017);
@@ -75,7 +77,7 @@ public class LocalSubmitter {
         builder.setBolt("executing-bolt", new ExecutingBolt()).shuffleGrouping("scheduling-bolt");
         builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("executing-bolt");
         builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
-
+        _redis.deleteAllNodes();
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("TriggerTopology", config, builder.createTopology());
 
