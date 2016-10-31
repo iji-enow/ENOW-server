@@ -34,73 +34,109 @@ public class StatusDAO implements IStatusDAO {
 
     @Override
     public String addStatus(StatusDTO dto) {
-        String id = dto.getTopic();
+        try {
+            String id = dto.getTopic();
 
-        Set<String> keys = _jedis.keys("status-*");
-        Iterator<String> iter = keys.iterator();
-        ArrayList<String> ids = new ArrayList<>();
+            Set<String> keys = _jedis.keys("status-*");
+            Iterator<String> iter = keys.iterator();
+            ArrayList<String> ids = new ArrayList<>();
 
-        boolean statusExists = false;
+            boolean statusExists = false;
 
-        while (iter.hasNext()) {
-            String key = iter.next();
-            key = key.substring(7, key.length());
-            ids.add(key);
-            if (key.equals(id)) {
-                statusExists = true;
+            while (iter.hasNext()) {
+                String key = iter.next();
+                key = key.substring(7, key.length());
+                ids.add(key);
+                if (key.equals(id)) {
+                    statusExists = true;
+                }
             }
-        }
-        if (!statusExists) {
-            _jedis.lpush("status-" + id, dto.getPayload());
-            return id;
-        } else {
-            _jedis.del("status-" + id);
-            _jedis.lpush("status-" + id, dto.getPayload());
-            return id + " overwritten";
+            if (!statusExists) {
+                _jedis.lpush("status-" + id, dto.getPayload());
+                return id;
+            } else {
+                _jedis.del("status-" + id);
+                _jedis.lpush("status-" + id, dto.getPayload());
+                return id + " overwritten";
+            }
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
         }
     }
 
     @Override
     public StatusDTO getStatus(String topic) {
-        List<String> result = _jedis.lrange(STATUS_PREFIX + topic, 0, 0);
-        StatusDTO dto;
-        if (result.size() > 0) {
-            dto = new StatusDTO(topic, result.get(0));
-            return dto;
-        } else {
-            dto = new StatusDTO(topic, "");
-            return dto;
+        try {
+            List<String> result = _jedis.lrange(STATUS_PREFIX + topic, 0, 0);
+            StatusDTO dto;
+            if (result.size() > 0) {
+                dto = new StatusDTO(topic, result.get(0));
+                return dto;
+            } else {
+                dto = new StatusDTO(topic, "");
+                return dto;
+            }
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
         }
     }
 
     @Override
     public List<StatusDTO> getAllStatus() {
-        List<StatusDTO> allStatus = new ArrayList<>();
-        Set<String> keys = _jedis.keys("status-*");
-        for (String key : keys) {
-            key = key.substring(5, key.length());
-            allStatus.add(getStatus(key));
+        try {
+            List<StatusDTO> allStatus = new ArrayList<>();
+            Set<String> keys = _jedis.keys("status-*");
+            for (String key : keys) {
+                key = key.substring(5, key.length());
+                allStatus.add(getStatus(key));
+            }
+            return allStatus;
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
         }
-        return allStatus;
     }
 
     @Override
     public void updateStatus(StatusDTO dto) {
-        _jedis.rpop(STATUS_PREFIX + dto.getTopic());
-        _jedis.rpush(STATUS_PREFIX + dto.getTopic(), dto.getPayload());
+        try {
+            _jedis.rpop(STATUS_PREFIX + dto.getTopic());
+            _jedis.rpush(STATUS_PREFIX + dto.getTopic(), dto.getPayload());
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
+        }
     }
 
     @Override
     public void deleteStatus(String topic) {
-        _jedis.del(STATUS_PREFIX + topic);
+        try {
+            _jedis.del(STATUS_PREFIX + topic);
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
+        }
     }
 
     @Override
     public void deleteAllStatus() {
-        Set<String> keys = _jedis.keys("status-*");
-        Iterator<String> iter = keys.iterator();
-        while (iter.hasNext()) {
-            _jedis.del(iter.next());
+        try {
+            Set<String> keys = _jedis.keys("status-*");
+            Iterator<String> iter = keys.iterator();
+            while (iter.hasNext()) {
+                _jedis.del(iter.next());
+            }
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
         }
     }
 }

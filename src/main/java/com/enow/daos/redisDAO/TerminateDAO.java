@@ -23,53 +23,77 @@ public class TerminateDAO implements ITerminateDAO {
 
     @Override
     public String addTerminate(String roadMapID) {
-        String id = roadMapID;
+        try {
+            String id = roadMapID;
 
-        Set<String> keys = _jedis.keys("terminate-*");
-        Iterator<String> iter = keys.iterator();
-        ArrayList<String> ids = new ArrayList<>();
+            Set<String> keys = _jedis.keys("terminate-*");
+            Iterator<String> iter = keys.iterator();
+            ArrayList<String> ids = new ArrayList<>();
 
-        boolean terminateExists = false;
+            boolean terminateExists = false;
 
-        while (iter.hasNext()) {
-            String key = iter.next();
-            key = key.substring(7, key.length());
-            ids.add(key);
-            if (key.equals(id)) {
-                terminateExists = true;
+            while (iter.hasNext()) {
+                String key = iter.next();
+                key = key.substring(7, key.length());
+                ids.add(key);
+                if (key.equals(id)) {
+                    terminateExists = true;
+                }
             }
-        }
-        if (!terminateExists) {
-            _jedis.lpush("terminate-" + id, id);
-            return id;
-        } else {
-            _jedis.del("terminate-" + id);
-            _jedis.lpush("terminate-" + id, id);
-            return id + " overwritten";
+            if (!terminateExists) {
+                _jedis.lpush("terminate-" + id, id);
+                return id;
+            } else {
+                _jedis.del("terminate-" + id);
+                _jedis.lpush("terminate-" + id, id);
+                return id + " overwritten";
+            }
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
         }
     }
 
     @Override
     public boolean isTerminate(String roadMapID) {
-        List<String> result = _jedis.lrange(TERMINATE_PREFIX + roadMapID, 0, 0);
-        if (result.size() > 0) {
-            return true;
-        } else {
-            return false;
+        try {
+            List<String> result = _jedis.lrange(TERMINATE_PREFIX + roadMapID, 0, 0);
+            if (result.size() > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
         }
     }
 
     @Override
     public void deleteTerminate(String roadMapID) {
-        _jedis.del(TERMINATE_PREFIX + roadMapID);
+        try {
+            _jedis.del(TERMINATE_PREFIX + roadMapID);
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
+        }
     }
 
     @Override
     public void deleteAllTerminate() {
-        Set<String> keys = _jedis.keys("terminate-*");
-        Iterator<String> iter = keys.iterator();
-        while (iter.hasNext()) {
-            _jedis.del(iter.next());
+        try {
+            Set<String> keys = _jedis.keys("terminate-*");
+            Iterator<String> iter = keys.iterator();
+            while (iter.hasNext()) {
+                _jedis.del(iter.next());
+            }
+        } finally {
+            if (_jedis != null) {
+                _jedis.close();
+            }
         }
     }
 }
