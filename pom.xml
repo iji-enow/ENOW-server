@@ -129,17 +129,20 @@
     <build>
         <resources>
             <resource>
-                <!-- Where the Python bits are kept -->
-                <directory>./multilang</directory>
-            </resource>
-            <resource>
                 <directory>./src/main/resources</directory>
+                <includes>
+                    <include>log4j.properties</include>
+                </includes>
             </resource>
             <resource>
+                <!-- Where the Python bits are kept -->
                 <directory>${basedir}/resources</directory>
                 <filtering>false</filtering>
                 <includes>
                     <include>log4j2.xml</include>
+                    <include>storm.py</include>
+                    <include>executingBolt.py</include>
+                    <include>enow/</include>
                 </includes>
             </resource>
         </resources>

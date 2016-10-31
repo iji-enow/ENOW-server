@@ -122,7 +122,7 @@ public class RemoteSubmitter {
         // Set spouts
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
-        // Set bolts
+        /* Set bolts */
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
                 .shuffleGrouping("trigger-spout");
         builder.setBolt("status-bolt", new StatusBolt(), 4)
