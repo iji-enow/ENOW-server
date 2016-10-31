@@ -14,8 +14,6 @@ import org.apache.storm.tuple.Values;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
-import com.esotericsoftware.minlog.Log;
-
 import java.util.Map;
 
 

@@ -1,11 +1,8 @@
 package com.enow.storm.ActionTopology;
 
-import com.enow.daos.redisDAO.INodeDAO;
-import com.enow.facility.DAOFacility;
 import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
-import com.esotericsoftware.minlog.Log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

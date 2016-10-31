@@ -16,7 +16,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.esotericsoftware.minlog.Log;
+// import com.esotericsoftware.minlog.Log;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -136,7 +136,6 @@ public class CallingFeedBolt extends BaseRichBolt {
 			}
 			_collector.ack(input);
 		} catch (Exception e) {
-			Log.error("ack failed");
 			_collector.fail(input);
 		}
 	}

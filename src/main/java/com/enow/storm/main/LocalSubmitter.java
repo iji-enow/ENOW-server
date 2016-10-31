@@ -1,7 +1,6 @@
 package com.enow.storm.main;
 
 import com.enow.persistence.redis.RedisDB;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.kafka.BrokerHosts;
@@ -12,7 +11,6 @@ import org.apache.storm.kafka.ZkHosts;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
-import com.enow.persistence.redis.RedisDB;
 import com.enow.storm.ActionTopology.CallingFeedBolt;
 import com.enow.storm.ActionTopology.ExecutingBolt;
 import com.enow.storm.ActionTopology.ProvisioningBolt;

@@ -3,7 +3,6 @@ package com.enow.storm.TriggerTopology;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,13 +20,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.enow.daos.mongoDAO.MongoDAO;
-import com.enow.storm.Connect;
 import com.esotericsoftware.minlog.Log;
-import com.mongodb.MongoClient;
-import com.mongodb.WriteConcern;
 import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 
 public class StagingBolt extends BaseRichBolt {
 	protected static final Logger _LOG = LogManager.getLogger(StagingBolt.class);

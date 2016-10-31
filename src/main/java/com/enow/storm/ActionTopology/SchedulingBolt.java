@@ -4,7 +4,6 @@ import com.enow.persistence.dto.NodeDTO;
 import com.enow.persistence.dto.StatusDTO;
 import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
-import com.esotericsoftware.minlog.Log;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

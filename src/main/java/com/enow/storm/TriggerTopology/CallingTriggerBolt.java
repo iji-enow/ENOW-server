@@ -12,9 +12,6 @@ import org.json.simple.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.enow.storm.Connect;
-import com.esotericsoftware.minlog.Log;
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
