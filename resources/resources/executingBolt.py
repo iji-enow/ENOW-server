@@ -1,18 +1,13 @@
-import storm
-import sys
-import thread
-import json
-import logging
-import os
-from Queue import PriorityQueue
-from symbol import parameters
-import collections
-import bson
-import time
 import hashlib
+import json
+import os
+import sys
+from Queue import PriorityQueue
 from bson.json_util import dumps
-from bson.json_util import loads
 from pymongo import MongoClient
+
+import storm
+
 '''
 ========================================
     ENOW CODE EXECUTION MODULE
