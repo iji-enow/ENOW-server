@@ -24,6 +24,7 @@ public class RedisDB implements IRedisDB {
 
     public RedisDB(String IP, int PORT) {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
+        poolConfig.setMaxTotal(128);
         connection = new JedisPool(
                 poolConfig,
                 IP,
