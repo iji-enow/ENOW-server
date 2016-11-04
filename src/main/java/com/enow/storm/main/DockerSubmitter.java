@@ -1,7 +1,7 @@
 package com.enow.storm.main;
 
 /**
- * Created by writtic on 2016. 8. 30..
+ * Created by writtic on 2016. 11. 04..
  */
 
 import com.enow.persistence.redis.RedisDB;
@@ -14,22 +14,19 @@ import org.apache.storm.kafka.*;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.UUID;
 
-public class RemoteSubmitter {
+public class DockerSubmitter {
     private static final String[] TOPICS = new String[]{"event", "proceed", "order", "trigger", "status"};
-    private static final String[] SETTINGS = new String[]{"127.0.0.1", "27017", "127.0.0.1", "6379", "127.0.0.1:9092", "127.0.0.1:2181"};
-    // private static final String zkhost = "127.0.0.1:2181";
+    private static final String[] SETTINGS = new String[]{"192.168.99.100", "27017", "192.168.99.100", "6379", "192.168.99.100:9092", "192.168.99.100:2181"};
+    // private static final String zkhost = "192.168.99.100:2181";
     public static void main(String[] args) throws Exception {
         // RedisDB.getInstance(args[4], Integer.parseInt(args[5])).deleteAllNodes();
         // RedisDB.getInstance(args[4], Integer.parseInt(args[5])).deleteAllStatus();
 
         RedisDB.getInstance(SETTINGS[2], Integer.parseInt(SETTINGS[3])).deleteAllNodes();
         RedisDB.getInstance(SETTINGS[2], Integer.parseInt(SETTINGS[3])).deleteAllStatus();
-        new RemoteSubmitter().runMain(args);
+        new DockerSubmitter().runMain(args);
     }
 
     protected void runMain(String[] args) throws Exception {
@@ -43,16 +40,6 @@ public class RemoteSubmitter {
 
     protected void submitTopologyRemoteCluster(String arg, StormTopology topology, Config config) throws Exception {
         StormSubmitter.submitTopology(arg, config, topology);
-    }
-
-    protected void stopWaitingForInput() {
-        try {
-            System.out.println("PRESS ENTER TO STOP");
-            new BufferedReader(new InputStreamReader(System.in)).readLine();
-            System.exit(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     protected Config getConfig(String[] SETTINGS) {
