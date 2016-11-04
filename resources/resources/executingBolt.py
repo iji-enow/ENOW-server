@@ -40,7 +40,7 @@ sys.path.append(enow_jython_runtimePackage_Path)
 # import modules in PYTHONPATH
 from enow.jython.Building import Building
 # Declare class and inherit storm BasicBolt class
-class ExecutingBolt(storm.BasicBolt):
+class ExecutingBolt(storm.Bolt):
     # static member variable used for semaphore to block the other thread from execution
     program_semaphore = 0
     # Queue for enrolling waiting threads
@@ -62,6 +62,7 @@ class ExecutingBolt(storm.BasicBolt):
     def initialize(self, conf, context):
         self._conf = conf
         self._context = context
+        
         # declare an interface for setting and getting the components described above
         self.Building = Building()
         # declare an instance of MongoDB client

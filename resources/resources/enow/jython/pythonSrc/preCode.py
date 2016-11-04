@@ -5,7 +5,7 @@ import codecs
 import logging
 import os
 from time import sleep
-from pymongo import MongoClient
+
 '''
     List : Global Variables
     Descriptions :

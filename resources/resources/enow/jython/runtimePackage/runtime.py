@@ -2,6 +2,8 @@ from subprocess import PIPE, Popen
 import os
 import codecs
 import sys
+import storm
+
 '''
 Class : runtime
     Descriptions :
@@ -22,9 +24,10 @@ class runtime:
     def run(self, _args, _payloads, _previousData, _mapId_hashed_string):
        
         fileDir = os.path.dirname(os.path.realpath('__file__'))
+        
         sourceDir = os.path.join(fileDir, 'enow/jython/pythonSrc/preCode.py')
 
-        jythonPath = "/usr/bin/python"
+        jythonPath = "python"
         command = []
         command.append(jythonPath)
         command.append("-u")
