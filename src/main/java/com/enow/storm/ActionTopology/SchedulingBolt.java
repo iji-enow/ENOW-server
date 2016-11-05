@@ -5,8 +5,6 @@ import com.enow.persistence.dto.StatusDTO;
 import com.enow.persistence.redis.IRedisDB;
 import com.enow.persistence.redis.RedisDB;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -18,13 +16,16 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class SchedulingBolt extends BaseRichBolt {
-	protected static final Logger _LOG = LogManager.getLogger(SchedulingBolt.class);
+	protected static final Logger _LOG = LoggerFactory.getLogger(SchedulingBolt.class);
 	private IRedisDB _redis;
 	private OutputCollector _collector;
 	private JSONParser _parser;

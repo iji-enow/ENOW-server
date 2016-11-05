@@ -3,8 +3,6 @@ package com.enow.storm.ActionTopology;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -15,13 +13,15 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
 public class CallingFeedBolt extends BaseRichBolt {
-	protected static final Logger _LOG = LogManager.getLogger(CallingFeedBolt.class);
+	private static final Logger _LOG = LoggerFactory.getLogger(CallingFeedBolt.class);
 	protected static final String _KAFKA_FEED = "feed";
 	protected static final String _KAFKA_PROCEED = "proceed";
 	private OutputCollector _collector;

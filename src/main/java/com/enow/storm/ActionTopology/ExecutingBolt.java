@@ -1,26 +1,26 @@
 package com.enow.storm.ActionTopology;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.storm.task.ShellBolt;
 import org.apache.storm.topology.IRichBolt;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.Map;
 
 
 public class ExecutingBolt extends ShellBolt implements IRichBolt {
     // Call the countbolt.py using Python
-	protected static final Logger _LOG = LogManager.getLogger(ExecutingBolt.class);
+	protected static final Logger _LOG = LoggerFactory.getLogger(ExecutingBolt.class);
     public ExecutingBolt() {
         super("python", "executingBolt.py");
     }
     
     @Override
     public void execute(Tuple input){
-    	_LOG.info(input);
+    	_LOG.info(input.toString());
     	super.execute(input);
     }
 
