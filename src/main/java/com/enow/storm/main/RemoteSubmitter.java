@@ -97,11 +97,11 @@ public class RemoteSubmitter {
         builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));
         builder.setSpout("order-spout", new KafkaSpout(orderConfig));
         // Set bolts
-        builder.setBolt("indexing-bolt", new IndexingBolt()).shuffleGrouping("event-spout")
-                .shuffleGrouping("proceed-spout")
-                .shuffleGrouping("order-spout");
-        builder.setBolt("staging-bolt", new StagingBolt()).shuffleGrouping("indexing-bolt");
-        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).shuffleGrouping("staging-bolt");
+        builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout")
+                .allGrouping("proceed-spout")
+                .allGrouping("order-spout");
+        builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
+        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
         return builder.createTopology();
     }
     protected StormTopology getActionTopology(String zkhost) {
@@ -122,12 +122,12 @@ public class RemoteSubmitter {
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
         /* Set bolts */
         builder.setBolt("scheduling-bolt", new SchedulingBolt())
-                .shuffleGrouping("trigger-spout");
+                .allGrouping("trigger-spout");
         builder.setBolt("status-bolt", new StatusBolt(), 4)
-                .shuffleGrouping("status-spout");
-        builder.setBolt("execute-code-bolt", new ExecutingBolt()).shuffleGrouping("scheduling-bolt");
-        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("execute-code-bolt");
-        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
+                .allGrouping("status-spout");
+        builder.setBolt("execute-code-bolt", new ExecutingBolt()).allGrouping("scheduling-bolt");
+        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).allGrouping("execute-code-bolt");
+        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).allGrouping("provisioning-bolt");
         return builder.createTopology();
     }
 }
