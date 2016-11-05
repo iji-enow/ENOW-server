@@ -124,7 +124,7 @@ class ExecutingBolt(storm.Bolt):
         # convert tuple to json object
         jsonObject = self.tupleToJson(tup)
         # verify whether the input should be executed or not
-        if jsonObject["verified"] == True and jsonObject["payload"] != "":
+        if jsonObject["verified"] is True and jsonObject["payload"] is not "":
             # receive data needed for execution from the converted json object
             l_payload_json = jsonObject["payload"]
             l_mapId_string = jsonObject["nodeId"]
