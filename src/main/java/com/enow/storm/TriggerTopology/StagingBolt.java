@@ -41,6 +41,7 @@ public class StagingBolt extends BaseRichBolt {
 	@Override
 	public void execute(Tuple input) {
 		JSONObject _jsonObject = null;
+		String _roadMapId = null;
 		FindIterable<Document> iterable;
 		JSONParser jsonParser = new JSONParser();
 		JSONObject roadMapId;
@@ -59,6 +60,8 @@ public class StagingBolt extends BaseRichBolt {
 		ArrayList<JSONObject> _jsonArray = new ArrayList<JSONObject>();
 
 		_jsonObject = (JSONObject) input.getValueByField("jsonObject");
+		_roadMapId = (String) input.getStringByField("roadMapId");
+		
 
 		if (_jsonObject.containsKey("error")) {
 			//if _jsonObject contains key error it means indexingBolt occured an error log error : 1
@@ -299,7 +302,8 @@ public class StagingBolt extends BaseRichBolt {
 			}
 		}
 
-		collector.emit(new Values(_jsonArray));
+		collector.emit(new Values(_jsonArray,_roadMapId));
+		
 
 		try {	
 			collector.ack(input);
@@ -322,6 +326,6 @@ public class StagingBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("jsonArray"));
+		declarer.declare(new Fields("jsonArray","roadMapId"));
 	}
 }

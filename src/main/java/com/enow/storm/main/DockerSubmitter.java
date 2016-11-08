@@ -13,6 +13,7 @@ import org.apache.storm.generated.StormTopology;
 import org.apache.storm.kafka.*;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
 
 import java.util.UUID;
 
@@ -87,8 +88,8 @@ public class DockerSubmitter {
         builder.setBolt("indexing-bolt", new IndexingBolt()).shuffleGrouping("event-spout")
                 .shuffleGrouping("proceed-spout")
                 .shuffleGrouping("order-spout");
-        builder.setBolt("staging-bolt", new StagingBolt()).shuffleGrouping("indexing-bolt");
-        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).shuffleGrouping("staging-bolt");
+        builder.setBolt("staging-bolt", new StagingBolt()).fieldsGrouping("indexing-bolt", new Fields("roadMapId"));
+        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).fieldsGrouping("staging-bolt", new Fields("roadMapId"));
         return builder.createTopology();
     }
     protected StormTopology getActionTopology(String zkhost) {
@@ -112,9 +113,9 @@ public class DockerSubmitter {
                 .shuffleGrouping("trigger-spout");
         builder.setBolt("status-bolt", new StatusBolt(), 4)
                 .shuffleGrouping("status-spout");
-        builder.setBolt("execute-code-bolt", new ExecutingBolt()).shuffleGrouping("scheduling-bolt");
-        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("execute-code-bolt");
-        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
+        builder.setBolt("execute-code-bolt", new ExecutingBolt()).fieldsGrouping("scheduling-bolt",new Fields("roadMapId"));
+        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).fieldsGrouping("execute-code-bolt",new Fields("roadMapId"));
+        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).fieldsGrouping("provisioning-bolt",new Fields("roadMapId"));
         return builder.createTopology();
     }
 }

@@ -93,6 +93,6 @@ public class CallingTriggerBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("triggerTopologyResult"));
+
 	}
 }

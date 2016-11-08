@@ -154,7 +154,7 @@ public class SchedulingBolt extends BaseRichBolt {
 		}
 
 		// Go to next bolt
-		_collector.emit(new Values(_jsonObject));
+		_collector.emit(new Values(_jsonObject,(String)_jsonObject.get("roadMapId")));
 		try {
 			_LOG.info(_jsonObject.get("roadMapId") + "," + _jsonObject.get("nodeId") + "|" + _jsonObject.get("topic")
 					+ "|" + _jsonObject.toString());
@@ -167,6 +167,6 @@ public class SchedulingBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("jsonObject"));
+		declarer.declare(new Fields("jsonObject","roadMapId"));
 	}
 }

@@ -11,6 +11,7 @@ import org.apache.storm.kafka.StringScheme;
 import org.apache.storm.kafka.ZkHosts;
 import org.apache.storm.spout.SchemeAsMultiScheme;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.tuple.Fields;
 
 import com.enow.storm.ActionTopology.CallingFeedBolt;
 import com.enow.storm.ActionTopology.ExecutingBolt;
@@ -65,8 +66,8 @@ public class LocalSubmitter {
         builder.setSpout("proceed-spout", new KafkaSpout(proceedConfig));
         builder.setSpout("order-spout", new KafkaSpout(orderConfig));
         builder.setBolt("indexing-bolt", new IndexingBolt()).allGrouping("event-spout").allGrouping("proceed-spout").allGrouping("order-spout");
-        builder.setBolt("staging-bolt", new StagingBolt()).allGrouping("indexing-bolt");
-        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).allGrouping("staging-bolt");
+        builder.setBolt("staging-bolt", new StagingBolt()).fieldsGrouping("indexing-bolt", new Fields("roadMapId"));
+        builder.setBolt("calling-trigger-bolt", new CallingTriggerBolt()).fieldsGrouping("staging-bolt", new Fields("roadMapId"));
 
         builder.setSpout("trigger-spout", new KafkaSpout(triggerConfig));
         builder.setSpout("status-spout", new KafkaSpout(statusConfig));
@@ -74,9 +75,9 @@ public class LocalSubmitter {
                 .shuffleGrouping("trigger-spout");
         builder.setBolt("status-bolt", new StatusBolt())
                 .shuffleGrouping("status-spout");
-        builder.setBolt("executing-bolt", new ExecutingBolt()).shuffleGrouping("scheduling-bolt");
-        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).shuffleGrouping("executing-bolt");
-        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).shuffleGrouping("provisioning-bolt");
+        builder.setBolt("executing-bolt", new ExecutingBolt()).fieldsGrouping("scheduling-bolt",new Fields("roadMapId"));
+        builder.setBolt("provisioning-bolt", new ProvisioningBolt()).fieldsGrouping("executing-bolt",new Fields("roadMapId"));
+        builder.setBolt("calling-feed-bolt", new CallingFeedBolt()).fieldsGrouping("provisioning-bolt",new Fields("roadMapId"));
         _redis.deleteAllNodes();
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("TriggerTopology", config, builder.createTopology());
