@@ -193,6 +193,7 @@ class ExecutingBolt(storm.Bolt):
             # Handle the result and convert it to JSON object
         else:
             jsonObject["payload"] = ""
+            jsonObject["log"] = ""
             jsonObject["previousData"] = "null"
             storm.emit([jsonObject,roadMapId])
 
