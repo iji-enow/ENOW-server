@@ -70,7 +70,7 @@ public class RemoteSubmitter {
         config.put("redis.port", Integer.parseInt(SETTINGS[3]));
         config.put("kafka.properties", SETTINGS[4]);
         config.setDebug(true);
-        config.setNumWorkers(2);
+        config.setNumWorkers(4);
         return config;
     }
 
