@@ -274,7 +274,7 @@ public class IndexingBolt extends BaseRichBolt {
 			}
 		}
 
-		collector.emit(new Values(_jsonObject));
+		collector.emit(new Values(_jsonObject,(String)_jsonObject.get("roadMapId")));
 
 		try {
 			collector.ack(input);
@@ -286,7 +286,7 @@ public class IndexingBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("jsonObject"));
+		declarer.declare(new Fields("jsonObject","roadMapId"));
 	}
 }
 

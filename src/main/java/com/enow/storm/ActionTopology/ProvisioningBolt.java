@@ -36,16 +36,11 @@ public class ProvisioningBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         JSONObject _jsonObject = new JSONObject();
-        org.apache.storm.shade.org.json.simple.JSONObject _jsonObject_conversion = (org.apache.storm.shade.org.json.simple.JSONObject) input.getValue(0);
-        String _jsonObject_str = _jsonObject_conversion.toJSONString();
-        JSONParser _parser = new JSONParser();
-
-        try {
-            _jsonObject = (JSONObject) _parser.parse(_jsonObject_str);
-        } catch (ParseException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+        String _roadMapId = null;
+        
+        _jsonObject = (JSONObject) input.getValueByField("jsonObject");
+        _roadMapId = (String) input.getStringByField("roadMapId");
+		
 
         Boolean verified = (Boolean) _jsonObject.get("verified");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
@@ -68,7 +63,7 @@ public class ProvisioningBolt extends BaseRichBolt {
             }
         }
         // Go to next bolt
-        _collector.emit(new Values(_jsonObject));
+        _collector.emit(new Values(_jsonObject,_roadMapId));
         try {
             _collector.ack(input);
         } catch (Exception e) {
@@ -79,6 +74,6 @@ public class ProvisioningBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("jsonObject"));
+        declarer.declare(new Fields("jsonObject,roadMapId"));
     }
 }
