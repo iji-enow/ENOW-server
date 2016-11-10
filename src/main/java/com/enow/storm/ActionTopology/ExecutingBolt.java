@@ -33,7 +33,7 @@ public class ExecutingBolt extends ShellBolt implements IRichBolt {
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		// TODO Auto-generated method stub
-		declarer.declare(new Fields("jsonObject,roadMapId"));
+		declarer.declare(new Fields("jsonObject", "roadMapId"));
 	}
 }
 /*

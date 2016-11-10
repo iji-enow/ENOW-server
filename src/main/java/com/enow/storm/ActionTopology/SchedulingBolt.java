@@ -167,6 +167,6 @@ public class SchedulingBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields("jsonObject","roadMapId"));
+		declarer.declare(new Fields("jsonObject", "roadMapId"));
 	}
 }

@@ -17,6 +17,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.Map;
 
 public class ProvisioningBolt extends BaseRichBolt {
@@ -35,13 +36,19 @@ public class ProvisioningBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple input) {
+        org.apache.storm.shade.org.json.simple.JSONObject _jsonObject_shade = new org.apache.storm.shade.org.json.simple.JSONObject();
+        _jsonObject_shade = (org.apache.storm.shade.org.json.simple.JSONObject) input.getValue(0);
+        String _jsonObject_shade_string = (String) _jsonObject_shade.toJSONString();
+        JSONParser parser = new JSONParser();
         JSONObject _jsonObject = new JSONObject();
-        String _roadMapId = null;
+		try {
+			_jsonObject = (JSONObject) parser.parse(_jsonObject_shade_string);
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
         
-        _jsonObject = (JSONObject) input.getValueByField("jsonObject");
-        _roadMapId = (String) input.getStringByField("roadMapId");
-		
-
+        String _roadMapId = (String)input.getValue(1);
         Boolean verified = (Boolean) _jsonObject.get("verified");
         Boolean lastNode = (Boolean) _jsonObject.get("lastNode");
         // Confirm verification
@@ -63,7 +70,7 @@ public class ProvisioningBolt extends BaseRichBolt {
             }
         }
         // Go to next bolt
-        _collector.emit(new Values(_jsonObject,_roadMapId));
+        _collector.emit(new Values(_jsonObject, _roadMapId));
         try {
             _collector.ack(input);
         } catch (Exception e) {
@@ -74,6 +81,6 @@ public class ProvisioningBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
-        declarer.declare(new Fields("jsonObject,roadMapId"));
+        declarer.declare(new Fields("jsonObject", "roadMapId"));
     }
 }

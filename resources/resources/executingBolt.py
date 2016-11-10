@@ -86,7 +86,6 @@ class ExecutingBolt(storm.Bolt):
     '''
     def tupleToJson(self, tuple):
         dictObject = tuple.values[0]
-        roadMapId = tuple.values[1]
         jsonObject_str = json.dumps(dictObject)
         jsonObject = json.loads(jsonObject_str)
         return jsonObject
@@ -184,17 +183,18 @@ class ExecutingBolt(storm.Bolt):
             if tmp == "":
                 jsonObject["pyError"] = "true"
                 jsonObject["log"] = self.fileToLog(l_mapId_hashed_string)
-                storm.emit([jsonObject,roadMapId])
+                storm.emit([jsonObject, l_roadMapId_string])
             else:
                 jsonResult = json.loads(tmp, strict=False)
                 jsonObject["log"] = self.fileToLog(l_mapId_hashed_string)
                 jsonObject["payload"] = jsonResult
-                storm.emit([jsonObject,roadMapId])
+                storm.emit([jsonObject, l_roadMapId_string])
             # Handle the result and convert it to JSON object
         else:
             jsonObject["payload"] = ""
             jsonObject["previousData"] = "null"
-            storm.emit([jsonObject,roadMapId])
+            l_roadMapId_string = jsonObject["roadMapId"]
+            storm.emit([jsonObject, l_roadMapId_string])
 
 # Start the bolt when it's invoked
 ExecutingBolt().run()

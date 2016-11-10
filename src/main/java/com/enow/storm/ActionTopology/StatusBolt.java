@@ -70,5 +70,8 @@ public class StatusBolt extends BaseRichBolt {
     }
 
     @Override
-    public void declareOutputFields(OutputFieldsDeclarer declarer) {}
+    public void declareOutputFields(OutputFieldsDeclarer declarer) {
+    	
+    	
+    }
 }

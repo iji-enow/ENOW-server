@@ -42,8 +42,11 @@ def eventHandlerFacade(_event, _context, _callback, _mapId_hashed_string, _modul
     stderr_logger = logging.getLogger('STDERR')
     sl = StreamToLogger(stderr_logger, logging.ERROR)
     sys.stderr = sl
-                        
-    eventHandler(_event, _context, _callback)
+    
+    try:           
+        eventHandler(_event, _context, _callback)
+    except Exception as e:
+        sys.exit()
 
 
 def Main():

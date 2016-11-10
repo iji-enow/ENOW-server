@@ -140,5 +140,6 @@ public class CallingFeedBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		
 	}
 }
