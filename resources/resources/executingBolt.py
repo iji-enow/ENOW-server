@@ -180,7 +180,7 @@ class ExecutingBolt(storm.Bolt):
             self.Building.setPayload(payload.encode("ascii"))
             self.Building.setPreviousData(previousData.encode("ascii"))
             self.Building.setPath(l_mapId_hashed_string.encode("ascii"))
-            self.client.close()
+
             tmp = self.Building.run()
             
             jsonObject["previousData"] = "null"
