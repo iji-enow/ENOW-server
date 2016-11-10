@@ -48,6 +48,10 @@ class ExecutingBolt(storm.Bolt):
     # initialize this instance
     def __init__(self):
         pass
+    def __del__(self):
+        del self.Building
+        del self.client
+        
     '''
     ========================================
         Function : initialize
@@ -176,6 +180,7 @@ class ExecutingBolt(storm.Bolt):
             self.Building.setPayload(payload.encode("ascii"))
             self.Building.setPreviousData(previousData.encode("ascii"))
             self.Building.setPath(l_mapId_hashed_string.encode("ascii"))
+            self.client.close()
             tmp = self.Building.run()
             
             jsonObject["previousData"] = "null"

@@ -22,6 +22,9 @@ class runtimeMain:
         self.sourceControl = None
         self.result = None
         self.mapId_hashed_string = _mapId_hashed_string
+        
+    def __del__(self):
+        del self.runtime
     '''
     Function : controllSource()
         Description : 

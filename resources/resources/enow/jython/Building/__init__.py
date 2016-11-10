@@ -9,16 +9,11 @@ from enow.jython.runtimePackage.runtimeMain import runtimeMain
          The class works as an interface between the executingBolt and runtimeMain.
 '''
 class Building():
-    main = None
-    result = None
-    code = None
-    parameter = None
-    payload = None
-    previousData = None
-    mapId_hashed_string = None
-
     def __init__(self):
         pass
+    
+    def __del__(self):
+        del self.main
 
     def getcode(self):
         if self.code is not None:
